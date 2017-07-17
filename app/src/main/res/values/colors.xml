@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="baddelGreen">#02a752</color>
+    <color name="baddelGray">#2b2d2d</color>
+    <color name="baddelheader">#000000</color>
+    <color name="baddelFontColor">#ffffff</color>
+</resources>

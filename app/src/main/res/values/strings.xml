@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">Baddel Station App</string>
+    <string name="rentBicycleBTSTR">Rent A Bicycle</string>
+    <string name="helpBTSTR">Need Help?</string>
+    <string name="baddelLogoTVSTR">Baddel</string>
+
+    <string name="enterPhoneNumberTittleSTR">Please enter your phone number</string>
+    <string name="enterPhoneNumberCancelSTR">Cancel</string>
+    <string name="enterPhoneNumberNextSTR">Next</string>
+
+    <string name="confirmSMSnoSMSSTR">I haven’t recieved sms</string>
+    <string name="confirmSMSchangeMobileNumberSTR">Modify Phone Number</string>
+    <string name="confirmSMSTittleSTR">We Have Sent you SMS with \n Bike Unlock Code to</string>
+
+    <string name="verMobileNumberTittleSTR">Verify Mobile Number</string>
+    <string name="verMobileNumberSTR">Insert Code Here</string>
+    <string name="verMobileNumberResendSTR">Resend Validation Code</string>
+    <string name="verMobileNumberMessageSTR">We have sent you a code on your mobile number, please type it here</string>
+
+    <string name="chooseRentTimeTittleSTR">Your Bike is Ready</string>
+    <string name="creditCardDataTittleSTR">Credit Card Data</string>
+
+    <string name="notification_description">Downloading Baddel Station App</string>
+    <string name="countingTimeTVSTR">Reserved Minutes : 30 Min for each bike</string>
+
+    <string name="midTimeTVSTR">300 MIN</string>
+    <string name="maxTimeTVSTR">600 MIN</string>
+    <string name="minTimeTVSTR">30 MIN</string>
+
+
+</resources>

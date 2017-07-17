@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/baddelGray"
+    tools:context="baddel.baddelstationapp.creditCardDataActivity">
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/baddelheader"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="@dimen/headerImageWidth"
+            android:layout_height="@dimen/headerImageHeight"
+            android:src="@drawable/baddelogobrandname" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/chooseRentTimeTittleTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/linearLayout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="65dp"
+        android:text="@string/creditCardDataTittleSTR"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/baddelGreen"
+        android:textSize="50dp" />
+
+
+    <Button
+        android:id="@+id/creditCardDataNextBT"
+        android:layout_width="@dimen/footerButtonWidth"
+        android:layout_height="@dimen/footerButtonHeight"
+        android:layout_marginBottom="44dp"
+        android:layout_marginEnd="21dp"
+        android:layout_marginRight="49dp"
+        android:background="@drawable/buttonshape"
+        android:padding="20dp"
+        android:text="@string/enterPhoneNumberNextSTR"
+        android:textColor="@color/baddelFontColor"
+        android:textSize="40dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:id="@+id/creditCardDataCancelBT"
+        android:layout_width="@dimen/footerButtonWidth"
+        android:layout_height="@dimen/footerButtonHeight"
+        android:layout_marginLeft="63dp"
+        android:layout_marginStart="44dp"
+        android:background="@drawable/buttonshape"
+        android:padding="20dp"
+        android:text="@string/enterPhoneNumberCancelSTR"
+        android:textColor="@color/baddelFontColor"
+        android:textSize="40dp"
+        android:layout_alignTop="@+id/creditCardDataNextBT"
+        android:layout_toEndOf="@+id/webView2"
+        android:layout_marginTop="13dp" />
+
+
+    <RelativeLayout
+        android:id="@+id/frontCardLayout"
+        android:layout_width="900dp"
+        android:layout_height="match_parent"
+        android:background="@drawable/baddelcredit"
+        android:layout_below="@+id/linearLayout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="27dp">
+
+        <EditText
+            android:id="@+id/creditCardValidMonthET1"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="mm"
+            android:text="01"
+            android:maxLength="2"
+            android:inputType="number"
+            android:nextFocusDown="@+id/creditCardValidYearET1"
+            android:textColor="@color/baddelFontColor"
+            android:layout_marginBottom="37dp"
+            android:layout_above="@+id/creditCardHolderNameET1"
+            android:layout_alignStart="@+id/creditCardNumberET1" />
+
+        <EditText
+            android:id="@+id/creditCardNumberET1"
+            android:layout_width="320dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="63dp"
+            android:layout_marginStart="71dp"
+            android:inputType="number"
+            android:text="5203780319097011"
+            android:hint="credit Number"
+            android:nextFocusDown="@+id/creditCardValidMonthET1"
+            android:textColor="@color/baddelFontColor"
+            android:layout_marginBottom="34dp"
+            android:layout_above="@+id/creditCardCVVET1"
+            android:layout_alignParentStart="true" />
+
+        <EditText
+            android:id="@+id/creditCardValidYearET1"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="14dp"
+            android:ems="10"
+            android:maxLength="2"
+            android:hint="yy"
+            android:text="19"
+            android:inputType="number"
+            android:nextFocusDown="@+id/creditCardHolderNameET1"
+            android:textColor="@color/baddelFontColor"
+            android:layout_alignBaseline="@+id/creditCardValidMonthET1"
+            android:layout_alignBottom="@+id/creditCardValidMonthET1"
+            android:layout_toEndOf="@+id/creditCardValidMonthET1" />
+
+
+        <EditText
+            android:id="@+id/creditCardHolderNameET1"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="card Holder Name"
+            android:inputType="text"
+            android:nextFocusDown="@+id/creditCardCVVET1"
+            android:text="MT"
+            android:textColor="@color/baddelFontColor"
+            android:layout_marginBottom="184dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignStart="@+id/creditCardValidMonthET1" />
+
+
+        <EditText
+            android:id="@+id/creditCardCVVET1"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="102dp"
+            android:ems="10"
+            android:hint="CVV"
+            android:text="936"
+            android:imeOptions="actionDone"
+            android:inputType="number"
+            android:maxLength="3"
+            android:textColor="@color/baddelFontColor"
+            android:layout_alignBottom="@+id/creditCardValidYearET1"
+            android:layout_toEndOf="@+id/creditCardNumberET1"
+            android:layout_marginBottom="14dp" />
+
+    </RelativeLayout>
+
+
+    <TextView
+        android:id="@+id/creditCardPeriodPriceTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/creditCardDataNextBT"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="21dp"
+        android:text="TextView"
+        android:textColor="@color/baddelGreen"
+        android:textSize="30dp" />
+
+    <WebView
+        android:id="@+id/webView2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
+</RelativeLayout>

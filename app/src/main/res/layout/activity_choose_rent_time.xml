@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:rsv="http://schemas.android.com/apk/res-auto"
+    android:background="@color/baddelGray"
+    android:layout_height="match_parent"
+    tools:context="baddel.baddelstationapp.chooseRentTimeActivity">
+
+    <!--<com.github.channguyen.rsv.RangeSliderView-->
+        <!--android:id="@+id/rangeSliderView"-->
+        <!--rsv:filledColor="@color/baddelGreen"-->
+        <!--rsv:rangeCount="21"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="100dp"-->
+        <!--android:layout_marginLeft="30dp"-->
+        <!--android:layout_marginRight="30dp"-->
+        <!--android:layout_alignParentStart="true"-->
+        <!--android:layout_above="@+id/countingTimeTV" />-->
+
+    
+    <baddel.baddelstationapp.customViews.CircularSeekBar
+        android:id="@+id/circularSeekBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        app:start_angle="270"
+        app:end_angle="270"
+        app:circle_x_radius="200dp"
+        app:circle_y_radius="200dp"
+        app:progress="30"
+        app:max="600"
+        app:circle_stroke_width="30dp"
+        app:circle_progress_color="@color/baddelGreen"
+        app:pointer_color="@color/baddelGreen"
+        app:pointer_halo_color="@color/baddelGreen"
+        android:layout_above="@+id/countingTimeTV"
+        android:layout_below="@+id/chooseRentTimeTittleTV" />
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/numberOfBikesLayout"
+        android:layout_alignStart="@+id/chooseRentTimeNextBT"
+        android:layout_marginBottom="82dp"
+        android:text="150 min"
+        android:textColor="@color/baddelGreen"
+        android:textSize="30dp" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="300 min"
+        android:textColor="@color/baddelGreen"
+        android:textSize="30dp"
+        android:layout_below="@+id/textView6"
+        android:layout_alignStart="@+id/textView3"
+        android:layout_marginTop="46dp" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/chooseRentTimeHelpBT"
+        android:layout_marginStart="15dp"
+        android:layout_toEndOf="@+id/chooseRentTimeTittleTV"
+        android:text="30 min"
+        android:textColor="@color/baddelGreen"
+        android:textSize="30dp" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="450 min"
+        android:textSize="30dp"
+        android:textColor="@color/baddelGreen"
+        android:layout_marginEnd="70dp"
+        android:layout_alignBaseline="@+id/textView6"
+        android:layout_alignBottom="@+id/textView6"
+        android:layout_toStartOf="@+id/textView3" />
+
+    <TextView
+        android:id="@+id/sliderCounterTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="30 min"
+        android:textColor="@color/colorAccent"
+        android:textSize="30dp"
+        android:layout_alignBaseline="@+id/textView6"
+        android:layout_alignBottom="@+id/textView6"
+        android:layout_alignStart="@+id/textView3" />
+
+    <
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/baddelheader"
+        android:gravity="center"
+        android:id="@+id/linearLayout"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true">
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="@dimen/headerImageWidth"
+            android:layout_height="@dimen/headerImageHeight"
+            android:src="@drawable/baddelogobrandname" />
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="50dp"
+        android:textColor="@color/baddelGreen"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/chooseRentTimeTittleSTR"
+        android:id="@+id/chooseRentTimeTittleTV"
+        android:layout_marginTop="65dp"
+        android:layout_below="@+id/linearLayout"
+        android:layout_centerHorizontal="true" />
+
+
+    <Button
+        android:id="@+id/chooseRentTimeNextBT"
+        android:layout_width="@dimen/footerButtonWidth"
+        android:layout_height="@dimen/footerButtonHeight"
+        android:layout_marginBottom="75dp"
+        android:textColor="@color/baddelFontColor"
+        android:background="@drawable/buttonshape"
+        android:text="@string/enterPhoneNumberNextSTR"
+        android:padding="20dp"
+        android:textSize="40dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="37dp"
+        android:layout_marginEnd="37dp" />
+
+    <Button
+        android:id="@+id/chooseRentTimeCancelBT"
+        android:layout_width="@dimen/footerButtonWidth"
+        android:layout_height="@dimen/footerButtonHeight"
+        android:text="@string/enterPhoneNumberCancelSTR"
+        android:textColor="@color/baddelFontColor"
+        android:background="@drawable/buttonshape"
+        android:padding="20dp"
+        android:textSize="40dp"
+        android:layout_marginLeft="63dp"
+        android:layout_marginStart="63dp"
+        android:layout_alignBaseline="@+id/chooseRentTimeNextBT"
+        android:layout_alignBottom="@+id/chooseRentTimeNextBT"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/helpBTSTR"
+        android:id="@+id/chooseRentTimeHelpBT"
+        android:padding="10dp"
+        android:background="@color/baddelGreen"
+        android:textColor="@color/baddelFontColor"
+        android:layout_marginRight="26dp"
+        android:layout_alignTop="@+id/chooseRentTimeTittleTV"
+        android:layout_alignEnd="@+id/chooseRentTimeNextBT" />
+
+    <TextView
+        android:id="@+id/countingTimeTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        android:textSize="40dp"
+        android:textColor="@color/baddelFontColor"
+        android:text="@string/countingTimeTVSTR"
+        android:layout_marginTop="39dp"
+        android:layout_alignTop="@+id/textView4"
+        android:layout_toEndOf="@+id/chooseRentTimeCancelBT" />
+
+    <RelativeLayout
+        android:id="@+id/numberOfBikesLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="22dp"
+        android:layout_below="@+id/textView3"
+        android:layout_toStartOf="@+id/chooseRentTimeTittleTV"
+        android:layout_marginEnd="20dp">
+        <NumberPicker
+            android:theme="@style/AppTheme.Picker"
+            android:id="@+id/numberOfBikesNP"
+            android:textAlignment="center"
+            android:descendantFocusability="blocksDescendants"
+            android:layout_width="100dp"
+            android:layout_height="200dp"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@+id/numberOfBikesTV" />
+
+        <TextView
+            android:id="@+id/numberOfBikesTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Number Of Bikes : 1"
+            android:textSize="30dp"
+            android:textColor="@color/baddelGreen"
+            android:layout_centerVertical="true" />
+    </RelativeLayout>
+
+
+
+
+
+
+</RelativeLayout>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:gravity="center_vertical"
+    android:id="@+id/Period_item"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent">
+
+    <TextView
+
+        android:textColor="@color/baddelGreen"
+        android:textSize="@dimen/textSize"
+        android:text="30min"
+        android:padding="16dp"
+        android:id="@+id/rentAmountRCTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="wrap_content"
+        android:layout_height="150dp"
+        android:background="@mipmap/ic_launcher"
+        android:layout_below="@+id/rentAmountRCTV"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/rentAmountRCTV"
+        android:layout_alignEnd="@+id/rentAmountRCTV" />
+</RelativeLayout>

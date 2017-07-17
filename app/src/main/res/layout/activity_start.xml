@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:weightSum="3"
+        tools:context="baddel.baddelstationapp.startActivity">
+
+        <com.daimajia.slider.library.SliderLayout
+            android:id="@+id/imageSlider"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:background="@color/baddelGray"
+            android:clickable="false">
+
+        </com.daimajia.slider.library.SliderLayout>
+
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@color/baddelGray">
+
+
+        <Button
+            android:id="@+id/rentBicycleBT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="@color/baddelGreen"
+            android:padding="20dp"
+            android:text="@string/rentBicycleBTSTR"
+            android:textColor="@color/baddelFontColor"
+            android:textSize="35dp" />
+
+        <Button
+            android:id="@+id/helpBT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="46dp"
+            android:background="@color/baddelGreen"
+            android:padding="10dp"
+            android:text="@string/helpBTSTR"
+            android:textColor="@color/baddelFontColor" />
+
+        <pl.droidsonroids.gif.GifImageView
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:id="@+id/baddelGifLogo"
+            android:background="@drawable/dialogshape"
+            android:scaleType="fitXY"
+            android:src="@drawable/baddelgif"
+            android:layout_above="@+id/rentBicycleBT"
+            android:layout_marginBottom="66dp"
+            android:layout_alignStart="@+id/rentBicycleBT"
+            android:layout_alignEnd="@+id/rentBicycleBT" />
+
+
+        <!--<ImageView-->
+        <!--android:id="@+id/imageView"-->
+        <!--android:layout_width="150dp"-->
+        <!--android:layout_height="150dp"-->
+        <!--android:layout_above="@+id/rentBicycleBT"-->
+        <!--android:layout_alignEnd="@+id/rentBicycleBT"-->
+        <!--android:layout_alignLeft="@+id/rentBicycleBT"-->
+        <!--android:layout_alignRight="@+id/rentBicycleBT"-->
+        <!--android:layout_alignStart="@+id/rentBicycleBT"-->
+        <!--android:layout_marginBottom="90dp"-->
+        <!--android:src="@drawable/baddelogobrandname" />-->
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/rentBicycleBT"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="107dp"
+            android:text="HelloRemoteUpdate"
+            android:textColor="@color/baddelFontColor"
+            android:visibility="gone" />
+
+        <!--<Button-->
+        <!--android:id="@+id/downloadBT"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_above="@+id/helpBT"-->
+        <!--android:layout_alignEnd="@+id/helpBT"-->
+        <!--android:layout_marginBottom="90dp"-->
+        <!--android:text="downloadAndInstall" />-->
+
+
+    </RelativeLayout>
+
+</LinearLayout>

@@ -160,12 +160,12 @@
         android:id="@+id/creditCardPeriodPriceTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/creditCardDataNextBT"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="21dp"
         android:text="TextView"
         android:textColor="@color/baddelGreen"
-        android:textSize="30dp" />
+        android:textSize="30dp"
+        android:layout_alignBaseline="@+id/creditCardDataNextBT"
+        android:layout_alignBottom="@+id/creditCardDataNextBT"
+        android:layout_centerHorizontal="true" />
 
     <WebView
         android:id="@+id/webView2"

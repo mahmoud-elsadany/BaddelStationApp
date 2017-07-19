@@ -62,10 +62,6 @@ public class chooseRentTimeActivity extends AppCompatActivity {
         //setPeriodSeekBar();
 
         startService();
-
-
-        Log.d("costing","cost of 30 min: " + costEquation(30));
-
     }
 
     private void returnToStartActivity() {
@@ -86,10 +82,12 @@ public class chooseRentTimeActivity extends AppCompatActivity {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            myCounter.cancel();
-            myCounter = null;
-            returnToStartActivity();
-            showToast("touch");
+            if (myCounter != null) {
+                myCounter.cancel();
+                myCounter = null;
+                returnToStartActivity();
+                showToast("touch");
+            }
         }
         return super.onTouchEvent(event);
     }
@@ -105,27 +103,30 @@ public class chooseRentTimeActivity extends AppCompatActivity {
         countingTimeTV = (TextView) findViewById(R.id.countingTimeTV);
         sliderCounterTV = (TextView) findViewById(R.id.sliderCounterTV);
         rentingDetailsTV = (TextView) findViewById(R.id.rentingDetailsTV);
-
         circularSeekBar = (CircularSeekBar) findViewById(R.id.circularSeekBar);
         Session.getInstance().setChosenPeriodTime(30);
 
         circularSeekBar.setOnSeekBarChangeListener(new CircularSeekBar.OnCircularSeekBarChangeListener() {
             @Override
             public void onProgressChanged(CircularSeekBar circularSeekBar, int progress, boolean fromUser) {
-                countingTimeTV.setText("Reserved Minutes : " + String.valueOf(progress) + " Min for each bike");
-                sliderCounterTV.setText(progress + " min");
-                rentingDetailsTV.setText("reserve " + numberPicker.getValue() + " bikes for " + progress + " min costs " + 23+" egp");
-                Session.getInstance().setChosenPeriodTime(progress);
+                int actualProgress;
+                if (progress == 0)
+                    actualProgress = 30;
+                else
+                    actualProgress = progress*30;
+
+                countingTimeTV.setText("Reserved Minutes : " + String.valueOf(actualProgress) + " Min for each bike");
+                sliderCounterTV.setText(actualProgress + " min");
+                rentingDetailsTV.setText("reserve " + numberPicker.getValue() + " bikes for " + actualProgress + " min costs " + costEquation(actualProgress)*actualProgress*numberPicker.getValue()+" egp");
+                Session.getInstance().setChosenPeriodTime(progress*numberPicker.getValue());
             }
 
             @Override
             public void onStopTrackingTouch(CircularSeekBar seekBar) {
-
             }
 
             @Override
             public void onStartTrackingTouch(CircularSeekBar seekBar) {
-
             }
         });
     }
@@ -159,6 +160,7 @@ public class chooseRentTimeActivity extends AppCompatActivity {
         chooseRentTimeNextBT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Session.getInstance().setChosenPeriodTime(30);
                 if (Session.getInstance().getChosenPeriodTime() > 0) {
                     //go to enter phone Number
                     startActivity(new Intent(chooseRentTimeActivity.this, enterPhoneNumberActivity.class));
@@ -194,28 +196,34 @@ public class chooseRentTimeActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        myCounter.cancel();
-        myCounter = null;
-        callController.unBindController();
-        callController = null;
+        if (myCounter != null){
+            myCounter.cancel();
+            myCounter = null;
+            callController.unBindController();
+            callController = null;
+        }
         super.onDestroy();
     }
 
     @Override
     protected void onStop() {
-        myCounter.cancel();
-        myCounter = null;
-        callController.unBindController();
-        callController = null;
+        if (myCounter != null){
+            myCounter.cancel();
+            myCounter = null;
+            callController.unBindController();
+            callController = null;
+        }
         super.onStop();
     }
 
     private double costEquation(int min) {
-        double x = 0.4001504 + (0.8129855 - 0.4001504);
-        double power = min / 65.64831;
-        double myPower = Math.pow(power, 2.605385);
+        double x = (1.235204 - 0.3861872);
+        double y = min / 28.85022;
+        double myPower = Math.pow(y, 1.429056);
 
-        double total = x / (1 + myPower);
+        double division = x /(1+myPower);
+
+        double total = 0.3861872 + division;
 
         return total;
     }

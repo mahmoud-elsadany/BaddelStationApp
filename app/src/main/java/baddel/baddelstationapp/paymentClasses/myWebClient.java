@@ -18,6 +18,7 @@ import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import baddel.baddelstationapp.Controller.Controller;
@@ -39,6 +40,8 @@ public class myWebClient extends WebViewClient implements responseDelegate {
     public Class destContext;
 
     private myAsyncTask myAsyncTask;
+
+    private String payFortTag = "payfort_";
 
     public myWebClient(Context sourceContext,Class destContext){
         this.sourceContext = sourceContext;
@@ -70,24 +73,25 @@ public class myWebClient extends WebViewClient implements responseDelegate {
 
                 if (sessionResponse != null){
                     if (sessionResponse.contains("success")){
-                        Log.d("javaScriptResponse", sessionResponse);
+                        Log.d(payFortTag, sessionResponse);
 
-//                        trip_DS trip_ds = Session.getInstance().getCurrentTripObject();
-//
-//                        putSetOrder(trip_ds);
+                        ArrayList<trip_DS> trips_Array = Session.getInstance().getCurrentTripArrayListObjects();
+
+                        for (trip_DS tripObject:trips_Array) {
+                            putSetOrder(tripObject);
+                        }
 
 
                     }else{
-                        Log.d("javaScriptResponse", sessionResponse);
-//                        sourceContext.startActivity(new Intent(sourceContext,destContext));
-//                        Toast.makeText(sourceContext,"Error in Response",Toast.LENGTH_SHORT).show();
+                        Log.d(payFortTag, sessionResponse);
+                        //sourceContext.startActivity(new Intent(sourceContext,destContext));
+                        Toast.makeText(sourceContext,"Error in Response",Toast.LENGTH_SHORT).show();
                     }
-                }
-//                else{
-//                    sourceContext.startActivity(new Intent(sourceContext,destContext));
-//                    Toast.makeText(sourceContext,"No Response",Toast.LENGTH_SHORT).show();
+                } else{
+                    //sourceContext.startActivity(new Intent(sourceContext,destContext));
+                    Toast.makeText(sourceContext,"No Response",Toast.LENGTH_SHORT).show();
 
-//                }
+                }
             }
         });
 
@@ -97,7 +101,7 @@ public class myWebClient extends WebViewClient implements responseDelegate {
     public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
         super.onReceivedError(view, request, error);
 
-        Log.d("payfort_Errors",  error.toString());
+        Log.d(payFortTag, "payfortErrror"+ error.toString());
 
     }
 
@@ -148,11 +152,16 @@ public class myWebClient extends WebViewClient implements responseDelegate {
             Log.d("confirmSetOrder",response);
             trip_DS confirmTrip = new trip_DS(response);
 
-            if (confirmTrip != null){
-                Controller controller = new Controller();
-                controller.sendToTCP(String.valueOf(confirmTrip.startSlotNumber),confirmTrip);
-                sourceContext.startActivity(new Intent(sourceContext,destContext));
-                Session.getInstance().setCurrentTripObject(confirmTrip);
+            ArrayList<trip_DS> currentTrips = confirmTrip.currentTripObjects;
+
+            Session.getInstance().setCurrentTripArrayListObject(currentTrips);
+
+            if (currentTrips.size() > 0){
+                for (trip_DS tripObject:currentTrips){
+                    Controller controller = new Controller();
+                    controller.sendToTCP(String.valueOf(tripObject.startSlotNumber),confirmTrip.currentTripObjects.get(0));
+                    sourceContext.startActivity(new Intent(sourceContext,destContext));
+                }
             }else{
                 showToast("There Is Something Wrong");
             }

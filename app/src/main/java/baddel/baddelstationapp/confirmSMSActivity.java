@@ -138,24 +138,29 @@ public class confirmSMSActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(confirmSMSActivity.this,verifyMobileNumberActivity.class));
-
             }
         });
     }
 
     @Override
     protected void onDestroy() {
-        myCounter.cancel();
-        myCounter = null;
-        callController.unBindController();
+        if (myCounter != null){
+            myCounter.cancel();
+            myCounter = null;
+            callController.unBindController();
+            callController = null;
+        }
         super.onDestroy();
     }
 
     @Override
     protected void onStop() {
-        myCounter.cancel();
-        myCounter = null;
-        callController.unBindController();
+        if (myCounter != null){
+            myCounter.cancel();
+            myCounter = null;
+            callController.unBindController();
+            callController = null;
+        }
         super.onStop();
     }
 

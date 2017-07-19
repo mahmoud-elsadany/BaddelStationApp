@@ -187,6 +187,8 @@ public class startActivity extends AppCompatActivity implements responseDelegate
         HashMap<String, String> data = new HashMap<>();
         data.put("imei",android_id);
 
+        Log.d("config",android_id);
+
         String URL = myURL+apiMethod;
 
         if (isNetworkConnected()){
@@ -299,7 +301,8 @@ public class startActivity extends AppCompatActivity implements responseDelegate
 
                 Session.getInstance().setNumberOfAvailableBikes(stationDs.stationNumberOfAvailableBikes);
 
-                startActivity(new Intent(startActivity.this,chooseRentTimeActivity.class));
+                startActivity(new Intent(startActivity.this, chooseRentTimeActivity.class));
+
 
                 break;
 

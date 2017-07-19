@@ -27,7 +27,7 @@
         android:layout_alignParentEnd="true"
         android:layout_toEndOf="@+id/numberOfBikesLayout"
         android:layout_above="@+id/timeDetailsLayout"
-        android:layout_alignStart="@+id/button">
+        android:layout_alignStart="@+id/chooseRentTimeHelpBT">
 
         <baddel.baddelstationapp.customViews.CircularSeekBar
             android:id="@+id/circularSeekBar"
@@ -38,8 +38,8 @@
             app:end_angle="270"
             app:circle_x_radius="200dp"
             app:circle_y_radius="200dp"
-            app:progress="30"
-            app:max="600"
+            app:progress="1"
+            app:max="20"
             app:circle_stroke_width="30dp"
             app:circle_progress_color="@color/baddelGreen"
             app:pointer_color="@color/baddelGreen"
@@ -55,7 +55,7 @@
             android:text="450 min"
             android:textColor="@color/baddelGreen"
             android:textSize="30dp"
-            android:layout_marginEnd="123dp"
+            android:layout_marginEnd="71dp"
             android:layout_alignBaseline="@+id/sliderCounterTV"
             android:layout_alignBottom="@+id/sliderCounterTV"
             android:layout_toStartOf="@+id/textView3" />
@@ -64,7 +64,7 @@
             android:id="@+id/textView6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="150 min"
+            android:text="300 min"
             android:textColor="@color/baddelGreen"
             android:textSize="30dp"
             android:layout_alignParentBottom="true"
@@ -84,10 +84,10 @@
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="450 min"
+            android:text="150 min"
             android:textSize="30dp"
             android:textColor="@color/baddelGreen"
-            android:layout_marginStart="124dp"
+            android:layout_marginStart="80dp"
             android:layout_alignBaseline="@+id/sliderCounterTV"
             android:layout_alignBottom="@+id/sliderCounterTV"
             android:layout_toEndOf="@+id/textView6" />
@@ -238,7 +238,7 @@
     </RelativeLayout>
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/chooseRentTimeHelpBT"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginRight="26dp"
@@ -246,9 +246,9 @@
         android:padding="10dp"
         android:text="@string/helpBTSTR"
         android:textColor="@color/baddelFontColor"
-        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/timeDetailsLayout"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="48dp" />
+        android:layout_marginTop="17dp" />
 
 
 </RelativeLayout>

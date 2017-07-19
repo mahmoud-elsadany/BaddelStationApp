@@ -46,12 +46,7 @@ public class customDialogs {
         final Dialog dialog = new Dialog(myContext);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.getWindow().setGravity(Gravity.TOP);
-        dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                dialog.cancel();
-            }
-        });
+        dialog.setCancelable(false);
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         dialog.setContentView(R.layout.tcpconnectionexception);
         dialog.getWindow().setBackgroundDrawable(myContext.getResources().getDrawable(R.drawable.dialogshape));

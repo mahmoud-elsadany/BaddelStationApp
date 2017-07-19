@@ -9,7 +9,7 @@ import org.json.JSONObject;
 
 public class orderDetailsObject {
 
-    public int orderDetailsId;
+    public String orderDetailsId;
     public int orderDetailsProfileId;
     public String orderDetailsProfileUserName;
     public String orderDetailsProfileEmail;
@@ -42,7 +42,7 @@ public class orderDetailsObject {
     private static final String orderDetailsTotal_OBJECT = "Total";
     private static final String orderDetailsStatus_OBJECT = "Status";
 
-    public orderDetailsObject(int orderDetailsId, int orderDetailsProfileId, String orderDetailsProfileUserName, String orderDetailsProfileEmail, String orderDetailsProfilePhoneNumber, String orderDetailsProfileFirstName, String orderDetailsProfileLastName, int orderDetailsProfileBalance, Boolean orderDetailsProfileIsBlocked, Boolean orderDetailsProfileIsRegistered, int orderDetailsNoOfMinutes, int orderDetailsTotal, String orderDetailsProfileStatus) {
+    public orderDetailsObject(String orderDetailsId, int orderDetailsProfileId, String orderDetailsProfileUserName, String orderDetailsProfileEmail, String orderDetailsProfilePhoneNumber, String orderDetailsProfileFirstName, String orderDetailsProfileLastName, int orderDetailsProfileBalance, Boolean orderDetailsProfileIsBlocked, Boolean orderDetailsProfileIsRegistered, int orderDetailsNoOfMinutes, int orderDetailsTotal, String orderDetailsProfileStatus) {
         this.orderDetailsId = orderDetailsId;
         this.orderDetailsProfileId = orderDetailsProfileId;
         this.orderDetailsProfileUserName = orderDetailsProfileUserName;
@@ -62,7 +62,7 @@ public class orderDetailsObject {
         try {
             JSONObject JsonObject = new JSONObject(response);
 
-            this.orderDetailsId = JsonObject.getInt(orderDetailsId_OBJECT);
+            this.orderDetailsId = JsonObject.getString(orderDetailsId_OBJECT);
             this.orderDetailsNoOfMinutes = JsonObject.getInt(orderDetailsNoOfMinutes_OBJECT);
             this.orderDetailsTotal = JsonObject.getInt(orderDetailsTotal_OBJECT);
             this.orderDetailsProfileStatus = JsonObject.getString(orderDetailsStatus_OBJECT);

@@ -171,6 +171,7 @@ public class Controller extends Service implements responseDelegate {
                 Log.d("tcpSendToTCP", message);
 
                 if (message.equals("TRUE")) {
+                    //split to get slotNumber
                     StartTripRequest(slotObject);
                 }else if (message.contains("LOCK_BIKE")) {
                     String[] result = message.split("_");
@@ -247,15 +248,6 @@ public class Controller extends Service implements responseDelegate {
         String myURL = Session.getInstance().getWebServicesBaseUrl();
         String apiMethod = Session.getInstance().getAPIMETHODPutStartTrip();
         int myProcessNum = 4;
-
-//        JSONObject startTripObject = new JSONObject();
-//        try {
-//            startTripObject.put("tripId", slotObject.tripId);
-//            startTripObject.put("SecurityToken", slotObject.slotSecurityToken);
-//            startTripObject.put("BikeDeviceIMEI", slotObject.slotBikeDeviceIMEI);
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
 
 
         JSONObject startTripObject = new JSONObject();

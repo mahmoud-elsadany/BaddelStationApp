@@ -18,6 +18,7 @@ import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import baddel.baddelstationapp.Controller.callController;
@@ -115,7 +116,11 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
                     showToast("please put your verify Code !!");
                 }else{
                     //check verify code
-                    confirmUserRequest(Session.getInstance().getCurrentTripObject(),verMobileNumberET.getText().toString());
+
+                    confirmUserRequest(Session.getInstance().getCurrentTripArrayListObjects().get(0),verMobileNumberET.getText().toString());
+//                    showToast("Verify code is Accepted");
+//                    startActivity(new Intent(verifyMobileNumberActivity.this,creditCardDataActivity.class));
+
                 }
             }
         });
@@ -152,6 +157,8 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
         data.put("id",String.valueOf(currentTrip.tripId));
         data.put("confirmUser", confirmUserObject.toString());
 
+        Log.d("confirmTag","id: "+String.valueOf(currentTrip.tripId)+"\nconfirmUser: "+confirmUserObject.toString());
+
         String URL = myURL + apiMethod;
 
         if (isNetworkConnected()) {
@@ -175,9 +182,12 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
 
     @Override
     protected void onDestroy() {
-        myCounter.cancel();
-        myCounter = null;
-        callController.unBindController();
+        if (myCounter != null){
+            myCounter.cancel();
+            myCounter = null;
+            callController.unBindController();
+            callController = null;
+        }
         super.onDestroy();
     }
 
@@ -188,10 +198,10 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
             Log.d("confirmSMSResponse",response);
 
             trip_DS trip_ds = new trip_DS(response);
+            ArrayList<trip_DS> trips = trip_ds.currentTripObjects;
 
-            if (trip_ds.slotSecurityToken != null){
-                showToast("Verify Code is Accepted");
-                Session.getInstance().setCurrentTripObject(trip_ds);
+            if (trips.size() > 0){
+                Session.getInstance().setCurrentTripArrayListObject(trips);
                 showToast("Verify code is Accepted");
                 startActivity(new Intent(verifyMobileNumberActivity.this,creditCardDataActivity.class));
             }else{
@@ -203,10 +213,12 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
 
     @Override
     protected void onStop() {
-        myCounter.cancel();
-        myCounter = null;
-        callController.unBindController();
-        callController = null;
+        if (myCounter != null){
+            myCounter.cancel();
+            myCounter = null;
+            callController.unBindController();
+            callController = null;
+        }
         super.onStop();
     }
 }

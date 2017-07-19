@@ -77,8 +77,6 @@ public class putClass {
                 writer.write(getPutDataString(data));
             }
 
-
-
             writer.close();
             out.close();
 

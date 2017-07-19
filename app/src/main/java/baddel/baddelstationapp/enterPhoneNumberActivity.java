@@ -20,6 +20,7 @@ import com.hbb20.CountryCodePicker;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import baddel.baddelstationapp.Controller.callController;
@@ -140,6 +141,7 @@ public class enterPhoneNumberActivity extends AppCompatActivity implements respo
         String android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
         String myURL = Session.getInstance().getWebServicesBaseUrl();
         String apiMethod = Session.getInstance().getAPIMETHODPostRequestTrip();
+        int numberOfBikes = Session.getInstance().getNumberOfChosenBikes();
 
         JSONObject JsonObject = new JSONObject();
         try {
@@ -147,9 +149,12 @@ public class enterPhoneNumberActivity extends AppCompatActivity implements respo
             JsonObject.put("CostCalculationMethod", "prepaid");
             JsonObject.put("PhoneNumber", PhoneNumber);
             JsonObject.put("BikeDeviceIMEI", "");
+            JsonObject.put("NumberOfBikes", numberOfBikes);
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        Log.d("requestTrip",JsonObject.toString());
 
 
         int myProcessNum = 3;
@@ -180,9 +185,12 @@ public class enterPhoneNumberActivity extends AppCompatActivity implements respo
 
     @Override
     protected void onDestroy() {
-        myCounter.cancel();
-        myCounter = null;
-        callController.unBindController();
+        if (myCounter != null){
+            myCounter.cancel();
+            myCounter = null;
+            callController.unBindController();
+            callController = null;
+        }
         super.onDestroy();
     }
 
@@ -198,11 +206,10 @@ public class enterPhoneNumberActivity extends AppCompatActivity implements respo
             }else{
                 trip_DS trip_ds = new trip_DS(response);
 
-                Session.getInstance().setCurrentTripObject(trip_ds);
+                ArrayList<trip_DS> trips = trip_ds.currentTripObjects;
 
-                String token = trip_ds.slotSecurityToken;
-                if (token != null){
-                    Session.getInstance().setMessageToken(token);
+                if (trips.size() > 0){
+                    Session.getInstance().setCurrentTripArrayListObject(trips);
 
                     Intent goToConfirmSMS = new Intent(enterPhoneNumberActivity.this,confirmSMSActivity.class);
                     goToConfirmSMS.putExtra("phoneNumber",phoneNumberWithCode);
@@ -225,10 +232,12 @@ public class enterPhoneNumberActivity extends AppCompatActivity implements respo
 
     @Override
     protected void onStop() {
-        myCounter.cancel();
-        myCounter = null;
-        callController.unBindController();
-        callController = null;
+        if (myCounter != null){
+            myCounter.cancel();
+            myCounter = null;
+            callController.unBindController();
+            callController = null;
+        }
         super.onStop();
     }
 }

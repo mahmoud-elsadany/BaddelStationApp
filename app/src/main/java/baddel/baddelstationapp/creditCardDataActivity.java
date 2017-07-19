@@ -70,14 +70,15 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
 
         NoOfMin = Session.getInstance().getChosenPeriodTime();
 
+
+
         startService();
 
 
     }
 
     private void returnToStartActivity(){
-        myCounter = new CountDownTimer(90000, 1000) {
-
+        myCounter = new CountDownTimer(140000, 1000) {
             public void onTick(long millisUntilFinished) {
                 //TODO: Do something every second
             }
@@ -96,7 +97,6 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
         }
         return super.onTouchEvent(event);
     }
-
 
     private void startService(){
         callController = new callController(creditCardDataActivity.this);
@@ -163,9 +163,10 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
         payFortData.put("language", "en");
         payFortData.put("merchant_identifier", "QXCCpHjg");
         payFortData.put("remember_me", "NO");
-        payFortData.put("return_url", "http://104.197.104.190:8080/api/payment/request-token");
+        payFortData.put("return_url", Session.getInstance().getWebServicesBaseUrl()+"payment/request-token");
         payFortData.put("service_command", "TOKENIZATION");
     }
+
     private void postNewOrder(int NoOfMin) {
         //POST Request for minutes
         String myURL = Session.getInstance().getWebServicesBaseUrl();
@@ -178,12 +179,10 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
             e.printStackTrace();
         }
 
-
         int myProcessNum = 1;
 
         HashMap<String, String> data = new HashMap<>();
         data.put("createOrder", NoOfMinutesJsonObject.toString());
-
 
         String URL = myURL + apiMethod;
 
@@ -290,6 +289,8 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
 
                 payFortData.put("merchant_reference", String.valueOf(orderDetailsObject.orderDetailsId));
 
+                Log.d("creditCardResponse",String.valueOf(orderDetailsObject.orderDetailsId));
+
                 postDataToPayFort();
 
                 break;
@@ -337,17 +338,22 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
 
     @Override
     protected void onDestroy() {
-        myCounter.cancel();
-        myCounter = null;
-        callController.unBindController();
+        if (myCounter != null){
+            myCounter.cancel();
+            myCounter = null;
+            callController.unBindController();
+            callController = null;
+        }
         super.onDestroy();
     }
     @Override
     protected void onStop() {
-        myCounter.cancel();
-        myCounter = null;
-        callController.unBindController();
-        callController = null;
+        if (myCounter != null){
+            myCounter.cancel();
+            myCounter = null;
+            callController.unBindController();
+            callController = null;
+        }
         super.onStop();
     }
 }

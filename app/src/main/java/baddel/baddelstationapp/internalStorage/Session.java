@@ -1,5 +1,7 @@
 package baddel.baddelstationapp.internalStorage;
 
+import java.util.ArrayList;
+
 import baddel.baddelstationapp.Models.trip_DS;
 
 /**
@@ -15,7 +17,7 @@ public class Session {
     private int numberOfAvailableBikes;
     private boolean isTCPConnection = true;
     private int numberOfChosenBikes;
-    private trip_DS currentTripObject;
+    private ArrayList<trip_DS> currentTripArrayListObject;
 
     //webSocket constant Values
     private String webSocketBaseUrl = "http://104.197.104.190:8081/realtime";
@@ -24,8 +26,8 @@ public class Session {
     private String webSocketHub = "stationsHub";
 
     //HTTP API constant Values
-    private String webServicesBaseUrl = "http://104.197.104.190:8081/api/";
-    //private String webServicesBaseUrl = "http://dev.api.baddelonline.com/api/";
+    //private String webServicesBaseUrl = "http://104.197.104.190:8081/api/";
+    private String webServicesBaseUrl = "http://dev.api.baddelonline.com/api/";
     //private String webServicesBaseUrl = "http://staging.api.baddelonline.com/api/";
     private String tokenUserName = "station";
     private String tokenPassword = "Baddel@123";
@@ -40,7 +42,7 @@ public class Session {
 
 
     //TCPSocket constant Values
-    private String tcpSocketIP = "192.168.1.101";
+    private String tcpSocketIP = "192.168.0.145";
     private int tcpSocketPORT = 5001;
 //    private String tcpSocketIP = "192.168.1.100";
 //    private int tcpSocketPORT = 5001;
@@ -51,11 +53,7 @@ public class Session {
     private String payFortUrl = "https://checkout.payfort.com/FortAPI/paymentPage";
     private String APIMETHODPostPaymentOrder = "payment/order";
 
-    public int getOrderId() {
-        return OrderId;
-    }
-
-    private int OrderId;
+    private String OrderId;
 
 
     private static Session instance;
@@ -146,9 +144,14 @@ public class Session {
         return APIMETHODPostPaymentOrder;
     }
 
-    public void setOrderId(int orderId) {
+    public void setOrderId(String orderId) {
         OrderId = orderId;
     }
+
+    public String getOrderId() {
+        return OrderId;
+    }
+
 
     public String getPayFortUrl() {
         return payFortUrl;
@@ -194,12 +197,12 @@ public class Session {
         isTCPConnection = TCPConnection;
     }
 
-    public trip_DS getCurrentTripObject() {
-        return currentTripObject;
+    public ArrayList<trip_DS> getCurrentTripArrayListObjects() {
+        return currentTripArrayListObject;
     }
 
-    public void setCurrentTripObject(trip_DS currentTripObject) {
-        this.currentTripObject = currentTripObject;
+    public void setCurrentTripArrayListObject(ArrayList<trip_DS> currentTripArrayListObject) {
+        this.currentTripArrayListObject = currentTripArrayListObject;
     }
 
     public String getAPIMETHODPutConfirmUser() {

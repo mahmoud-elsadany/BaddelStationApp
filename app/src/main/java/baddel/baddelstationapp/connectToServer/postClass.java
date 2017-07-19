@@ -70,10 +70,13 @@ public class postClass {
                     BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     response.append(br.readLine());
                 }else if (responseCode == HttpsURLConnection.HTTP_MOVED_TEMP) {
+                    //302
                     response.append(conn.getHeaderField("location"));
                 }else if (responseCode == HttpsURLConnection.HTTP_BAD_REQUEST){
                     //400
-                    response.append("phone_number_missed");
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    response.append(br.readLine());
+                    response.append("..phone_number_missed");
                 }else if (responseCode == HttpsURLConnection.HTTP_FORBIDDEN){
                     //403
                     response.append("no_available_bikes, error_while_send_sms");
@@ -127,7 +130,6 @@ public class postClass {
     }
 
     private String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException {
-
         StringBuilder result = new StringBuilder();
         boolean first = true;
         for (Map.Entry<String, String> entry : params.entrySet()) {
@@ -138,14 +140,12 @@ public class postClass {
 
             result.append(entry.getValue());
         }
-
         return result.toString();
     }
 
 
     private String getPostDataParametersString(HashMap<String, String> params) throws UnsupportedEncodingException {
         TreeMap<String, String> treeMap = new TreeMap<>(params);
-
 
         StringBuilder result = new StringBuilder();
         boolean first = true;

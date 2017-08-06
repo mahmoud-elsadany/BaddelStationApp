@@ -4,7 +4,7 @@
     <string name="helpBTSTR">Need Help?</string>
     <string name="baddelLogoTVSTR">Baddel</string>
 
-    <string name="enterPhoneNumberTittleSTR">Please enter your phone number</string>
+    <string name="enterPhoneNumberTittleSTR">We need to verify your phone number</string>
     <string name="enterPhoneNumberCancelSTR">Cancel</string>
     <string name="enterPhoneNumberNextSTR">Next</string>
 
@@ -27,5 +27,13 @@
     <string name="maxTimeTVSTR">600 MIN</string>
     <string name="minTimeTVSTR">30 MIN</string>
 
+
+    <string name="needHelpSTR">    Need Help? \n please call 01288662741</string>
+
+
+
+    <string name="oneBikesSTR">1 \n Bike</string>
+    <string name="twoBikesSTR">2 \n Bikes</string>
+    <string name="threeBikesSTR">3 \n Bikes</string>
 
 </resources>

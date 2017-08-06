@@ -1,9 +1,15 @@
 package baddel.baddelstationapp;
 
+import android.app.ActivityManager;
+import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,10 +32,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import baddel.baddelstationapp.ClientTCPSocketing.TCPClient;
+import baddel.baddelstationapp.Controller.Controller;
 import baddel.baddelstationapp.Controller.callController;
 import baddel.baddelstationapp.Models.orderDetailsObject;
+import baddel.baddelstationapp.Models.trip_DS;
 import baddel.baddelstationapp.connectToServer.myAsyncTask;
 import baddel.baddelstationapp.connectToServer.responseDelegate;
+import baddel.baddelstationapp.customViews.customDialogs;
 import baddel.baddelstationapp.internalStorage.Session;
 import baddel.baddelstationapp.paymentClasses.SHA256Hashing;
 import baddel.baddelstationapp.paymentClasses.myWebClient;
@@ -38,7 +48,7 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
     //UI references
     private Button creditCardDataCancelBT,creditCardDataNextBT;
     private EditText creditCardNumberET,creditCardValidYearET,creditCardValidMonthET,creditCardHolderNameET,creditCardCVVET;
-    private TextView creditCardPeriodPriceTV;
+    //private TextView creditCardPeriodPriceTV;
 
     //HTTP asyncTask
     private myAsyncTask asyncTask;
@@ -51,12 +61,15 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
 
     //countDown object
     private CountDownTimer myCounter;
+    private Runnable myRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        hideSystemUI();
         setContentView(R.layout.activity_credit_card_data);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        myCounter = null;
 
 //        if (!Session.getInstance().isTCPConnection())
 //            customDialogs.ShowConnectionExceptionDialog(creditCardDataActivity.this);
@@ -70,30 +83,81 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
 
         NoOfMin = Session.getInstance().getChosenPeriodTime();
 
-
-
         startService();
 
+        getBundle();
 
     }
 
-    private void returnToStartActivity(){
-        myCounter = new CountDownTimer(140000, 1000) {
+    private void hideSystemUI() {
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE);
+    }
+
+    private void getBundle(){
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null){
+            if (bundle.getBoolean("payfort")){
+                ArrayList<trip_DS> trips_Array = Session.getInstance().getCurrentTripArrayListObjects();
+                putSetOrder(trips_Array.get(0));
+            }else {
+                Dialog errorDialog = customDialogs.ShowReservedBikes(creditCardDataActivity.this,creditCardDataActivity.class,"Sorry you have a problem with your Card !!");
+                errorDialog.show();
+            }
+        }
+    }
+
+    private void returnToStartActivity() {
+        myCounter = new CountDownTimer(250000, 1000) {
+
             public void onTick(long millisUntilFinished) {
                 //TODO: Do something every second
             }
+
             public void onFinish() {
-                startActivity(new Intent(creditCardDataActivity.this,startActivity.class));
+                final Dialog timeoutWarningDialog = customDialogs.ShowTimeoutWarningDialog(myCounter,creditCardDataActivity.this,creditCardDataActivity.class);
+                timeoutWarningDialog.show();
+
+                final Handler mHandler = new Handler();
+                myRunnable = new Runnable(){
+                    @Override
+                    public void run() {
+                        cancelReservationTrip(Session.getInstance().getCurrentTripArrayListObjects().get(0));
+//                        Session.getInstance().setCancelTrip(true);
+//                        startActivity(new Intent(creditCardDataActivity.this,startActivity.class));
+                    }
+                };
+
+                timeoutWarningDialog.setOnDismissListener(new Dialog.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        myCounter.cancel();
+                        mHandler.removeCallbacks(myRunnable);
+                        startActivity(new Intent(creditCardDataActivity.this,creditCardDataActivity.class));
+                    }
+                });
+
+
+                mHandler.postDelayed(myRunnable, 7000);
             }
+
         }.start();
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            myCounter.cancel();
-            myCounter = null;
-            returnToStartActivity();
+            if (myCounter != null) {
+                myCounter.cancel();
+                myCounter = null;
+                returnToStartActivity();
+            }
         }
         return super.onTouchEvent(event);
     }
@@ -103,14 +167,15 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
     }
 
     private void setEditTexts(){
-        creditCardPeriodPriceTV = (TextView)findViewById(R.id.creditCardPeriodPriceTV);
-        String periodPriceSTR = Session.getInstance().getChosenPeriodTime()+" * minPrice";
-        creditCardPeriodPriceTV.setText(periodPriceSTR);
+        //creditCardPeriodPriceTV = (TextView)findViewById(R.id.creditCardPeriodPriceTV);
+        //String periodPriceSTR = Session.getInstance().getChosenPeriodTime()+" * minPrice";
+        //creditCardPeriodPriceTV.setText(periodPriceSTR);
         creditCardNumberET = (EditText)findViewById(R.id.creditCardNumberET1);
         creditCardValidYearET = (EditText)findViewById(R.id.creditCardValidYearET1);
         creditCardValidMonthET = (EditText)findViewById(R.id.creditCardValidMonthET1);
         creditCardHolderNameET = (EditText)findViewById(R.id.creditCardHolderNameET1);
         creditCardCVVET = (EditText)findViewById(R.id.creditCardCVVET1);
+        creditCardNumberET.requestFocus();
         webView = (WebView) findViewById(R.id.webView2);
 
     }
@@ -120,7 +185,7 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
         creditCardDataCancelBT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(creditCardDataActivity.this,startActivity.class));
+                cancelReservationTrip(Session.getInstance().getCurrentTripArrayListObjects().get(0));
             }
         });
     }
@@ -136,10 +201,13 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
                 String cardHolderName = creditCardHolderNameET.getText().toString();
                 String cardCVV = creditCardCVVET.getText().toString();
 
+
                 if (cardCVV.equals("")||cardHolderName.equals("")||cardNumber.equals("")||cardValidYear.equals("")||cardValidMonth.equals(""))
                     showToast("please fill all values");
                 else{
-                    setPayFortHashMap(cardHolderName, cardNumber, cardCVV,cardValidYear + cardValidMonth);
+                    String editedCardHolderName = cardHolderName.replace(" ","+");
+
+                    setPayFortHashMap(editedCardHolderName, cardNumber, cardCVV,cardValidYear + cardValidMonth);
 
                     postNewOrder(NoOfMin);
                 }
@@ -147,7 +215,6 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
             }
         });
     }
-
 
     private void showToast(String message){
         Toast.makeText(creditCardDataActivity.this,message,Toast.LENGTH_LONG).show();
@@ -166,7 +233,6 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
         payFortData.put("return_url", Session.getInstance().getWebServicesBaseUrl()+"payment/request-token");
         payFortData.put("service_command", "TOKENIZATION");
     }
-
     private void postNewOrder(int NoOfMin) {
         //POST Request for minutes
         String myURL = Session.getInstance().getWebServicesBaseUrl();
@@ -275,6 +341,63 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
         }
 
     }
+    private void putSetOrder(trip_DS myTripDS) {
+        String myURL = Session.getInstance().getWebServicesBaseUrl();
+        String apiMethod = Session.getInstance().getAPIMETHODPutSetOrder();
+        int myProcessNum = 4;
+
+        JSONObject setOrderObject = new JSONObject();
+        try {
+            setOrderObject.put("OrderId", Session.getInstance().getOrderId());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        Log.d("jsonOrder",setOrderObject.toString());
+
+        HashMap<String, String> data = new HashMap<>();
+        data.put("id",String.valueOf(myTripDS.tripId));
+        data.put("tripPayment", setOrderObject.toString());
+
+        String URL = myURL + apiMethod;
+
+        if (isNetworkConnected()) {
+
+            asyncTask = new myAsyncTask(creditCardDataActivity.this, data, URL, myProcessNum, Session.getInstance().getTokenUserName(), Session.getInstance().getTokenPassword(), null, 3);
+
+            asyncTask.delegate = this;
+
+            asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        } else {
+            showToast("No Internet Connection");
+        }
+    }
+    private void cancelReservationTrip(trip_DS currentTrip){
+        Session.getInstance().setCancelTrip(true);
+        String myURL = Session.getInstance().getWebServicesBaseUrl();
+        String apiMethod = Session.getInstance().getAPIMETHODPostCancelTrip();
+        int myProcessNum = 5;
+
+        HashMap<String, String> data = new HashMap<>();
+        data.put("id",String.valueOf(currentTrip.tripId));
+
+        Log.d("cancelTrip","id: "+String.valueOf(currentTrip.tripId));
+
+        String URL = myURL + apiMethod;
+
+        if (isNetworkConnected()) {
+
+            asyncTask = new myAsyncTask(creditCardDataActivity.this, data, URL, myProcessNum, Session.getInstance().getTokenUserName(), Session.getInstance().getTokenPassword(), null, 3);
+
+            asyncTask.delegate = this;
+
+            asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        } else {
+            showToast("No Internet Connection");
+        }
+    }
+
 
     @Override
     public void getServerResponse(String response, int ProcessNum) {
@@ -307,10 +430,48 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
 
                 String payfortUrl = response.substring(1, response.length() - 1);
 
+
                 webView.setWebViewClient(new myWebClient(creditCardDataActivity.this,creditCardDataActivity.class));
                 webView.getSettings().setJavaScriptEnabled(true);
                 webView.setVisibility(View.VISIBLE);
+                webView.getSettings().setBuiltInZoomControls(true);
+                webView.getSettings().setTextZoom(20);
+                webView.getSettings().setSupportZoom(true);
+                webView.getSettings().setLoadWithOverviewMode(true);
                 webView.loadUrl(payfortUrl);
+
+                break;
+            case 4:
+                //setOrder
+                Log.d("confirmSetOrder",response);
+                final trip_DS confirmTrip = new trip_DS(response);
+
+                ArrayList<trip_DS> currentTrips = confirmTrip.currentTripObjects;
+
+                Session.getInstance().setCurrentTripArrayListObject(currentTrips);
+
+                if (currentTrips.size() > 0){
+                    for (final trip_DS tripObject:currentTrips){
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                Controller controller = new Controller();
+                                controller.sendToTCP(String.valueOf(tripObject.startSlotNumber),confirmTrip.currentTripObjects.get(0));
+                            }
+                        }, 1000);
+
+                    }
+                    startActivity(new Intent(creditCardDataActivity.this,startActivity.class));
+                }else{
+                    showToast("There Is Something Wrong");
+                }
+                break;
+            case 5:
+                //cancel Trip
+                Log.d("cancelTripResponse",response);
+
+                showToast(response);
+                startActivity(new Intent(creditCardDataActivity.this,startActivity.class));
 
                 break;
             default:
@@ -327,7 +488,9 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK) && webView.canGoBack()) {
 
-            startActivity(new Intent(this,startActivity.class));
+            cancelReservationTrip(Session.getInstance().getCurrentTripArrayListObjects().get(0));
+
+            //startActivity(new Intent(this,startActivity.class));
 
             webView.goBack();
 
@@ -346,6 +509,17 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
         }
         super.onDestroy();
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        ActivityManager activityManager = (ActivityManager) getApplicationContext()
+                .getSystemService(Context.ACTIVITY_SERVICE);
+
+        activityManager.moveTaskToFront(getTaskId(), 0);
+    }
+
     @Override
     protected void onStop() {
         if (myCounter != null){

@@ -21,7 +21,8 @@ public class Station_DS {
     public int stationNumberOfSlots;
     public int stationNumberOfAvailableBikes;
     public ArrayList<String> stationSlots;
-    public ArrayList<String> stationAds;
+
+    public ArrayList<Advert_DS> stationAds = new ArrayList<>();
 
 
     private static final String Id_Object = "Id";
@@ -35,11 +36,12 @@ public class Station_DS {
     private static final String NumberOfAvailableBikes_Object = "NumberOfAvailableBikes";
     private static final String Slots_Object = "Slots";
     private static final String Ads_Object = "Ads";
+    private static final String Station_Ad_Object = "Ad";
 
 
          //////   "CreationDate": "2017-06-16T15:48:37.443",
 
-    public Station_DS(int stationID, String stationName, String stationDeviceIMEI, double stationLatitude, double stationLongitude, String stationCreationDate, int stationNumberOfSlots, int stationNumberOfAvailableBikes, ArrayList<String> stationSlots, ArrayList<String> stationAds) {
+    public Station_DS(int stationID, String stationName, String stationDeviceIMEI, double stationLatitude, double stationLongitude, String stationCreationDate, int stationNumberOfSlots, int stationNumberOfAvailableBikes, ArrayList<String> stationSlots) {
         this.stationID = stationID;
         this.stationName = stationName;
         this.stationDeviceIMEI = stationDeviceIMEI;
@@ -49,7 +51,6 @@ public class Station_DS {
         this.stationNumberOfSlots = stationNumberOfSlots;
         this.stationNumberOfAvailableBikes = stationNumberOfAvailableBikes;
         this.stationSlots = stationSlots;
-        this.stationAds = stationAds;
     }
 
     public Station_DS(String response) {
@@ -67,25 +68,44 @@ public class Station_DS {
             this.stationNumberOfSlots = JsonObject.getInt(NumberOfSlots_Object);
             this.stationNumberOfAvailableBikes = JsonObject.getInt(NumberOfAvailableBikes_Object);
 
-            JSONArray stationSlotsArray = JsonObject.getJSONArray(Slots_Object);
-            JSONObject stationSlotObject;
+            JSONArray stationsAds = JsonObject.getJSONArray(Ads_Object);
+            JSONObject ObjectOfArray;
 
-            for (int i = 0;i<stationSlotsArray.length();i++) {
-                stationSlotObject = stationSlotsArray.getJSONObject(i);
-                this.stationSlots.add(stationSlotObject.getString(Slots_Object));
+            for (int i = 0; i < stationsAds.length();i++){
+
+                ObjectOfArray = stationsAds.getJSONObject(i);
+
+                String stationAdObject = ObjectOfArray.getString(Station_Ad_Object);
+
+                Advert_DS advert_Obj = new Advert_DS(stationAdObject);
+
+                stationAds.add(advert_Obj);
+
             }
 
-            JSONArray stationAdsArray = JsonObject.getJSONArray(Slots_Object);
-            JSONObject stationAdsObject;
-
-            for (int i = 0;i<stationAdsArray.length();i++) {
-                stationAdsObject = stationAdsArray.getJSONObject(i);
-                this.stationSlots.add(stationAdsObject.getString(Ads_Object));
-            }
+//            JSONArray stationSlotsArray = JsonObject.getJSONArray(Slots_Object);
+//            JSONObject stationSlotObject;
+//
+//            for (int i = 0;i<stationSlotsArray.length();i++) {
+//                stationSlotObject = stationSlotsArray.getJSONObject(i);
+//                this.stationSlots.add(stationSlotObject.getString(Slots_Object));
+//            }
+//
+//            JSONArray stationAdsArray = JsonObject.getJSONArray(Slots_Object);
+//            JSONObject stationAdsObject;
+//
+//            for (int i = 0;i<stationAdsArray.length();i++) {
+//                stationAdsObject = stationAdsArray.getJSONObject(i);
+//                this.stationSlots.add(stationAdsObject.getString(Ads_Object));
+//            }
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    public ArrayList<Advert_DS> stationAdvertDS_ArrayList(){
+        return stationAds;
     }
 
 }

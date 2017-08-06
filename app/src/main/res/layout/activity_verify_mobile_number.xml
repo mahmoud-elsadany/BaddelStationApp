@@ -22,90 +22,131 @@
             android:src="@drawable/baddelogobrandname" />
     </LinearLayout>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="50dp"
-        android:textColor="@color/baddelGreen"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/verMobileNumberTittleSTR"
-        android:id="@+id/verMobileNumberTittleTV"
-        android:layout_marginTop="95dp"
-        android:layout_below="@+id/linearLayout"
-        android:layout_centerHorizontal="true" />
-
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="text"
-        android:background="@drawable/edittextborder"
-        android:ems="10"
-        android:hint="@string/verMobileNumberSTR"
-        android:textSize="@dimen/textSize"
-        android:textColor="@color/baddelFontColor"
-        android:textColorHint="@color/baddelFontColor"
-        android:padding="6dp"
-        android:id="@+id/verMobileNumberET"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="20dp"
-        android:textColor="@color/baddelGreen"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/verMobileNumberMessageSTR"
-        android:id="@+id/verMobileNumberMessageTV"
-        android:layout_marginTop="11dp"
-        android:layout_below="@+id/verMobileNumberET"
-        android:layout_centerHorizontal="true" />
-
-    <Button
-        android:id="@+id/verMobileNumberNextBT"
-        android:layout_width="@dimen/footerButtonWidth"
-        android:layout_height="@dimen/footerButtonHeight"
-        android:layout_marginBottom="75dp"
-        android:textColor="@color/baddelFontColor"
-        android:background="@drawable/buttonshape"
-        android:text="@string/enterPhoneNumberNextSTR"
-        android:padding="20dp"
-        android:textSize="40dp"
+    <RelativeLayout
+        android:layout_width="800dp"
+        android:layout_height="match_parent"
+        android:id="@+id/leftConfirmSMSLayout"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="37dp"
-        android:layout_marginEnd="37dp" />
+        android:layout_alignParentStart="true">
 
-    <Button
-        android:id="@+id/verMobileNumberCancelBT"
-        android:layout_width="@dimen/footerButtonWidth"
-        android:layout_height="@dimen/footerButtonHeight"
-        android:text="@string/enterPhoneNumberCancelSTR"
-        android:textColor="@color/baddelFontColor"
-        android:background="@drawable/buttonshape"
-        android:padding="20dp"
-        android:textSize="40dp"
-        android:layout_alignBaseline="@+id/verMobileNumberNextBT"
-        android:layout_alignBottom="@+id/verMobileNumberNextBT"
-        android:layout_toLeftOf="@+id/verMobileNumberMessageTV"
-        android:layout_toStartOf="@+id/verMobileNumberMessageTV"
-        android:layout_marginRight="66dp"
-        android:layout_marginEnd="66dp" />
 
-    <Button
-        android:id="@+id/verMobileNumberResendBT"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/footerButtonHeight"
-        android:text="@string/verMobileNumberResendSTR"
-        android:textColor="@color/baddelFontColor"
-        android:background="@drawable/buttonshape"
-        android:padding="20dp"
-        android:textSize="20dp"
-        android:layout_marginBottom="24dp"
-        android:layout_above="@+id/verMobileNumberNextBT"
-        android:layout_centerHorizontal="true" />
+        <TextView
+            android:id="@+id/textView9"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/verMobileNumberMessageTV"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="84dp"
+            android:layout_marginStart="21dp"
+            android:drawableLeft="@drawable/leftsmsdrawable"
+            android:drawablePadding="20dp"
+            android:gravity="center_vertical"
+            android:text="We have sent Sms to "
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/baddelGreen"
+            android:textSize="35dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="35dp"
+            android:gravity="center_vertical"
+            android:drawablePadding="20dp"
+            android:textColor="@color/baddelFontColor"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text=" +201122335544 "
+            android:id="@+id/verMobileNumberTittleTV"
+            android:layout_alignBaseline="@+id/textView9"
+            android:layout_alignBottom="@+id/textView9"
+            android:layout_toEndOf="@+id/textView9" />
+
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:background="@drawable/edittextborder"
+            android:ems="10"
+            android:hint="@string/verMobileNumberSTR"
+            android:textSize="@dimen/textSize"
+            android:textColor="@color/baddelFontColor"
+            android:textColorHint="@color/baddelFontColor"
+            android:padding="15dp"
+            android:id="@+id/verMobileNumberET"
+            android:layout_marginBottom="182dp"
+            android:layout_marginStart="16dp"
+            android:layout_above="@+id/verMobileNumberCancelBT"
+            android:layout_alignStart="@+id/verMobileNumberCancelBT" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="30dp"
+            android:textColor="@color/baddelGreen"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Please Enter verification code"
+            android:id="@+id/verMobileNumberMessageTV"
+            android:layout_above="@+id/verMobileNumberET"
+            android:layout_alignStart="@+id/verMobileNumberET"
+            android:layout_marginBottom="17dp" />
+
+        <Button
+            android:id="@+id/verMobileNumberNextBT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="76dp"
+            android:background="@drawable/ok"
+            android:layout_marginRight="37dp"
+            android:layout_marginEnd="34dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true" />
+
+        <Button
+            android:id="@+id/verMobileNumberCancelBT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/cancel"
+            android:layout_alignBaseline="@+id/verMobileNumberNextBT"
+            android:layout_alignBottom="@+id/verMobileNumberNextBT"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="35dp" />
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rightConfirmSMSLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/baddelDarkGrey"
+        android:layout_toEndOf="@+id/leftConfirmSMSLayout"
+        android:layout_below="@+id/linearLayout">
+
+        <Button
+            android:id="@+id/resendSMSBT"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/footerButtonHeight"
+            android:background="@drawable/havnotrecievesms"
+            android:layout_marginTop="158dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
+
+        <Button
+            android:id="@+id/modifyPhoneNumberBT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/modifyphonenumber"
+            android:layout_marginTop="98dp"
+            android:layout_below="@+id/resendSMSBT"
+            android:layout_alignStart="@+id/resendSMSBT"
+            android:layout_alignEnd="@+id/resendSMSBT" />
+
+
+
+
+    </RelativeLayout>
+
+
 
 
 

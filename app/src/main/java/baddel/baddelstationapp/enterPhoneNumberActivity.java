@@ -1,9 +1,14 @@
 package baddel.baddelstationapp;
 
+import android.app.ActivityManager;
+import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,6 +28,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import baddel.baddelstationapp.ClientTCPSocketing.TCPClient;
 import baddel.baddelstationapp.Controller.callController;
 import baddel.baddelstationapp.Models.trip_DS;
 import baddel.baddelstationapp.connectToServer.myAsyncTask;
@@ -46,13 +52,18 @@ public class enterPhoneNumberActivity extends AppCompatActivity implements respo
 
     //countDown object
     private CountDownTimer myCounter;
+    private Runnable myRunnable;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        hideSystemUI();
         setContentView(R.layout.activity_enter_phone_number);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        myCounter = null;
+
 
 //        if (!Session.getInstance().isTCPConnection())
 //            customDialogs.ShowConnectionExceptionDialog(enterPhoneNumberActivity.this);
@@ -65,6 +76,22 @@ public class enterPhoneNumberActivity extends AppCompatActivity implements respo
         returnToStartActivity();
 
         startService();
+
+
+    }
+
+    private void hideSystemUI() {
+        // Set the IMMERSIVE flag.
+        // Set the content to appear under the system bars so that the content
+        // doesn't resize when the system bars hide and show.
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE);
     }
 
     private void startService(){
@@ -78,17 +105,40 @@ public class enterPhoneNumberActivity extends AppCompatActivity implements respo
         }
     }
 
-    private void returnToStartActivity(){
+    private void returnToStartActivity() {
         myCounter = new CountDownTimer(Session.getInstance().getWaitingTime(), 1000) {
 
             public void onTick(long millisUntilFinished) {
                 //TODO: Do something every second
             }
-            public void onFinish() {
-                startActivity(new Intent(enterPhoneNumberActivity.this,startActivity.class));
-            }
-        }.start();
 
+            public void onFinish() {
+                final Dialog timeoutWarningDialog = customDialogs.ShowTimeoutWarningDialog(myCounter,enterPhoneNumberActivity.this,enterPhoneNumberActivity.class);
+                timeoutWarningDialog.show();
+
+                final Handler mHandler = new Handler();
+                myRunnable = new Runnable(){
+                    @Override
+                    public void run() {
+                        startActivity(new Intent(enterPhoneNumberActivity.this,startActivity.class));
+                    }
+                };
+
+                timeoutWarningDialog.setOnDismissListener(new Dialog.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        myCounter.cancel();
+                        mHandler.removeCallbacks(myRunnable);
+                        startActivity(new Intent(enterPhoneNumberActivity.this,enterPhoneNumberActivity.class));
+
+                    }
+                });
+
+
+                mHandler.postDelayed(myRunnable, 7000);
+            }
+
+        }.start();
     }
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -96,7 +146,6 @@ public class enterPhoneNumberActivity extends AppCompatActivity implements respo
             myCounter.cancel();
             myCounter = null;
             returnToStartActivity();
-            showToast("touch");
         }
         return super.onTouchEvent(event);
     }
@@ -176,7 +225,7 @@ public class enterPhoneNumberActivity extends AppCompatActivity implements respo
             //asyncTask.execute();
             asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-            showToast("done post PhoneNumber");
+            //showToast("done post PhoneNumber");
         } else {
             showToast("No Internet Connection");
         }
@@ -211,7 +260,7 @@ public class enterPhoneNumberActivity extends AppCompatActivity implements respo
                 if (trips.size() > 0){
                     Session.getInstance().setCurrentTripArrayListObject(trips);
 
-                    Intent goToConfirmSMS = new Intent(enterPhoneNumberActivity.this,confirmSMSActivity.class);
+                    Intent goToConfirmSMS = new Intent(enterPhoneNumberActivity.this,verifyMobileNumberActivity.class);
                     goToConfirmSMS.putExtra("phoneNumber",phoneNumberWithCode);
                     startActivity(goToConfirmSMS);
                 }else{
@@ -224,6 +273,12 @@ public class enterPhoneNumberActivity extends AppCompatActivity implements respo
         }
 
     }
+
+    @Override
+    public void onBackPressed() {
+
+    }
+
     //check the connection
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(this.CONNECTIVITY_SERVICE);
@@ -239,5 +294,15 @@ public class enterPhoneNumberActivity extends AppCompatActivity implements respo
             callController = null;
         }
         super.onStop();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        ActivityManager activityManager = (ActivityManager) getApplicationContext()
+                .getSystemService(Context.ACTIVITY_SERVICE);
+
+        activityManager.moveTaskToFront(getTaskId(), 0);
     }
 }

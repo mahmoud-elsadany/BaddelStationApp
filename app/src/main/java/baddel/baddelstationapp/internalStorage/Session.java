@@ -2,6 +2,7 @@ package baddel.baddelstationapp.internalStorage;
 
 import java.util.ArrayList;
 
+import baddel.baddelstationapp.Models.Advert_DS;
 import baddel.baddelstationapp.Models.trip_DS;
 
 /**
@@ -11,23 +12,46 @@ import baddel.baddelstationapp.Models.trip_DS;
 public class Session {
 
     //random constant values
-    private int waitingTime = 30000;
+    private int waitingTime = 60000;
     private int chosenPeriodTime = 0;
     private String messageToken = "";
     private int numberOfAvailableBikes;
     private boolean isTCPConnection = true;
     private int numberOfChosenBikes;
+    private Boolean cancelTrip = false;
     private ArrayList<trip_DS> currentTripArrayListObject;
+    private ArrayList<Advert_DS> stationAdvertsList;
+    private Boolean tcpDown = false;
+
+
+    public String getKioskPassword() {
+        return KioskPassword;
+    }
+
+    private String KioskPassword = "12345";
+
+    public String getAndroidId() {
+        return androidId;
+    }
+
+    public void setAndroidId(String androidId) {
+        this.androidId = androidId;
+    }
+
+    private String androidId;
 
     //webSocket constant Values
-    private String webSocketBaseUrl = "http://104.197.104.190:8081/realtime";
+    //private String webSocketBaseUrl = "http://104.197.104.190:8081/realtime";
+    //private String webSocketBaseUrl = "http://dev.api.baddelonline.com/realtime";
+    private String webSocketBaseUrl = "http://api.baddelonline.com/realtime";
     private String webSocketStartTripOnMethod = "startTrip";
     private String webSocketUpdateAppMethod = "updateApp";
     private String webSocketHub = "stationsHub";
 
     //HTTP API constant Values
     //private String webServicesBaseUrl = "http://104.197.104.190:8081/api/";
-    private String webServicesBaseUrl = "http://dev.api.baddelonline.com/api/";
+    //private String webServicesBaseUrl = "http://dev.api.baddelonline.com/api/";
+    private String webServicesBaseUrl = "http://api.baddelonline.com/api/";
     //private String webServicesBaseUrl = "http://staging.api.baddelonline.com/api/";
     private String tokenUserName = "station";
     private String tokenPassword = "Baddel@123";
@@ -35,19 +59,20 @@ public class Session {
     private String APIMETHODPostAppVersion = "stations/set-app-version";
     private String APIMETHODPostRequestTrip = "trips/request";
     private String APIMETHODPutStartTrip = "trips/start";
+    private String APIMETHODPutRefreshToken = "trips/refresh-token";
     private String APIMETHODPutFinishTrip = "trips/finish";
     private String APIMETHODGetStationDetails = "stations/";
     private String APIMETHODPutConfirmUser = "trips/confirm-user";
     private String APIMETHODPutSetOrder = "trips/set-order";
+    private String APIMETHODPostCancelTrip = "trips/cancel-trip";
 
 
     //TCPSocket constant Values
-    private String tcpSocketIP = "192.168.0.145";
-    private int tcpSocketPORT = 5001;
-//    private String tcpSocketIP = "192.168.1.100";
+//    private String tcpSocketIP = "192.168.1.5";
 //    private int tcpSocketPORT = 5001;
+    private String tcpSocketIP = "192.168.1.100";
+    private int tcpSocketPORT = 5001;
     private String messageResponse;
-
 
     //payment values
     private String payFortUrl = "https://checkout.payfort.com/FortAPI/paymentPage";
@@ -211,6 +236,38 @@ public class Session {
 
     public String getAPIMETHODPutSetOrder() {
         return APIMETHODPutSetOrder;
+    }
+
+    public String getAPIMETHODPutRefreshToken() {
+        return APIMETHODPutRefreshToken;
+    }
+
+    public ArrayList<Advert_DS> getStationAdvertsList() {
+        return stationAdvertsList;
+    }
+
+    public void setStationAdvertsList(ArrayList<Advert_DS> stationAdvertsList) {
+        this.stationAdvertsList = stationAdvertsList;
+    }
+
+    public String getAPIMETHODPostCancelTrip() {
+        return APIMETHODPostCancelTrip;
+    }
+
+    public Boolean getCancelTrip() {
+        return cancelTrip;
+    }
+
+    public void setCancelTrip(Boolean cancelTrip) {
+        this.cancelTrip = cancelTrip;
+    }
+
+    public Boolean getTcpDown() {
+        return tcpDown;
+    }
+
+    public void setTcpDown(Boolean tcpDown) {
+        this.tcpDown = tcpDown;
     }
 }
 

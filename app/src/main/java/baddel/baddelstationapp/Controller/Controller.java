@@ -1,5 +1,6 @@
 package baddel.baddelstationapp.Controller;
 
+import android.app.Dialog;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -18,6 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -28,8 +30,12 @@ import baddel.baddelstationapp.ClientWebSocketSignalR.signalRDelegate;
 import baddel.baddelstationapp.Models.trip_DS;
 import baddel.baddelstationapp.connectToServer.myAsyncTask;
 import baddel.baddelstationapp.connectToServer.responseDelegate;
+import baddel.baddelstationapp.creditCardDataActivity;
+import baddel.baddelstationapp.customViews.customDialogs;
 import baddel.baddelstationapp.internalStorage.SQliteDB;
 import baddel.baddelstationapp.internalStorage.Session;
+import baddel.baddelstationapp.startActivity;
+import baddel.baddelstationapp.verifyMobileNumberActivity;
 
 /**
  * Created by mahmo on 2017-06-16.
@@ -38,9 +44,8 @@ import baddel.baddelstationapp.internalStorage.Session;
 public class Controller extends Service implements responseDelegate {
 
     //tcp Socket variables
-    private TCPClient mTcpClient;
+    private static TCPClient mTcpClient;
     private Handler handler;
-
 
     //general variables
     private String ControllerTag = "tcp";
@@ -48,13 +53,18 @@ public class Controller extends Service implements responseDelegate {
 
     //signalR service
     private SignalRService mService;
+    private TCPClient tcpService;
     private boolean mBound = false;
+    private boolean tcpBound = false;
 
 
     //HTTP asyncTask
     private myAsyncTask asyncTask;
     private SQliteDB sQliteDB;
 
+
+    //request from mobile
+    private Boolean isMobile = false;
 
     private final IBinder mBinder = new tripControllerBinder(); // Binder given to clients
 
@@ -77,10 +87,8 @@ public class Controller extends Service implements responseDelegate {
 
         // connect to the server
         mTcpClient = new TCPClient();
-        //mTcpClient.runTCP();
-        startTCPClient();
+        //startTCPClient();
         listenToSocket();
-
     }
 
     @Override
@@ -96,7 +104,7 @@ public class Controller extends Service implements responseDelegate {
         // connect to the server
         mTcpClient = new TCPClient();
         //mTcpClient.runTCP();
-        startTCPClient();
+        //startTCPClient();
         listenToSocket();
 
         return result;
@@ -124,14 +132,22 @@ public class Controller extends Service implements responseDelegate {
         Intent intent = new Intent();
         intent.setClass(this, SignalRService.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        startService(new Intent(this, SignalRService.class));
     }
+//    private void startTCPClient() {
+//        Intent intent = new Intent();
+//        intent.setClass(this, TCPClient.class);
+//        bindService(intent, TCPConnection, Context.BIND_AUTO_CREATE);
+//        startService(new Intent(Controller.this, TCPClient.class));
+//    }
 
     private void getStartTripDelegate() {
         new SignalRService().setOnResponseListener(new signalRDelegate() {
             @Override
             public void getOnStartTripResponse(String response) {
-                Log.d(ControllerTag, response);
-                trip_DS trip_ds = new trip_DS(response);
+                Log.d(ControllerTag, "fromMobile" + response);
+                trip_DS trip_ds = new trip_DS(response, 1);
+
                 //add 0 before numbers of one digit to send two digits for all values
                 Log.d(ControllerTag, String.valueOf(trip_ds.startSlotNumber));
                 String slotNumSTR = String.valueOf(trip_ds.startSlotNumber);
@@ -156,39 +172,167 @@ public class Controller extends Service implements responseDelegate {
         });
     }
 
-    public void sendToTCP(String SlotNumber, final trip_DS slotObject) {
-        String Message = "UNLOCK_BIKE_" + SlotNumber;
+    public void sendToTCP(String SlotNumber, final trip_DS tripObject) {
+        final String Message = "UNLOCK_BIKE_" + SlotNumber;
+
+        //String Message = "UNLOCK_BIKE_1";
+        Log.d("tcp", Message);
+
         if (mTcpClient != null) {
             mTcpClient.sendMessage(Message);
-        }
 
-        mTcpClient.setOnResponseListener(new OnMessageReceived() {
-            @Override
-            public void messageReceived(String message) {
-                //this method calls the onProgressUpdate
-                Session.getInstance().setMessageResponse(message);
+            Log.d("tcpSent", Message);
 
-                Log.d("tcpSendToTCP", message);
+            mTcpClient.setOnResponseListener(new OnMessageReceived() {
+                @Override
+                public void messageReceived(String message) {
+                    //this method calls the onProgressUpdate
+                    Session.getInstance().setMessageResponse(message);
 
-                if (message.equals("TRUE")) {
-                    //split to get slotNumber
-                    StartTripRequest(slotObject);
-                }else if (message.contains("LOCK_BIKE")) {
-                    String[] result = message.split("_");
-                    String lockedSlotNumber = result[2];
-                    String lockedBikeIMEI = result[3];
+                    ArrayList<trip_DS> currentTrips = Session.getInstance().getCurrentTripArrayListObjects();
 
-                    FinishTripRequest(lockedSlotNumber, lockedBikeIMEI);
+                    Log.d("receiveFromTCP", message);
 
-                    String Message = "finished";
-                    if (mTcpClient != null) {
-                        mTcpClient.sendMessage(Message);
+                    if (message.contains("_TRUE_")) {
+                        //split to get slotNumber { UNLOCK_SLOTNUMBER_TRUE_BIKEGUID }
+                        String[] result = message.split("_");
+                        final String unlockSlotNumber = result[1];
+                        final String unlockBikeIMEI = result[3];
+
+
+                        if (currentTrips == null) {
+                            //when it started from mobile
+                            isMobile = true;
+                            StartTripRequest(tripObject);
+                        } else {
+                            //when it started from station
+                            isMobile = false;
+                            for (final trip_DS tripDsObj : currentTrips) {
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+//                                        if (tripDsObj.startSlotNumber == Integer.parseInt(unlockSlotNumber) && tripDsObj.slotBikeDeviceIMEI.equals(unlockBikeIMEI)) {
+//                                            StartTripRequest(tripDsObj);
+//                                        }
+                                        if (tripDsObj.startSlotNumber == Integer.parseInt(unlockSlotNumber)) {
+                                            StartTripRequest(tripDsObj);
+                                        }
+                                    }
+                                }, 1000);
+                            }
+                        }
+
+//                        for (trip_DS tripDsObj : currentTrips) {
+////                            if (tripDsObj.startSlotNumber == Integer.parseInt(unlockSlotNumber) && tripDsObj.slotBikeDeviceIMEI.equals(unlockBikeIMEI)) {
+////                                StartTripRequest(tripDsObj);
+////                            }
+//                            if (tripDsObj.startSlotNumber == Integer.parseInt(unlockSlotNumber)) {
+//                                StartTripRequest(tripDsObj);
+//                            }
+//                        }
+
+                        String Message = "ack";
+                        if (mTcpClient != null) {
+                            mTcpClient.sendMessage(Message);
+                        }
+
+                    } else if (message.contains("LOCK_BIKE")) {
+                        //split to get slotNumber { LOCK_BIKE_SLOTNUMBER_BIKEGUID }
+                        String[] result = message.split("_");
+                        String lockedSlotNumber = result[2];
+                        String lockedBikeIMEI = result[3];
+
+                        FinishTripRequest(lockedSlotNumber, lockedBikeIMEI);
+
+                        //String Message = "ENDTRIP_" + lockedSlotNumber + "_OK";
+                        String Message = "ack";
+                        if (mTcpClient != null) {
+                            mTcpClient.sendMessage(Message);
+                        }
+                    } else if (message.equals("")) {
+                        //when he send me nothing
+                        if (mTcpClient != null) {
+                            mTcpClient.sendMessage(Message);
+                        }
                     }
-                }
 
-            }
-        });
+//                    else if (message.contains("TRUE")) {
+//                        //split to get slotNumber { TRUE }
+//                        if (currentTrips == null) {
+//                            //when it started from mobile
+//                            isMobile = true;
+//                            StartTripRequest(tripObject);
+//                        }else{
+//                            //when it started from station
+//                            isMobile = false;
+//                            for (final trip_DS tripDsObj : currentTrips) {
+//                                new Handler().postDelayed(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        StartTripRequest(tripDsObj);
+//                                    }
+//                                }, 1000);
+//                            }
+//                        }
+//
+//                        String Message = "ack";
+//                        if (mTcpClient != null) {
+//                            mTcpClient.sendMessage(Message);
+//                        }
+//
+//                    }
+
+
+                }
+            });
+        }
     }
+
+//    public void requestMissedTrips() {
+//        if (mTcpClient != null) {
+//            String Message = "REQUEST_MISSED_TRIPS";
+//            mTcpClient.sendMessage(Message);
+//
+//            Log.d("tcpSendToTCP", Message);
+//
+//            mTcpClient.setOnResponseListener(new OnMessageReceived() {
+//                @Override
+//                public void messageReceived(String message) {
+//                    //this method calls the onProgressUpdate
+//                    Session.getInstance().setMessageResponse(message);
+//
+//                    Log.d("tcpSendToTCP", message);
+//
+//                    if (message.contains(",LOCK_BIKE_")) {
+//                        //split Missed requests LOCK_BIKE_SlotNumber_BIKEGUID,LOCK_BIKE_SlotNumber_BIKEGUID
+//                        String[] missedTripsObjects = message.split(",");
+//                        for (int i = 0; i < missedTripsObjects.length; i++) {
+//                            if (message.contains("LOCK_BIKE")) {
+//                                //split to get slotNumber { LOCK_BIKE_SLOTNUMBER_BIKEGUID }
+//                                String[] result = message.split("_");
+//                                String lockedSlotNumber = result[2];
+//                                String lockedBikeIMEI = result[3];
+//
+//                                FinishTripRequest(lockedSlotNumber, lockedBikeIMEI);
+//                            }
+//                        }
+//                    }else if (message.contains("LOCK_BIKE")){
+//                        //missed requests with no array
+//                        String[] result = message.split("_");
+//                        String lockedSlotNumber = result[2];
+//                        String lockedBikeIMEI = result[3];
+//                        FinishTripRequest(lockedSlotNumber, lockedBikeIMEI);
+//
+//                        //String Message = "ENDTRIP_" + lockedSlotNumber + "_OK";
+//                        String Message = "ack";
+//                        if (mTcpClient != null) {
+//                            mTcpClient.sendMessage(Message);
+//                        }
+//                    }
+//                }
+//            });
+//        }
+//    }
 
     private void listenToSocket() {
         runOnUiThread(new Runnable() {
@@ -209,7 +353,7 @@ public class Controller extends Service implements responseDelegate {
 
                             FinishTripRequest(lockedSlotNumber, lockedBikeIMEI);
 
-                            String Message = "finished";
+                            String Message = "ack";
                             if (mTcpClient != null) {
                                 mTcpClient.sendMessage(Message);
                             }
@@ -223,10 +367,6 @@ public class Controller extends Service implements responseDelegate {
 
     private void runOnUiThread(Runnable r) {
         handler.post(r);
-    }
-
-    private void startTCPClient() {
-        startService(new Intent(Controller.this, TCPClient.class));
     }
 
     private final ServiceConnection mConnection = new ServiceConnection() {
@@ -244,17 +384,31 @@ public class Controller extends Service implements responseDelegate {
         }
     };
 
-    private void StartTripRequest(trip_DS slotObject) {
+//    private final ServiceConnection TCPConnection = new ServiceConnection() {
+//        @Override
+//        public void onServiceConnected(ComponentName className,
+//                                       IBinder service) {
+//            TCPClient.LocalBinder binder = (TCPClient.LocalBinder) service;
+//            tcpService = binder.getService();
+//            tcpBound = true;
+//        }
+//
+//        @Override
+//        public void onServiceDisconnected(ComponentName arg0) {
+//            mBound = false;
+//        }
+//    };
+
+    private void StartTripRequest(trip_DS tripObj) {
         String myURL = Session.getInstance().getWebServicesBaseUrl();
         String apiMethod = Session.getInstance().getAPIMETHODPutStartTrip();
         int myProcessNum = 4;
 
-
         JSONObject startTripObject = new JSONObject();
         try {
-            startTripObject.put("tripId", slotObject.tripId);
-            startTripObject.put("SecurityToken", slotObject.slotSecurityToken);
-            startTripObject.put("BikeDeviceIMEI", slotObject.slotBikeDeviceIMEI);
+            startTripObject.put("tripId", tripObj.tripId);
+            startTripObject.put("SecurityToken", tripObj.slotSecurityToken);
+            startTripObject.put("BikeDeviceIMEI", tripObj.slotBikeDeviceIMEI);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -262,9 +416,12 @@ public class Controller extends Service implements responseDelegate {
         HashMap<String, String> data = new HashMap<>();
         data.put("startTrip", startTripObject.toString());
 
+
+        Log.d("startTrip", startTripObject.toString());
+
         String URL = myURL + apiMethod;
 
-        if (isNetworkConnected()) {
+        if (true) {
 
             asyncTask = new myAsyncTask(Controller.this, data, URL, myProcessNum, Session.getInstance().getTokenUserName(), Session.getInstance().getTokenPassword(), null, 3);
 
@@ -272,7 +429,6 @@ public class Controller extends Service implements responseDelegate {
 
 //            asyncTask.execute();
             asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
 
         } else {
             showToast("No Internet Connection");
@@ -284,8 +440,9 @@ public class Controller extends Service implements responseDelegate {
         String apiMethod = Session.getInstance().getAPIMETHODPutFinishTrip();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         String date = df.format(new Date());
-        Log.d(ControllerTag, "time: "+date);
-        String android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
+        Log.d(ControllerTag, "time: " + date);
+        //String android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
+        String android_id = Session.getInstance().getAndroidId();
         int myProcessNum = 5;
         JSONObject finishTripObject = new JSONObject();
 
@@ -301,8 +458,10 @@ public class Controller extends Service implements responseDelegate {
         HashMap<String, String> data = new HashMap<>();
         data.put("finishTrip", finishTripObject.toString());
 
+        Log.d("finishTripObjectSTR", finishTripObject.toString());
+
         String URL = myURL + apiMethod;
-        if (isNetworkConnected()) {
+        if (true) {
             asyncTask = new myAsyncTask(Controller.this, data, URL, myProcessNum, Session.getInstance().getTokenUserName(), Session.getInstance().getTokenPassword(), null, 3);
 
             asyncTask.delegate = this;
@@ -319,32 +478,55 @@ public class Controller extends Service implements responseDelegate {
         Toast.makeText(Controller.this, msg, Toast.LENGTH_LONG).show();
     }
 
-    //check the connection
-    private boolean isNetworkConnected() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(this.CONNECTIVITY_SERVICE);
-        return cm.getActiveNetworkInfo() != null;
-    }
-
     @Override
     public void getServerResponse(String response, int ProcessNum) {
         switch (ProcessNum) {
             case 4:
                 //putRequest StartTrip
                 Log.d("getStartTrip", response);
+
+                if (!isMobile) {
+                    ArrayList<trip_DS> trips = Session.getInstance().getCurrentTripArrayListObjects();
+
+                    String reservedSlots = "";
+
+                    for (trip_DS tripObj : trips) {
+                        reservedSlots += "bike in slot " + tripObj.startSlotNumber + "\n";
+                    }
+
+                    final Dialog showReservedBikesDialog = customDialogs.ShowDialogAfterStartTrip(getApplicationContext(), reservedSlots);
+                    showReservedBikesDialog.show();
+
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            showReservedBikesDialog.cancel();
+                        }
+                    }, 5000);
+                }
+
                 break;
             case 5:
                 //putRequest finishTrip
                 Log.d("getFinishTrip", response);
-
 //                String Message = "finished";
 //                if (mTcpClient != null) {
 //                    mTcpClient.sendMessage(Message);
 //                }
-
                 break;
             default:
                 break;
         }
+    }
+
+    public int countCommas(String haystack, char needle) {
+        int count = 0;
+        for (int i = 0; i < haystack.length(); i++) {
+            if (haystack.charAt(i) == needle) {
+                count++;
+            }
+        }
+        return count;
     }
 
 }

@@ -20,6 +20,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 
+import baddel.baddelstationapp.Controller.Controller;
 import baddel.baddelstationapp.chooseRentTimeActivity;
 import baddel.baddelstationapp.customViews.customDialogs;
 import baddel.baddelstationapp.internalStorage.Session;
@@ -31,6 +32,10 @@ import baddel.baddelstationapp.internalStorage.Session;
 public class TCPClient extends Service {
 
     private static final String TCPTAG = "TCP";
+    private final String internetTag = "checkTCPTag";
+
+    private int firstTimeOpenSocket = 0;
+
 
     private String serverMessage;
 
@@ -39,13 +44,14 @@ public class TCPClient extends Service {
 
     private Socket socket;
 
-    private int mInterval = 2000; // 3 seconds by default, can be changed later
+    private int mInterval = 2000; // 2 seconds by default, can be changed later
     private Handler mHandler;
 
-    private Dialog TCPExceptionDialog;
+    private Controller controller;
 
-    PrintWriter out;
+    static PrintWriter out;
     BufferedReader in;
+
 
     private final IBinder mBinder = new LocalBinder();
 
@@ -68,66 +74,119 @@ public class TCPClient extends Service {
     public void onCreate() {
         super.onCreate();
 
-        TCPExceptionDialog = customDialogs.ShowConnectionExceptionDialog(getApplicationContext());
-
-
+        runTCP();
+//        controller = new Controller();
         mHandler = new Handler();
         startRepeatingTask();
+
+
     }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        int result = super.onStartCommand(intent, flags, startId);
+
+        //mHandler = new Handler();
+        startRepeatingTask();
+
+        return result;
+    }
+
 
     Runnable mStatusChecker = new Runnable() {
         @Override
         public void run() {
             try {
-                runTCP(); //this function can change value of mInterval.
+//                if (Session.getInstance().getTcpDown()) {
+//                    //tcp has been down
+//                    if (socket != null) {
+//                        if (socket.isConnected()) {
+//                            try {
+//                                socket.close();
+//                                socket.shutdownInput();
+//                                socket.shutdownOutput();
+//                                socket.setKeepAlive(false);
+//                            } catch (IOException e) {
+//                                e.printStackTrace();
+//                            }
+//                        }
+//                        socket = null;
+//                    }
+//                    //runTCP();
+//                    firstTimeOpenSocket = 0;
+//                    Log.d("TCPreconnect", "tcp down");
+//                } else {
+//                    //tcp is connected
+//                    // runTCP();
+//                    if (firstTimeOpenSocket == 0)
+//                        runTCP();
+//
+//                    firstTimeOpenSocket = 1;
+//
+//                    Log.d("TCPreconnect", "tcp connected");
+//                }
+
+
+                sendMessage("@");
+                Log.d("TCPtestsend", "@");
+
+            } catch (Exception e) {
+                Log.d("TCPtestsend", "test fail");
+                runTCP();
             } finally {
                 mHandler.postDelayed(mStatusChecker, mInterval);
             }
         }
     };
 
-    private void startRepeatingTask(){
+    private void startRepeatingTask() {
         mStatusChecker.run();
     }
 
-    private void stopRepeatingTask(){
+    private void stopRepeatingTask() {
         mHandler.removeCallbacks(mStatusChecker);
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId){
-        int result = super.onStartCommand(intent, flags, startId);
 
-        startRepeatingTask();
-        //runTCP();
-
-        return result;
-    }
-
-    public void sendMessage(String message){
+    public void sendMessage(String message) {
         if (out != null && !out.checkError()) {
+            Log.d("tcpReallySent", message);
             out.println(message);
             out.flush();
         }
     }
 
-    public void runTCP(){
-        AsyncTask<Void,Void,String> tcpAsyncTask = new AsyncTask<Void, Void, String>() {
+    private void runTCP() {
+        new AsyncTask<Void, Void, String>() {
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                if (socket != null) {
+                    try {
+                        socket.close();
+                        socket.shutdownInput();
+                        socket.shutdownOutput();
+                        socket.setKeepAlive(false);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
 
             @Override
             protected String doInBackground(Void... params) {
-
                 try {
                     InetAddress serverAddr = InetAddress.getByName(SERVERIP);
 
-                    Socket socket = new Socket(serverAddr, SERVERPORT);
+                    socket = new Socket(serverAddr, SERVERPORT);
+
                     socket.setKeepAlive(true);
 
                     Log.d(TCPTAG, "C: Connecting...");
 
                     try {
-
-
                         String serverMessage = "";
                         out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
 
@@ -135,7 +194,9 @@ public class TCPClient extends Service {
 
                         Log.d(TCPTAG, "C: Done.");
 
-                        TCPExceptionDialog.cancel();
+                        sendMessage("REQUEST_MISSED_TRIPS");
+
+                        //controller.requestMissedTrips();
 
                         //receive the message which the server sends back
 
@@ -154,12 +215,10 @@ public class TCPClient extends Service {
 
                             if (responseDelegate != null) {
                                 //call the method messageReceived from MyActivity class
-
                                 if (responseDelegate != null)
                                     responseDelegate.messageReceived(serverMessage);
                                 Log.d(TCPTAG, "message:" + serverMessage);
                             }
-
                         }
 
 
@@ -170,16 +229,16 @@ public class TCPClient extends Service {
 
                         Log.d(TCPTAG, "S: Error", e);
 
-                    }
-                    finally {
+                    } finally {
                         //the socket must be closed. It is not possible to reconnect to this socket
                         // after it is closed, which means a new socket instance has to be created.
                         Log.d(TCPTAG, "here in finally");
 
-                        if (socket != null){
-                            mHandler = new Handler();
-                            startRepeatingTask();
-                            //runTCP();
+                        if (socket != null) {
+                            //mHandler = new Handler();
+                            //startRepeatingTask();
+                            socket.close();
+                            runTCP();
                         }
 
                     }
@@ -189,6 +248,10 @@ public class TCPClient extends Service {
                     Log.d(TCPTAG, "C: Error", e);
 
                     Log.d(TCPTAG, "Device is Out Of Service");
+
+                    //startRepeatingTask();
+
+                    runTCP();
                 }
 
                 return null;
@@ -199,35 +262,42 @@ public class TCPClient extends Service {
 
                 //Session.getInstance().setTCPConnection(false);
 
-                if (message==null)
-                    TCPExceptionDialog.show();
+                if (message == null) {
+                    //TCPExceptionDialog.show();
+                    //startRepeatingTask();
+                    //runTCP();
+                }
 
 
                 Log.d(TCPTAG, "done connecting --> " + message);
             }
-        };
-
-        tcpAsyncTask.execute();
+        }.execute();
     }
+
 
 //    public void runTCP(){
 //        try {
 //            InetAddress serverAddr = InetAddress.getByName(SERVERIP);
 //
 //            socket = new Socket(serverAddr, SERVERPORT);
+//
 //            socket.setKeepAlive(true);
 //
 //            Log.d(TCPTAG, "C: Connecting...");
 //
 //            try {
-//                Session.getInstance().setTCPConnection(true);
-//
 //                String serverMessage = "";
 //                out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
 //
 //                Log.d(TCPTAG, "C: Sent.");
 //
 //                Log.d(TCPTAG, "C: Done.");
+//
+//                sendMessage("REQUEST_MISSED_TRIPS");
+//
+////                        controller.requestMissedTrips();
+//
+//                //TCPExceptionDialog.cancel();
 //
 //                //receive the message which the server sends back
 //
@@ -246,12 +316,10 @@ public class TCPClient extends Service {
 //
 //                    if (responseDelegate != null) {
 //                        //call the method messageReceived from MyActivity class
-//
 //                        if (responseDelegate != null)
 //                            responseDelegate.messageReceived(serverMessage);
 //                        Log.d(TCPTAG, "message:" + serverMessage);
 //                    }
-//
 //                }
 //
 //
@@ -262,28 +330,35 @@ public class TCPClient extends Service {
 //
 //                Log.d(TCPTAG, "S: Error", e);
 //
-//            }
-//            finally {
+//            } finally {
 //                //the socket must be closed. It is not possible to reconnect to this socket
 //                // after it is closed, which means a new socket instance has to be created.
 //                Log.d(TCPTAG, "here in finally");
 //
-//                if (socket != null)
+//                if (socket != null) {
+//                    //mHandler = new Handler();
+//                    //startRepeatingTask();
 //                    socket.close();
+//                    runTCP();
+//                }
 //
 //            }
 //
 //        } catch (Exception e) {
 //
-//            Session.getInstance().setTCPConnection(false);
-//
 //            Log.d(TCPTAG, "C: Error", e);
 //
 //            Log.d(TCPTAG, "Device is Out Of Service");
+//
+//            //startRepeatingTask();
+//
+//            runTCP();
 //        }
+//
+//        return null;
 //    }
 
-    public class LocalBinder extends Binder{
+    public class LocalBinder extends Binder {
         public TCPClient getService() {
             return TCPClient.this;
         }
@@ -293,6 +368,10 @@ public class TCPClient extends Service {
     public void onDestroy() {
 
         stopRepeatingTask();
+
+        stopSelf();
+
+        Log.d(internetTag, "internet destroyed");
 
         if (socket != null) {
             if (socket.isConnected()) {
@@ -308,7 +387,7 @@ public class TCPClient extends Service {
             socket = null;
         }
 
-        stopSelf();
+//        stopSelf();
 
         Log.d(TCPTAG, "Socket destroyed");
         super.onDestroy();

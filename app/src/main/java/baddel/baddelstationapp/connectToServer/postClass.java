@@ -69,7 +69,9 @@ public class postClass {
                 if (responseCode == HttpsURLConnection.HTTP_OK) {
                     BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     response.append(br.readLine());
-                }else if (responseCode == HttpsURLConnection.HTTP_MOVED_TEMP) {
+                }else if (responseCode == HttpsURLConnection.HTTP_CLIENT_TIMEOUT){
+                    response.append("TimeOut");
+                } else if (responseCode == HttpsURLConnection.HTTP_MOVED_TEMP) {
                     //302
                     response.append(conn.getHeaderField("location"));
                 }else if (responseCode == HttpsURLConnection.HTTP_BAD_REQUEST){
@@ -80,6 +82,9 @@ public class postClass {
                 }else if (responseCode == HttpsURLConnection.HTTP_FORBIDDEN){
                     //403
                     response.append("no_available_bikes, error_while_send_sms");
+                }else if (responseCode == HttpsURLConnection.HTTP_NOT_FOUND){
+                    //404
+                    response.append("Trip Not Found");
                 } else {
                     response.append("Error Registering");
                 }

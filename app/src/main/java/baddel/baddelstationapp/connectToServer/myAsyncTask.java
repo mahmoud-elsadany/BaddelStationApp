@@ -44,7 +44,7 @@ public class myAsyncTask extends AsyncTask<String, Void, String> {
         this.myContext = context;
 
         Log.d("baddelContext",myContext.toString());
-        if (myContext.toString().contains("verifyMobileNumberActivity")||myContext.toString().contains("startActivity")||myContext.toString().contains("creditCardDataActivity")||myContext.toString().contains("enterPhoneNumberActivity")){
+        if (myContext.toString().contains("creditCardDataActivity")||myContext.toString().contains("verifyMobileNumberActivity")||myContext.toString().contains("startActivity")||myContext.toString().contains("creditCardDataActivity")||myContext.toString().contains("enterPhoneNumberActivity")){
             DialogExist = true;
         }
         this.data = dataSend;

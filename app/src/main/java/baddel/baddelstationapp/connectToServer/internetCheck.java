@@ -1,30 +1,28 @@
 package baddel.baddelstationapp.connectToServer;
 
+import android.app.Dialog;
 import android.app.Service;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.InetAddress;
-import java.net.Socket;
-
-import baddel.baddelstationapp.ClientTCPSocketing.TCPClient;
+import baddel.baddelstationapp.customViews.customDialogs;
+import baddel.baddelstationapp.internalStorage.Session;
 
 /**
  * Created by mahmo on 2017-07-18.
  */
 
 public class internetCheck extends Service {
-    @Nullable
+
+    private final String internetTag = "checkInternetTag";
+
+    private int mInterval = 10000; // 10 seconds by default, can be changed later
+    private Handler mHandler;
+
+    private Dialog TCPExceptionDialog;
+
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -33,23 +31,35 @@ public class internetCheck extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        TCPExceptionDialog = customDialogs.ShowConnectionExceptionDialog(getApplicationContext());
+
+        mHandler = new Handler();
+        startRepeatingTask();
     }
 
-
     @Override
-    public void onDestroy() {
+    public int onStartCommand(Intent intent, int flags, int startId){
+        int result = super.onStartCommand(intent, flags, startId);
 
+        //startRepeatingTask();
 
-        super.onDestroy();
+        return result;
     }
 
     Runnable mStatusChecker = new Runnable() {
         @Override
         public void run() {
             try {
-                //runTCP(); //this function can change value of mInterval.
+                if(isOnline()){
+                    Log.d(internetTag,"is online");
+                    TCPExceptionDialog.cancel();
+                }else{
+                    Log.d(internetTag,"is offline");
+                    TCPExceptionDialog.show();
+                }
             } finally {
-                //mHandler.postDelayed(mStatusChecker, mInterval);
+                mHandler.postDelayed(mStatusChecker, mInterval);
             }
         }
     };
@@ -58,58 +68,31 @@ public class internetCheck extends Service {
         mStatusChecker.run();
     }
 
-//    private void stopRepeatingTask() {
-//        mHandler.removeCallbacks(mStatusChecker);
-//    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        int result = super.onStartCommand(intent, flags, startId);
-
-        startRepeatingTask();
-        //runTCP();
-
-        return result;
+    private void stopRepeatingTask() {
+        mHandler.removeCallbacks(mStatusChecker);
     }
 
+    private Boolean isOnline() {
+        try {
+            Process p1 = java.lang.Runtime.getRuntime().exec("ping -c 1 www.google.com");
+            int returnVal = p1.waitFor();
+            boolean reachable = (returnVal==0);
+            return reachable;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
-//    public void runTCP() {
-//        AsyncTask<Void, Void, String> tcpAsyncTask = new AsyncTask<Void, Void, String>() {
-//
-//            @Override
-//            protected String doInBackground(Void... params) {
-//
-//                try {
-//                    InetAddress ipAddr = InetAddress.getByName("google.com");
-//
-//                    return  !ipAddr.equals("");
-//                } catch (Exception e) {
-//
-//                    Log.d(TCPTAG, "S: Error", e);
-//
-//                }
-//
-//
-//                return null;
-//            }
-//
-//            @Override
-//            protected void onPostExecute(String message) {
-//
-//                //Session.getInstance().setTCPConnection(false);
-//
-//                if (message == null)
-//                    TCPExceptionDialog.show();
-//
-//
-//                Log.d(TCPTAG, "done connecting --> " + message);
-//            }
-//        };
-//
-//        tcpAsyncTask.execute();
-//
-//
-//    }
+    @Override
+    public void onDestroy() {
 
+        stopRepeatingTask();
+
+        stopSelf();
+
+        Log.d(internetTag, "internet destroyed");
+        super.onDestroy();
+    }
 
 }

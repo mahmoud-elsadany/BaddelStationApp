@@ -3,50 +3,43 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:rsv="http://schemas.android.com/apk/res-auto"
-    android:background="@color/baddelGray"
+    android:background="@drawable/bg"
     android:layout_height="match_parent"
     tools:context="baddel.baddelstationapp.chooseRentTimeActivity">
 
-    <!--<com.github.channguyen.rsv.RangeSliderView-->
-        <!--android:id="@+id/rangeSliderView"-->
-        <!--rsv:filledColor="@color/baddelGreen"-->
-        <!--rsv:rangeCount="21"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="100dp"-->
-        <!--android:layout_marginLeft="30dp"-->
-        <!--android:layout_marginRight="30dp"-->
-        <!--android:layout_alignParentStart="true"-->
-        <!--android:layout_above="@+id/countingTimeTV" />-->
+
+
 
     <RelativeLayout
+        android:id="@+id/chooseTimeLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/chooseTimeLayout"
-        android:layout_below="@+id/chooseRentTimeTittleTV"
-        android:layout_alignParentEnd="true"
-        android:layout_toEndOf="@+id/numberOfBikesLayout"
-        android:layout_above="@+id/timeDetailsLayout"
-        android:layout_alignStart="@+id/chooseRentTimeHelpBT">
+        android:layout_marginEnd="60dp"
+        android:layout_above="@+id/chooseRentTimeCancelBT"
+        android:layout_alignTop="@+id/numberOfBikesLayout"
+        android:layout_toStartOf="@+id/numberOfBikesLayout"
+        android:background="@drawable/choosetimebackground">
 
         <baddel.baddelstationapp.customViews.CircularSeekBar
             android:id="@+id/circularSeekBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_above="@+id/textView6"
             android:layout_alignParentEnd="true"
-            app:start_angle="270"
-            app:end_angle="270"
-            app:circle_x_radius="200dp"
-            app:circle_y_radius="200dp"
-            app:progress="1"
-            app:max="20"
-            app:circle_stroke_width="30dp"
-            app:circle_progress_color="@color/baddelGreen"
-            app:pointer_color="@color/baddelGreen"
-            app:pointer_halo_color="@color/baddelGreen"
             android:layout_alignParentStart="true"
             android:layout_below="@+id/textView3"
-            android:layout_above="@+id/textView6" />
+            app:circle_progress_color="@color/baddelGreen"
+            app:circle_stroke_width="20dp"
+            app:circle_x_radius="250dp"
+            app:circle_y_radius="250dp"
+            app:end_angle="270"
+            app:max="20"
+            app:circle_color="@color/baddelSeekBarColor"
+            app:pointer_color="@color/baddelGreen"
+            app:pointer_radius="20dp"
+            app:pointer_halo_color="@color/baddelGreen"
+            app:progress="1"
+            app:start_angle="270" />
 
         <TextView
             android:id="@+id/textView8"
@@ -54,11 +47,11 @@
             android:layout_height="wrap_content"
             android:text="450 min"
             android:textColor="@color/baddelGreen"
-            android:textSize="30dp"
-            android:layout_marginEnd="71dp"
-            android:layout_alignBaseline="@+id/sliderCounterTV"
-            android:layout_alignBottom="@+id/sliderCounterTV"
-            android:layout_toStartOf="@+id/textView3" />
+            android:textSize="24dp"
+            android:layout_alignBaseline="@+id/textView"
+            android:layout_alignBottom="@+id/textView"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="38dp" />
 
         <TextView
             android:id="@+id/textView6"
@@ -66,9 +59,10 @@
             android:layout_height="wrap_content"
             android:text="300 min"
             android:textColor="@color/baddelGreen"
-            android:textSize="30dp"
+            android:textSize="24dp"
             android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true" />
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="24dp" />
 
         <TextView
             android:id="@+id/textView3"
@@ -76,34 +70,77 @@
             android:layout_height="wrap_content"
             android:text="30 min"
             android:textColor="@color/baddelGreen"
-            android:textSize="30dp"
+            android:textSize="24dp"
             android:layout_alignParentTop="true"
-            android:layout_alignStart="@+id/sliderCounterTV" />
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp" />
 
         <TextView
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="150 min"
-            android:textSize="30dp"
             android:textColor="@color/baddelGreen"
-            android:layout_marginStart="80dp"
-            android:layout_alignBaseline="@+id/sliderCounterTV"
-            android:layout_alignBottom="@+id/sliderCounterTV"
-            android:layout_toEndOf="@+id/textView6" />
+            android:textSize="24dp"
+            android:layout_marginEnd="35dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true" />
 
         <TextView
             android:id="@+id/sliderCounterTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="30 min"
-            android:textColor="@color/colorAccent"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textSize="80dp"
+            android:text = "30"
+            android:textColor="@color/baddelGreen"
+            android:layout_alignBottom="@+id/textView"
+            android:layout_marginBottom="11dp"
+            android:layout_alignStart="@+id/sliderStandardsTV"
+            android:layout_alignEnd="@+id/sliderStandardsTV" />
+        <TextView
+            android:id="@+id/sliderStandardsTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="40dp"
+            android:text = "Minutes "
+            android:textColor="@color/baddelGreen"
+            android:layout_marginTop="12dp"
+            android:layout_alignTop="@+id/textView8"
+            android:layout_centerHorizontal="true" />
+        <TextView
+            android:id="@+id/sliderStandards2TV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
             android:textSize="30dp"
-            android:layout_centerVertical="true"
+            android:text = "per Bike "
+            android:textColor="@color/baddelFontColor"
+            android:layout_below="@+id/sliderStandardsTV"
             android:layout_centerHorizontal="true" />
 
     </RelativeLayout>
 
+    <ImageView
+        android:id="@+id/imageView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/count"
+        android:layout_marginEnd="80dp"
+        android:layout_above="@+id/chooseTimeLayout"
+        android:layout_toStartOf="@+id/chooseRentTimeNextBT"
+        android:layout_marginBottom="18dp" />
+
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/duration"
+        android:layout_marginStart="18dp"
+        android:layout_alignTop="@+id/imageView4"
+        android:layout_alignParentStart="true" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -122,133 +159,143 @@
 
     </LinearLayout>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="30dp"
-        android:textColor="@color/baddelGreen"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="2-choose Your Time: "
-        android:id="@+id/chooseRentTimeTittleTV"
-        android:layout_below="@+id/linearLayout"
-        android:layout_alignStart="@+id/chooseTimeLayout"
-        android:layout_marginStart="16dp" />
-
-    <TextView
-        android:id="@+id/textView7"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="1-choose Number of bikes"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/baddelGreen"
-        android:textSize="30dp"
-        android:layout_below="@+id/linearLayout"
-        android:layout_alignParentStart="true" />
-
     <Button
         android:id="@+id/chooseRentTimeNextBT"
-        android:layout_width="@dimen/footerButtonWidth"
-        android:layout_height="@dimen/footerButtonHeight"
-        android:textColor="@color/baddelFontColor"
-        android:background="@drawable/buttonshape"
-        android:text="@string/enterPhoneNumberNextSTR"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ok"
         android:padding="20dp"
-        android:textSize="40dp"
         android:layout_marginRight="37dp"
-        android:layout_marginEnd="35dp"
+        android:layout_marginEnd="26dp"
         android:layout_alignBaseline="@+id/chooseRentTimeCancelBT"
         android:layout_alignBottom="@+id/chooseRentTimeCancelBT"
         android:layout_alignParentEnd="true" />
 
     <Button
         android:id="@+id/chooseRentTimeCancelBT"
-        android:layout_width="@dimen/footerButtonWidth"
-        android:layout_height="@dimen/footerButtonHeight"
-        android:text="@string/enterPhoneNumberCancelSTR"
-        android:textColor="@color/baddelFontColor"
-        android:background="@drawable/buttonshape"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/cancel"
         android:padding="20dp"
-        android:textSize="40dp"
         android:layout_marginLeft="63dp"
+        android:layout_marginBottom="24dp"
         android:layout_alignParentBottom="true"
-        android:layout_alignEnd="@+id/textView7"
-        android:layout_marginEnd="28dp"
-        android:layout_marginBottom="24dp" />
-
-    <RelativeLayout
-        android:layout_width="300dp"
-        android:layout_height="200dp"
-        android:gravity="center"
-        android:id="@+id/timeDetailsLayout"
         android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:layout_above="@+id/chooseRentTimeNextBT">
-
-        <TextView
-            android:id="@+id/countingTimeTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="20dp"
-            android:textSize="40dp"
-            android:textColor="@color/baddelFontColor"
-            android:text="@string/countingTimeTVSTR"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentStart="true" />
-
-        <TextView
-            android:id="@+id/rentingDetailsTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="20dp"
-            android:textSize="40dp"
-            android:textColor="@color/baddelGreen"
-            android:text="reserve 1 bike for 30 min costs 25 egp"
-            android:layout_below="@+id/countingTimeTV"
-            android:layout_alignParentStart="true" />
-
-    </RelativeLayout>
+        android:layout_marginStart="68dp" />
 
 
-
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/numberOfBikesLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
-        android:layout_below="@+id/textView7"
-        android:layout_alignStart="@+id/chooseRentTimeCancelBT">
-        <NumberPicker
-            android:theme="@style/AppTheme.Picker"
-            android:id="@+id/numberOfBikesNP"
-            android:textAlignment="center"
-            android:descendantFocusability="blocksDescendants"
-            android:layout_width="100dp"
-            android:layout_height="200dp"
-            android:layout_centerVertical="true"
-            android:layout_toEndOf="@+id/numberOfBikesTV" />
+        android:layout_marginTop="99dp"
+        android:layout_below="@+id/linearLayout"
+        android:layout_alignStart="@+id/imageView5"
+        android:layout_marginStart="73dp">
+
+
+        <Button
+            android:id="@+id/oneBikeIMBT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@drawable/selectedbutton"
+            android:gravity="center"
+            android:text="@string/oneBikesSTR"
+            android:textColor="@color/baddelFontColor"
+            android:textSize="25dp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/twoBikesIMBT"
+            android:background="@drawable/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:layout_margin="10dp"
+            android:gravity="center"
+            android:textSize="25dp"
+            android:textColor="@color/baddelFontColor"
+            android:text="@string/twoBikesSTR" />
+
+        <Button
+            android:id="@+id/threeBikesIMBT"
+            android:background="@drawable/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:layout_margin="10dp"
+            android:gravity="center"
+            android:textSize="25dp"
+            android:textColor="@color/baddelFontColor"
+            android:text="@string/threeBikesSTR" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/imageView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="107dp"
+        app:srcCompat="@drawable/cost"
+        android:layout_below="@+id/numberOfBikesLayout"
+        android:layout_alignStart="@+id/imageView4" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_marginStart="56dp"
+        android:layout_marginTop="25dp"
+        android:layout_below="@+id/imageView5"
+        android:layout_toEndOf="@+id/imageView5">
+        <TextView
+            android:id="@+id/tripCostTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="25 EGP"
+            android:textStyle="bold"
+            android:textSize="70dp"
+            android:textColor="@color/baddelFontColor" />
 
         <TextView
             android:id="@+id/numberOfBikesTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Number Of Bikes : 1"
-            android:textSize="30dp"
+            android:gravity="center"
+            android:text="Bikes x1"
+            android:textSize="24dp"
             android:textColor="@color/baddelGreen"
-            android:layout_centerVertical="true" />
-    </RelativeLayout>
+            />
 
-    <Button
-        android:id="@+id/chooseRentTimeHelpBT"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="26dp"
-        android:background="@color/baddelGreen"
-        android:padding="10dp"
-        android:text="@string/helpBTSTR"
-        android:textColor="@color/baddelFontColor"
-        android:layout_below="@+id/timeDetailsLayout"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="17dp" />
+        <TextView
+            android:id="@+id/priceOfEachBike"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="25 EGP per bike"
+            android:textColor="@color/baddelGreen"
+            android:textSize="24dp" />
+
+    </LinearLayout>
+
+
+
+
+
+    <!--<Button-->
+    <!--android:id="@+id/chooseRentTimeHelpBT"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_marginRight="26dp"-->
+    <!--android:background="@color/baddelGreen"-->
+    <!--android:padding="10dp"-->
+    <!--android:text="@string/helpBTSTR"-->
+    <!--android:textColor="@color/baddelFontColor"-->
+    <!--android:layout_below="@+id/timeDetailsLayout"-->
+    <!--android:layout_centerHorizontal="true"-->
+    <!--android:layout_marginTop="17dp" />-->
 
 
 </RelativeLayout>

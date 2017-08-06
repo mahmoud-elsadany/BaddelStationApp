@@ -1,24 +1,24 @@
 package baddel.baddelstationapp;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-
+import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
 //import com.github.channguyen.rsv.RangeSliderView;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
+import java.util.concurrent.RunnableFuture;
 
 import baddel.baddelstationapp.Controller.callController;
 import baddel.baddelstationapp.customViews.CircularSeekBar;
@@ -28,40 +28,51 @@ import baddel.baddelstationapp.internalStorage.Session;
 
 public class chooseRentTimeActivity extends AppCompatActivity {
     //UI references
-    private TextView countingTimeTV, numberOfBikesTV, sliderCounterTV, rentingDetailsTV;
-    //private RangeSliderView largeSlider;
+    private TextView tripCostTV, sliderCounterTV, numberOfBikesTV, priceOfEachBikeTV;
     private CircularSeekBar circularSeekBar;
-    private Button chooseRentTimeCancelBT, chooseRentTimeHelpBT, chooseRentTimeNextBT;
-    private NumberPicker numberPicker;
+    private Button chooseRentTimeCancelBT, chooseRentTimeNextBT, oneBikeBT, twoBikesBT, threeBikesBT;
 
-    //recyclerView variables
-    private ArrayList<String> rentCardsPeriodTimes = new ArrayList<>();
+    private int bikeNumbers = 1;
+
+    private int actualProgress = 30;
 
     //TcpSocket
     private callController callController;
 
     //countDown object
     private CountDownTimer myCounter;
-
+    private Runnable myRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        hideSystemUI();
         setContentView(R.layout.activity_choose_rent_time);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        myCounter = null;
 
         returnToStartActivity();
 
-        //setChooseRentTimeSeekBar();
-        setNumberPicker();
+        setBikeNumbers();
         setChooseRentTimeNextBT();
         setChooseRentTimeCancelBT();
-        setChooseRentTimeHelpBT();
-
         setCircularSeekBar();
-        //setPeriodSeekBar();
 
         startService();
+    }
+
+    private void hideSystemUI() {
+        // Set the IMMERSIVE flag.
+        // Set the content to appear under the system bars so that the content
+        // doesn't resize when the system bars hide and show.
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE);
     }
 
     private void returnToStartActivity() {
@@ -72,11 +83,33 @@ public class chooseRentTimeActivity extends AppCompatActivity {
             }
 
             public void onFinish() {
-                startActivity(new Intent(chooseRentTimeActivity.this, startActivity.class));
+                final Dialog timeoutWarningDialog = customDialogs.ShowTimeoutWarningDialog(myCounter,chooseRentTimeActivity.this,chooseRentTimeActivity.class);
+                timeoutWarningDialog.show();
+
+                final Handler mHandler = new Handler();
+                myRunnable = new Runnable(){
+                    @Override
+                    public void run() {
+                        startActivity(new Intent(chooseRentTimeActivity.this,startActivity.class));
+                    }
+                };
+
+                timeoutWarningDialog.setOnDismissListener(new Dialog.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        startActivity(new Intent(chooseRentTimeActivity.this,chooseRentTimeActivity.class));
+                        myCounter.cancel();
+                        mHandler.removeCallbacks(myRunnable);
+                    }
+                });
+
+
+                mHandler.postDelayed(myRunnable, 7000);
             }
 
         }.start();
     }
+
 
 
     @Override
@@ -86,12 +119,10 @@ public class chooseRentTimeActivity extends AppCompatActivity {
                 myCounter.cancel();
                 myCounter = null;
                 returnToStartActivity();
-                showToast("touch");
             }
         }
         return super.onTouchEvent(event);
     }
-
 
     private void startService() {
         callController = new callController(chooseRentTimeActivity.this);
@@ -100,25 +131,30 @@ public class chooseRentTimeActivity extends AppCompatActivity {
     }
 
     private void setCircularSeekBar() {
-        countingTimeTV = (TextView) findViewById(R.id.countingTimeTV);
+        tripCostTV = (TextView) findViewById(R.id.tripCostTV);
         sliderCounterTV = (TextView) findViewById(R.id.sliderCounterTV);
-        rentingDetailsTV = (TextView) findViewById(R.id.rentingDetailsTV);
+        numberOfBikesTV = (TextView)findViewById(R.id.numberOfBikesTV);
+        priceOfEachBikeTV = (TextView)findViewById(R.id.priceOfEachBike);
+
+        //rentingDetailsTV = (TextView) findViewById(R.id.rentingDetailsTV);
         circularSeekBar = (CircularSeekBar) findViewById(R.id.circularSeekBar);
         Session.getInstance().setChosenPeriodTime(30);
 
         circularSeekBar.setOnSeekBarChangeListener(new CircularSeekBar.OnCircularSeekBarChangeListener() {
             @Override
             public void onProgressChanged(CircularSeekBar circularSeekBar, int progress, boolean fromUser) {
-                int actualProgress;
+
                 if (progress == 0)
                     actualProgress = 30;
                 else
                     actualProgress = progress*30;
 
-                countingTimeTV.setText("Reserved Minutes : " + String.valueOf(actualProgress) + " Min for each bike");
-                sliderCounterTV.setText(actualProgress + " min");
-                rentingDetailsTV.setText("reserve " + numberPicker.getValue() + " bikes for " + actualProgress + " min costs " + costEquation(actualProgress)*actualProgress*numberPicker.getValue()+" egp");
-                Session.getInstance().setChosenPeriodTime(progress*numberPicker.getValue());
+                tripCostTV.setText(costEquation(actualProgress,bikeNumbers) + " EGP");
+                priceOfEachBikeTV.setText(costEquation(actualProgress,1) + " EGP Per bike");
+
+                sliderCounterTV.setText(String.valueOf(actualProgress));
+                //rentingDetailsTV.setText("reserve " + numberPicker.getValue() + " bikes for " + actualProgress + " min costs " + costEquation(actualProgress)*actualProgress*numberPicker.getValue()+" egp");
+                Session.getInstance().setChosenPeriodTime(progress*bikeNumbers);
             }
 
             @Override
@@ -131,27 +167,66 @@ public class chooseRentTimeActivity extends AppCompatActivity {
         });
     }
 
-    private void setNumberPicker() {
-        numberOfBikesTV = (TextView) findViewById(R.id.numberOfBikesTV);
-        numberPicker = (NumberPicker) findViewById(R.id.numberOfBikesNP);
+    private void setBikeNumbers(){
+        oneBikeBT = (Button)findViewById(R.id.oneBikeIMBT);
+        twoBikesBT = (Button)findViewById(R.id.twoBikesIMBT);
+        threeBikesBT = (Button)findViewById(R.id.threeBikesIMBT);
 
-        numberPicker.setMinValue(1);
-        if (Session.getInstance().getNumberOfAvailableBikes() >= 3)
-            numberPicker.setMaxValue(3);
-        else
-            numberPicker.setMaxValue(Session.getInstance().getNumberOfAvailableBikes());
+        Session.getInstance().setNumberOfChosenBikes(1);
 
+        if (Session.getInstance().getNumberOfAvailableBikes() == 2) {
+            threeBikesBT.setVisibility(View.INVISIBLE);
 
-        numberPicker.setWrapSelectorWheel(false);
-        numberPicker.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-        numberPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+        }else if (Session.getInstance().getNumberOfAvailableBikes() == 1){
+            threeBikesBT.setVisibility(View.INVISIBLE);
+            twoBikesBT.setVisibility(View.INVISIBLE);
+        }else if (Session.getInstance().getNumberOfAvailableBikes() == 0){
+            oneBikeBT.setVisibility(View.INVISIBLE);
+            threeBikesBT.setVisibility(View.INVISIBLE);
+            twoBikesBT.setVisibility(View.INVISIBLE);
+        }
+
+        oneBikeBT.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                //Display the newly selected number from picker
-                numberOfBikesTV.setText("Number Of Bikes : " + newVal);
-                Session.getInstance().setNumberOfChosenBikes(newVal);
+            public void onClick(View v) {
+                bikeNumbers = 1;
+                oneBikeBT.setBackgroundResource(R.drawable.selectedbutton);
+                twoBikesBT.setBackgroundResource(R.drawable.button);
+                threeBikesBT.setBackgroundResource(R.drawable.button);
+                tripCostTV.setText(costEquation(actualProgress,bikeNumbers) + " EGP");
+                sliderCounterTV.setText(String.valueOf(actualProgress));
+                numberOfBikesTV.setText("Bike x1");
+                Session.getInstance().setNumberOfChosenBikes(1);
             }
         });
+        twoBikesBT.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bikeNumbers = 2;
+                oneBikeBT.setBackgroundResource(R.drawable.button);
+                twoBikesBT.setBackgroundResource(R.drawable.selectedbutton);
+                threeBikesBT.setBackgroundResource(R.drawable.button);
+                tripCostTV.setText(costEquation(actualProgress,bikeNumbers) + " EGP");
+                sliderCounterTV.setText(String.valueOf(actualProgress));
+                numberOfBikesTV.setText("Bikes x2");
+                Session.getInstance().setNumberOfChosenBikes(2);
+            }
+        });
+        threeBikesBT.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bikeNumbers = 3;
+                oneBikeBT.setBackgroundResource(R.drawable.button);
+                twoBikesBT.setBackgroundResource(R.drawable.button);
+                threeBikesBT.setBackgroundResource(R.drawable.selectedbutton);
+                tripCostTV.setText(costEquation(actualProgress,bikeNumbers) + " EGP");
+                sliderCounterTV.setText(String.valueOf(actualProgress));
+                numberOfBikesTV.setText("Bikes x3");
+                Session.getInstance().setNumberOfChosenBikes(3);
+            }
+        });
+
+        Log.d("numberBikesTag",String.valueOf(Session.getInstance().getNumberOfChosenBikes()));
 
     }
 
@@ -160,7 +235,7 @@ public class chooseRentTimeActivity extends AppCompatActivity {
         chooseRentTimeNextBT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Session.getInstance().setChosenPeriodTime(30);
+                Session.getInstance().setChosenPeriodTime(30*bikeNumbers);
                 if (Session.getInstance().getChosenPeriodTime() > 0) {
                     //go to enter phone Number
                     startActivity(new Intent(chooseRentTimeActivity.this, enterPhoneNumberActivity.class));
@@ -176,16 +251,6 @@ public class chooseRentTimeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(chooseRentTimeActivity.this, startActivity.class));
-            }
-        });
-    }
-
-    private void setChooseRentTimeHelpBT() {
-        chooseRentTimeHelpBT = (Button) findViewById(R.id.chooseRentTimeHelpBT);
-        chooseRentTimeHelpBT.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
             }
         });
     }
@@ -215,33 +280,62 @@ public class chooseRentTimeActivity extends AppCompatActivity {
         }
         super.onStop();
     }
+    @Override
+    public void onBackPressed() {
 
-    private double costEquation(int min) {
-        double x = (1.235204 - 0.3861872);
-        double y = min / 28.85022;
-        double myPower = Math.pow(y, 1.429056);
-
-        double division = x /(1+myPower);
-
-        double total = 0.3861872 + division;
-
-        return total;
     }
-}
 
+//    private float costEquation(int min,int bikeNumbers) {
+//        float x = (float) (1.235204 - 0.3861872);
+//        float y = (float) (min / 28.85022);
+//        float myPower = (float) Math.pow(y, 1.429056);
+//
+//        float division = x /(1+myPower);
+//
+//        float total = (float) (0.3861872 + division);
+//
+//
+//        //float realTotal = total*min*bikeNumbers;
+//        float realTotal = total*min;
+//
+//        int returnTotal = (int)realTotal;
+//
+//        int fiveModulas = returnTotal % 5;
+//
+//        int returnRealTotal = (5-fiveModulas) + returnTotal;
+//
+//
+//        //return returnRealTotal;
+//        return returnRealTotal*bikeNumbers;
+//    }
 
+    private int costEquation(int min,int bikeNumbers){
+        double minPrice = 0;
 
-   /*
-    private void setChooseRentTimeRecyclerView(){
-        chooseRentTimeRecyclerView = (RecyclerView)findViewById(R.id.chooseRentTimeRecyclerView);
-        for (int i = 30;i<=600;i+=30){
-            rentCardsPeriodTimes.add(i+" min");
+        if(min>=30 && min<60){
+            minPrice = 25/30.0;
+        }else if(min>=60 && min<120){
+            minPrice = 40/60.0;
+        }else if (min>=120 && min<300){
+            minPrice = 70/120.0;
+
+        }else{
+            minPrice = 140/300.0;
         }
-        rentCardsRCAdapter = new rentCardsRCAdapter(rentCardsPeriodTimes,chooseRentTimeActivity.this);
+
+        double totalPrice =  Math.ceil(minPrice * min);
 
 
-        LinearLayoutManager horizontalLayoutManagaer = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        chooseRentTimeRecyclerView.setLayoutManager(horizontalLayoutManagaer);
+        double reminder = 0;
+        double modulus =totalPrice % 5;
+        if(modulus>0){
+            reminder = 5-modulus;
+        }
 
-        chooseRentTimeRecyclerView.setAdapter(rentCardsRCAdapter);
-    }*/
+        //var roundedTotal = totalPrice + (5-(totalPrice % 5));
+        double roundedTotal = (int)totalPrice + reminder;
+
+        return (int)roundedTotal*bikeNumbers;
+    }
+
+}

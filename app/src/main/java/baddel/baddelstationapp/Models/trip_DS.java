@@ -1,5 +1,7 @@
 package baddel.baddelstationapp.Models;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -147,7 +149,7 @@ public class trip_DS {
             JSONArray jsonArray = new JSONArray(response);
             JSONObject JsonObject;
 
-            for (int i = 0;i<jsonArray.length();i++) {
+            for (int i = 0; i < jsonArray.length(); i++) {
                 JsonObject = jsonArray.getJSONObject(i);
 
                 this.tripId = JsonObject.getInt(slotId_OBJECT);
@@ -165,29 +167,56 @@ public class trip_DS {
                 JSONObject bikeObject = JsonObject.getJSONObject(Bike_OBJECT);
                 this.slotBikeId = bikeObject.getInt(BikeId_OBJECT);
                 this.slotBikeDeviceIMEI = bikeObject.getString(BikeDeviceIMEI_OBJECT);
-                this.slotBikeChargeLevel = bikeObject.getInt(BikeChargeLevel_OBJECT);
-                this.slotBikeStatus = bikeObject.getString(BikeBikeStatus_OBJECT);
-                this.slotBikeReservationExpiration = bikeObject.getString(BikeReservationExpiration_OBJECT);
+                try {
+                    this.slotBikeChargeLevel = bikeObject.getInt(BikeChargeLevel_OBJECT);
+                } catch (JSONException e) {}
+                try {
+                    this.slotBikeStatus = bikeObject.getString(BikeBikeStatus_OBJECT);
+                }catch (JSONException e) {}
+                try {
+                    this.slotBikeReservationExpiration = bikeObject.getString(BikeReservationExpiration_OBJECT);
+                }catch (JSONException e){}
 
-
-                this.slotDuration = JsonObject.getInt(Duration_OBJECT);
+                try {
+                    this.slotDuration = JsonObject.getInt(Duration_OBJECT);
+                } catch (JSONException e) {}
 //            this.slotCost = JsonObject.getString(Cost_OBJECT);
-                this.slotCostCalculationMethod = JsonObject.getString(CostCalculationMethod_OBJECT);
+                try {
+                    this.slotCostCalculationMethod = JsonObject.getString(CostCalculationMethod_OBJECT);
+                } catch (JSONException e) {
+
+                }
                 try {
                     this.slotSecurityToken = JsonObject.getString(SecurityToken_OBJECT);
+                } catch (JSONException e) {
+                }
+
+                JSONObject startSlotObject = JsonObject.getJSONObject(StartSlot_OBJECT);
+
+                try {
+                    this.startSlotId = startSlotObject.getInt(StartSlotId_OBJECT);
+                } catch (JSONException e) {
+
+                }
+                try {
+                    this.startSlotNumber = startSlotObject.getInt(StartSlotSlotNumber_OBJECT);
+                } catch (JSONException e) {
+
+                }
+                try {
+                    this.startSlotStationId = startSlotObject.getInt(StartSlotStationId_OBJECT);
                 } catch (JSONException e) {
 
                 }
 
-                JSONObject startSlotObject = JsonObject.getJSONObject(StartSlot_OBJECT);
-                this.startSlotId = startSlotObject.getInt(StartSlotId_OBJECT);
-                this.startSlotNumber = startSlotObject.getInt(StartSlotSlotNumber_OBJECT);
-                this.startSlotStationId = startSlotObject.getInt(StartSlotStationId_OBJECT);
-
                 JSONObject startSlotBikeObject = JsonObject.getJSONObject(StartSlotBike_OBJECT);
                 this.startSlotBikeId = startSlotBikeObject.getInt(StartSlotBikeId_OBJECT);
                 this.startSlotBikeDeviceIMEI = startSlotBikeObject.getString(StartSlotBikeDeviceIMEI_OBJECT);
-                this.startSlotBikeChargeLevel = startSlotBikeObject.getInt(StartSlotBikeChargeLevel_OBJECT);
+                try {
+                    this.startSlotBikeChargeLevel = startSlotBikeObject.getInt(StartSlotBikeChargeLevel_OBJECT);
+                } catch (JSONException e) {
+
+                }
                 this.startSlotBikeStatus = startSlotBikeObject.getString(StartSlotBikeStatus_OBJECT);
                 this.startSlotBikeReservationExpiration = startSlotBikeObject.getString(StartSlotBikeReservationExpiration_OBJECT);
 
@@ -199,17 +228,107 @@ public class trip_DS {
                 PlannedDuration = JsonObject.getInt(slotPlannedDuration_OBJECT);
 
 
-                currentTripObjects.add(new trip_DS(tripId,slotStatus,slotProfileId,
-                        slotProfileUserName, slotProfilePhoneNumber,slotProfileFirstName,
-                        slotProfileLastName, slotProfileBalance, slotProfileIsBlocked,slotProfileIsRegistered,
-                        slotBikeId, slotBikeDeviceIMEI, slotBikeChargeLevel,slotBikeStatus, slotBikeReservationExpiration,
-                        slotDuration, slotCost, slotCostCalculationMethod,slotSecurityToken, startSlotId,startSlotNumber,
-                        startSlotStationId, startSlotBikeId ,startSlotBikeDeviceIMEI, startSlotBikeChargeLevel,
+                currentTripObjects.add(new trip_DS(tripId, slotStatus, slotProfileId,
+                        slotProfileUserName, slotProfilePhoneNumber, slotProfileFirstName,
+                        slotProfileLastName, slotProfileBalance, slotProfileIsBlocked, slotProfileIsRegistered,
+                        slotBikeId, slotBikeDeviceIMEI, slotBikeChargeLevel, slotBikeStatus, slotBikeReservationExpiration,
+                        slotDuration, slotCost, slotCostCalculationMethod, slotSecurityToken, startSlotId, startSlotNumber,
+                        startSlotStationId, startSlotBikeId, startSlotBikeDeviceIMEI, startSlotBikeChargeLevel,
                         startSlotBikeStatus, startSlotBikeReservationExpiration, FinishSlot, TripCoordinates,
-                        StartTime, FinishTime,PlannedDuration));
+                        StartTime, FinishTime, PlannedDuration));
             }
 
 
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public trip_DS(String response, int oneObject) {
+        JSONObject JsonObject = null;
+        try {
+            JsonObject = new JSONObject(response);
+
+
+            this.tripId = JsonObject.getInt(slotId_OBJECT);
+            this.slotStatus = JsonObject.getString(slotStatus_OBJECT);
+
+            JSONObject profileObject = JsonObject.getJSONObject(Profile_OBJECT);
+            this.slotProfileId = profileObject.getInt(ProfileId_OBJECT);
+            this.slotProfilePhoneNumber = profileObject.getString(ProfilePhoneNumber_OBJECT);
+
+            try {
+                this.slotProfileFirstName = profileObject.getString(ProfileFirstName_OBJECT);
+            } catch (Exception e) {
+                Log.d("tripObjectException", e.toString());
+            }
+            try {
+                this.slotProfileLastName = profileObject.getString(ProfileLastName_OBJECT);
+            } catch (Exception e) {
+                Log.d("tripObjectException", e.toString());
+            }
+            try {
+                this.slotProfileBalance = profileObject.getInt(ProfileBalance_OBJECT);
+            } catch (Exception e) {
+                Log.d("tripObjectException", e.toString());
+            }
+            try {
+                this.slotProfileIsBlocked = profileObject.getBoolean(ProfileIsBlocked_OBJECT);
+            } catch (Exception e) {
+                Log.d("tripObjectException", e.toString());
+            }
+            try {
+                this.slotProfileIsRegistered = profileObject.getBoolean(ProfileIsRegistered_OBJECT);
+            } catch (Exception e) {
+                Log.d("tripObjectException", e.toString());
+            }
+
+            JSONObject bikeObject = JsonObject.getJSONObject(Bike_OBJECT);
+            this.slotBikeId = bikeObject.getInt(BikeId_OBJECT);
+            this.slotBikeDeviceIMEI = bikeObject.getString(BikeDeviceIMEI_OBJECT);
+            try {
+                this.slotBikeChargeLevel = bikeObject.getInt(BikeChargeLevel_OBJECT);
+            } catch (JSONException e) {
+
+            }
+            this.slotBikeStatus = bikeObject.getString(BikeBikeStatus_OBJECT);
+            this.slotBikeReservationExpiration = bikeObject.getString(BikeReservationExpiration_OBJECT);
+
+
+            this.slotDuration = JsonObject.getInt(Duration_OBJECT);
+//            this.slotCost = JsonObject.getString(Cost_OBJECT);
+            this.slotCostCalculationMethod = JsonObject.getString(CostCalculationMethod_OBJECT);
+            try {
+                this.slotSecurityToken = JsonObject.getString(SecurityToken_OBJECT);
+            } catch (JSONException e) {
+
+            }
+
+            JSONObject startSlotObject = JsonObject.getJSONObject(StartSlot_OBJECT);
+            this.startSlotId = startSlotObject.getInt(StartSlotId_OBJECT);
+            this.startSlotNumber = startSlotObject.getInt(StartSlotSlotNumber_OBJECT);
+            try {
+                this.startSlotStationId = startSlotObject.getInt(StartSlotStationId_OBJECT);
+            } catch (JSONException e) {
+
+            }
+
+            JSONObject startSlotBikeObject = JsonObject.getJSONObject(StartSlotBike_OBJECT);
+            this.startSlotBikeId = startSlotBikeObject.getInt(StartSlotBikeId_OBJECT);
+            this.startSlotBikeDeviceIMEI = startSlotBikeObject.getString(StartSlotBikeDeviceIMEI_OBJECT);
+            try {
+                this.startSlotBikeChargeLevel = startSlotBikeObject.getInt(StartSlotBikeChargeLevel_OBJECT);
+            } catch (JSONException e) {
+
+            }
+            this.startSlotBikeStatus = startSlotBikeObject.getString(StartSlotBikeStatus_OBJECT);
+            this.startSlotBikeReservationExpiration = startSlotBikeObject.getString(StartSlotBikeReservationExpiration_OBJECT);
+
+//            FinishSlot = JsonObject.getString(slotFinishSlot_OBJECT);
+//            TripCoordinates = JsonObject.getString(slotTripCoordinates_OBJECT);
+//            StartTime = JsonObject.getString(slotStartTime_OBJECT);
+//            FinishTime = JsonObject.getString(slotFinishTime_OBJECT);
+            PlannedDuration = JsonObject.getInt(slotPlannedDuration_OBJECT);
         } catch (JSONException e) {
             e.printStackTrace();
         }

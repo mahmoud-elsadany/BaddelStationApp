@@ -70,6 +70,7 @@ public class SignalRService extends Service {
     @Override
     public void onDestroy() {
         mHubConnection.stop();
+        stopSelf();
         super.onDestroy();
     }
 
@@ -97,7 +98,6 @@ public class SignalRService extends Service {
             String serverUrl = Session.getInstance().getWebSocketBaseUrl();
 
             Platform.loadPlatformComponent(new AndroidPlatformComponent());
-
 
             Logger mLogger = new Logger() {
                 @Override

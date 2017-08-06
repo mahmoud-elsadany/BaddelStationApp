@@ -10,4 +10,6 @@
     <dimen name="footerButtonHeight">90dp</dimen>
 
     <dimen name="textSize">40dp</dimen>
+
+    <dimen name="textUI">24dp</dimen>
 </resources>

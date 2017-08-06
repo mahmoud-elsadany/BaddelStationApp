@@ -5,7 +5,18 @@
     <color name="colorAccent">#FF4081</color>
 
     <color name="baddelGreen">#02a752</color>
+    <color name="baddelExceptionColor">#f54330</color>
+
+    <color name="baddelGreenBorder">#4b02a752</color>
+
     <color name="baddelGray">#2b2d2d</color>
     <color name="baddelheader">#000000</color>
     <color name="baddelFontColor">#ffffff</color>
+
+    <color name="baddelSeekBarColor">#bcbec0</color>
+    <color name="baddelDarkGrey">#232323</color>
+
+    <color name="baddelFontTransparent">#00ffffff</color>
+
+
 </resources>

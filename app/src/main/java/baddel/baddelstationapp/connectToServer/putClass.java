@@ -23,6 +23,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.net.ssl.HttpsURLConnection;
+
+import baddel.baddelstationapp.internalStorage.Session;
+
 /**
  * Created by mahmo on 2017-06-18.
  */
@@ -37,11 +41,17 @@ public class putClass {
         try {
             URL urlToRequest;
 
-            if (data.size() > 1) {
+            if (data.size() > 1 && !Session.getInstance().getCancelTrip()) {
                 //Query String in index 0
                 String parameters = putDataParametersQueryString(data);
                 parameters = removeLastChar(parameters);
                 urlToRequest = new URL(requestURL + "?" + parameters);
+            }else if (data.size() == 1 && Session.getInstance().getCancelTrip()) {
+                //Query String in index 0
+                String parameters = putDataParametersQueryString(data);
+                parameters = removeLastChar(parameters);
+                urlToRequest = new URL(requestURL + "?" + parameters);
+                Session.getInstance().setCancelTrip(false);
             } else {
                 //request with no query String
                 urlToRequest = new URL(requestURL);
@@ -80,15 +90,25 @@ public class putClass {
             writer.close();
             out.close();
 
-            InputStream in = urlConnection.getInputStream();
-
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            response.append(br.readLine());
+//            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+//            response.append(br.readLine());
 
             urlConnection.connect();
             int responseCode = urlConnection.getResponseCode();
 
             Log.d("putResponseCodeTag", String.valueOf(responseCode));
+
+            if (responseCode == HttpsURLConnection.HTTP_OK) {
+                BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                response.append(br.readLine());
+            }else if (responseCode == HttpsURLConnection.HTTP_MOVED_TEMP || responseCode == 400) {
+                BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                response.append(br.readLine());
+            }else if (responseCode == 404) {
+                response.append("404");
+            }else if (responseCode == 403) {
+                response.append("403");
+            }
 
 
             return response.toString();
@@ -108,7 +128,6 @@ public class putClass {
     }
 
     private String getPutDataString(HashMap<String, String> params) throws UnsupportedEncodingException {
-
         StringBuilder result = new StringBuilder();
         boolean first = true;
         for (Map.Entry<String, String> entry : params.entrySet()) {
@@ -128,13 +147,11 @@ public class putClass {
         StringBuilder result = new StringBuilder();
         boolean first = true;
         for (Map.Entry<String, String> entry : params.entrySet()) {
-            if (first)
-                first = false;
-            else if (!first) {
+
+            if (!entry.getKey().equals("id")){
                 result.append(entry.getValue());
                 return result.toString();
-            }else
-                result.append("&");
+            }
 
         }
 
@@ -148,9 +165,18 @@ public class putClass {
         StringBuilder result = new StringBuilder();
         boolean first = true;
         for (Map.Entry<String, String> entry : treeMap.entrySet()) {
-            if (first) {
-                first = false;
-            }else if (!first){
+//            if (first) {
+//                first = false;
+//            }else if (!first){
+//                result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
+//                result.append("=");
+//                result.append(entry.getValue());
+//                result.append("&");
+//                return result.toString();
+//            }else{
+//                result.append("");
+//            }
+            if (entry.getKey().equals("id")){
                 result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
                 result.append("=");
                 result.append(entry.getValue());
@@ -159,6 +185,7 @@ public class putClass {
             }else{
                 result.append("");
             }
+
         }
 
         return result.toString();

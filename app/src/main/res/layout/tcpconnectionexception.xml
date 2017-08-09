@@ -8,7 +8,7 @@
 
 
     <TextView
-        android:id="@+id/textView5"
+        android:id="@+id/textView5exeptionDialog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Station Is Out Of Service"
@@ -17,5 +17,39 @@
         android:textColor="@color/baddelExceptionColor"
         />
 
+    <LinearLayout
+        android:background="@drawable/dialogshape"
+        android:orientation="vertical"
+        android:id="@+id/TcpConnectionLinearLayoutToGoOut"
+        android:gravity="center_horizontal"
+        android:padding="20dp"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="numberPassword"
+            android:background="@drawable/edittextborder"
+            android:ems="10"
+            android:layout_marginTop="40dp"
+            android:layout_marginBottom="40dp"
+            android:textSize="@dimen/textSize"
+            android:maxLength="10"
+            android:padding="15dp"
+            android:text=""
+            android:textColor="@color/baddelFontColor"
+            android:id="@+id/enterPasswordTcpConnectionET"/>
+
+        <Button
+            android:id="@+id/exitToSettingsTcpConnectionBT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/ok" />
+
+    </LinearLayout>
 
 </LinearLayout>

@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.PixelFormat;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
@@ -12,6 +13,7 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -33,6 +35,7 @@ import baddel.baddelstationapp.Models.trip_DS;
 import baddel.baddelstationapp.connectToServer.myAsyncTask;
 import baddel.baddelstationapp.connectToServer.responseDelegate;
 import baddel.baddelstationapp.customViews.customDialogs;
+import baddel.baddelstationapp.customViews.customViewGroup;
 import baddel.baddelstationapp.internalStorage.Session;
 
 public class verifyMobileNumberActivity extends AppCompatActivity implements responseDelegate {
@@ -43,6 +46,8 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
     private Button verMobileNumberNextBT, verMobileNumberCancelBT, resendSMSBT, modifyPhoneNumberBT;
 
     private String phoneNumberSTR;
+
+    private Boolean modifyPhoneNumber = false;
 
     //TCP service
     private callController callController;
@@ -59,6 +64,7 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_verify_mobile_number);
         hideSystemUI();
+        disableStatusBar();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         myCounter = null;
 
@@ -76,13 +82,20 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
 
         startService();
 
-
     }
 
     private void getBundle() {
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
             phoneNumberSTR = bundle.getString("phoneNumber");
+
+            if (bundle.getBoolean("cancelTripIntent")) {
+                if (myCounter != null) {
+                    myCounter.cancel();
+                    myCounter = null;
+                }
+                cancelReservationTrip(Session.getInstance().getCurrentTripArrayListObjects().get(0));
+            }
         }
     }
 
@@ -92,7 +105,7 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
     }
 
     private void startService() {
-        callController = new callController(verifyMobileNumberActivity.this);
+        //callController = new callController(verifyMobileNumberActivity.this);
     }
 
     private void returnToStartActivity() {
@@ -173,9 +186,8 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
         modifyPhoneNumberBT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent goToEnterPhoneNumber = new Intent(verifyMobileNumberActivity.this, enterPhoneNumberActivity.class);
-                goToEnterPhoneNumber.putExtra("ModifyPhoneNumber", verMobileNumberTittleTV.getText().toString());
-                startActivity(goToEnterPhoneNumber);
+                modifyPhoneNumber = true;
+                cancelReservationTrip(Session.getInstance().getCurrentTripArrayListObjects().get(0));
             }
         });
     }
@@ -320,8 +332,8 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
         if (myCounter != null) {
             myCounter.cancel();
             myCounter = null;
-            callController.unBindController();
-            callController = null;
+//            callController.unBindController();
+//            callController = null;
         }
         super.onDestroy();
     }
@@ -334,7 +346,7 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
     @Override
     public void getServerResponse(String response, int ProcessNum) {
         if (ProcessNum == 1) {
-
+            //confirm sms api
             Log.d("confirmSMSResponse", response);
 
             String reservedSlots = "";
@@ -347,7 +359,7 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
                 showToast("Verify code is Accepted");
 
                 for (trip_DS tripObj : trips) {
-                    reservedSlots += "bike in slot " + tripObj.startSlotNumber + "\n";
+                    reservedSlots += tripObj.startSlotNumber + ", ";
                 }
 
                 Dialog slotsDialog = customDialogs.ShowReservedBikes(verifyMobileNumberActivity.this, creditCardDataActivity.class, reservedSlots);
@@ -359,6 +371,7 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
             }
 
         } else if (ProcessNum == 2) {
+            //refresh token api
             Log.d("refreshTokenResponse", response);
 
             if (response.equals("403"))
@@ -367,12 +380,18 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
                 showToast("max trials exceded");
 
         } else if (ProcessNum == 3) {
+            //cancel trip
             Log.d("cancelTripResponse", response);
 
             showToast(response);
 
-            startActivity(new Intent(verifyMobileNumberActivity.this, startActivity.class));
-
+            if (modifyPhoneNumber) {
+                Intent goToEnterPhoneNumber = new Intent(verifyMobileNumberActivity.this, enterPhoneNumberActivity.class);
+                goToEnterPhoneNumber.putExtra("ModifyPhoneNumber", verMobileNumberTittleTV.getText().toString());
+                startActivity(goToEnterPhoneNumber);
+            }else{
+                startActivity(new Intent(verifyMobileNumberActivity.this, startActivity.class));
+            }
         }
     }
 
@@ -381,8 +400,8 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
         if (myCounter != null) {
             myCounter.cancel();
             myCounter = null;
-            callController.unBindController();
-            callController = null;
+//            callController.unBindController();
+//            callController = null;
         }
         super.onStop();
     }
@@ -395,5 +414,31 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
                 .getSystemService(Context.ACTIVITY_SERVICE);
 
         activityManager.moveTaskToFront(getTaskId(), 0);
+    }
+
+    private void disableStatusBar() {
+        WindowManager manager = ((WindowManager) getApplicationContext()
+                .getSystemService(Context.WINDOW_SERVICE));
+
+        WindowManager.LayoutParams localLayoutParams = new WindowManager.LayoutParams();
+        localLayoutParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
+        localLayoutParams.gravity = Gravity.TOP;
+        localLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+
+                // this is to enable the notification to recieve touch events
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+
+                // Draws over status bar
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+
+        localLayoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+        localLayoutParams.height = (int) (50 * getResources()
+                .getDisplayMetrics().scaledDensity);
+        localLayoutParams.format = PixelFormat.TRANSPARENT;
+
+
+        customViewGroup view = new customViewGroup(this);
+
+        manager.addView(view, localLayoutParams);
     }
 }

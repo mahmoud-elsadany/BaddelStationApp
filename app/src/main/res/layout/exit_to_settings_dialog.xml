@@ -19,7 +19,7 @@
         android:textSize="@dimen/textSize"
         android:maxLength="10"
         android:padding="15dp"
-        android:text="123"
+        android:text=""
         android:textColor="@color/baddelFontColor"
         android:id="@+id/enterKioskPasswordET"/>
 

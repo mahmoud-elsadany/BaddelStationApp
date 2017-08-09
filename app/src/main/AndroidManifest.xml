@@ -53,13 +53,18 @@
         <activity
             android:name=".enterPhoneNumberActivity"
             android:screenOrientation="landscape"
+            android:launchMode="singleTask"
+            android:excludeFromRecents="false"
             />
         <activity
             android:name=".verifyMobileNumberActivity"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="landscape"
+            android:excludeFromRecents="false"/>
         <activity
             android:name=".chooseRentTimeActivity"
-            android:screenOrientation="landscape"></activity>
+            android:screenOrientation="landscape"
+            android:launchMode="singleTask"
+            android:excludeFromRecents="false"></activity>
         <activity
             android:name=".creditCardDataActivity"
             android:screenOrientation="landscape">

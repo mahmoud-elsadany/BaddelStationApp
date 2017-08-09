@@ -44,7 +44,7 @@ public class TCPClient extends Service {
 
     private Socket socket;
 
-    private int mInterval = 2000; // 2 seconds by default, can be changed later
+    private int mInterval = 3000; // 2 seconds by default, can be changed later
     private Handler mHandler;
 
     private Controller controller;
@@ -77,7 +77,7 @@ public class TCPClient extends Service {
         runTCP();
 //        controller = new Controller();
         mHandler = new Handler();
-        startRepeatingTask();
+        //startRepeatingTask();
 
 
     }
@@ -87,6 +87,8 @@ public class TCPClient extends Service {
         int result = super.onStartCommand(intent, flags, startId);
 
         //mHandler = new Handler();
+        mInterval = Session.getInstance().getTcpInterval();
+
         startRepeatingTask();
 
         return result;
@@ -125,9 +127,8 @@ public class TCPClient extends Service {
 //
 //                    Log.d("TCPreconnect", "tcp connected");
 //                }
-
-
-                sendMessage("@");
+                if (!Session.getInstance().getSending())
+                    sendMessage("@");
                 Log.d("TCPtestsend", "@");
 
             } catch (Exception e) {
@@ -153,6 +154,8 @@ public class TCPClient extends Service {
             Log.d("tcpReallySent", message);
             out.println(message);
             out.flush();
+
+            Session.getInstance().setSending(false);
         }
     }
 
@@ -162,16 +165,16 @@ public class TCPClient extends Service {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                if (socket != null) {
-                    try {
-                        socket.close();
-                        socket.shutdownInput();
-                        socket.shutdownOutput();
-                        socket.setKeepAlive(false);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
+//                if (socket != null) {
+//                    try {
+//                        socket.close();
+//                        socket.shutdownInput();
+//                        socket.shutdownOutput();
+//                        socket.setKeepAlive(false);
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
 
             }
 
@@ -259,7 +262,6 @@ public class TCPClient extends Service {
 
             @Override
             protected void onPostExecute(String message) {
-
                 //Session.getInstance().setTCPConnection(false);
 
                 if (message == null) {
@@ -267,7 +269,6 @@ public class TCPClient extends Service {
                     //startRepeatingTask();
                     //runTCP();
                 }
-
 
                 Log.d(TCPTAG, "done connecting --> " + message);
             }

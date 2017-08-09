@@ -81,6 +81,7 @@ public class startActivity extends AppCompatActivity implements responseDelegate
 
     private Handler mHandler = new Handler();
 
+    private ArrayList<trip_DS> initiateArrayList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +91,7 @@ public class startActivity extends AppCompatActivity implements responseDelegate
         setContentView(R.layout.activity_start);
         count = 0;
         isRentBicycle = false;
+        Session.getInstance().setCurrentTripArrayListObject(initiateArrayList);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         //disableStatusBar();
@@ -109,19 +111,47 @@ public class startActivity extends AppCompatActivity implements responseDelegate
 
         setRentBicycleBT();
 
-        getStationDetails();
 
         if (sQliteDB.numberOfStations() > 0) {
             callController = new callController(startActivity.this);
+            getStationDetails();
         } else {
             getStationID();
         }
 
+
         startService(new Intent(startActivity.this, TCPcheck.class));
         //startService(new Intent(startActivity.this,internetCheck.class));
-        startService(new Intent(startActivity.this,TCPClient.class));
+        startService(new Intent(startActivity.this, TCPClient.class));
 
         setLogoImageView();
+
+        getBundle();
+
+    }
+
+    private void getBundle() {
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            if (bundle.getBoolean("showStartTripDialog")) {
+                ArrayList<trip_DS> trips = Session.getInstance().getCurrentTripArrayListObjects();
+
+                String reservedSlots = "";
+
+                for (trip_DS tripObj : trips) {
+                    reservedSlots += tripObj.startSlotNumber + ", ";
+                }
+                final Dialog showReservedBikesDialog = customDialogs.ShowDialogAfterStartTrip(startActivity.this, reservedSlots);
+                showReservedBikesDialog.show();
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        showReservedBikesDialog.cancel();
+                    }
+                }, 5000);
+            }
+        }
     }
 
     private void setLogoImageView() {
@@ -188,6 +218,7 @@ public class startActivity extends AppCompatActivity implements responseDelegate
 
     private void setImageSlider() {
 
+        imageSlider.removeAllSliders();
         HashMap<String, String> file_maps = new HashMap<>();
 
         ArrayList<Advert_DS> stationAdverts = Session.getInstance().getStationAdvertsList();
@@ -221,6 +252,7 @@ public class startActivity extends AppCompatActivity implements responseDelegate
         rentBicycleBT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //Session.getInstance().setCurrentTripArrayListObject(null);
                 isRentBicycle = true;
                 getStationDetails();
             }
@@ -247,6 +279,9 @@ public class startActivity extends AppCompatActivity implements responseDelegate
     @Override
     protected void onDestroy() {
         // Unbind from the service
+        Log.d("appDestroyed","Stop services");
+        stopService(new Intent(startActivity.this, TCPClient.class));
+        stopService(new Intent(startActivity.this, TCPcheck.class));
         callController.unBindController();
         super.onDestroy();
     }
@@ -364,6 +399,8 @@ public class startActivity extends AppCompatActivity implements responseDelegate
                 callController = new callController(startActivity.this);
                 sendAppStationVersion(String.valueOf(station_ds.stationID));
 
+                getStationDetails();
+
 //                if (!Session.getInstance().isTCPConnection())
 //                    customDialogs.ShowConnectionExceptionDialog(startActivity.this);
 
@@ -399,9 +436,9 @@ public class startActivity extends AppCompatActivity implements responseDelegate
                         }
                     }, 5000);
 
-                } else
+                }else {
                     setImageSlider();
-
+                }
 
                 break;
 
@@ -409,6 +446,7 @@ public class startActivity extends AppCompatActivity implements responseDelegate
                 break;
         }
     }
+
 
     @Override
     public void onBackPressed() {

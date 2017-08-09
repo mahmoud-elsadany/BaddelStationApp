@@ -3,7 +3,7 @@
     android:orientation="vertical"
     android:background="@drawable/dialogshape"
     android:gravity="center_horizontal"
-    android:padding="20dp"
+    android:padding="60dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -13,29 +13,59 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="50dp"
-        android:text="Baddel"
-        android:padding="20dp"
+        android:text="Preparing Your Bikes"
         android:drawablePadding="15dp"
-        android:drawableLeft="@drawable/leftsmsdrawable"
+        android:drawableLeft="@drawable/bikeicon"
         android:gravity="center"
         android:textColor="@color/baddelGreen" />
 
     <TextView
-        android:id="@+id/slotNumbersTV"
-        android:gravity="center"
+        android:id="@+id/textView12"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="30dp"
-        android:text="heee"
-        android:lines="3"
+        android:gravity="center"
+        android:textSize="20dp"
         android:textColor="@color/baddelFontColor"
-        />
+        android:text="Bikes in the following Slots will be unlocked, are you sure you want to continue?" />
 
-    <Button
-        android:id="@+id/slotNumbersSubmitBT"
-        android:layout_width="wrap_content"
-        android:layout_marginTop="20dp"
+
+    <TextView
+        android:id="@+id/slotNumbersTV"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/ok"/>
+        android:gravity="center"
+        android:padding="15dp"
+        android:text="heee"
+        android:textColor="@color/baddelFontColor"
+        android:textSize="40dp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <Button
+            android:id="@+id/slotNumbersCancelBT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="40dp"
+            android:layout_marginRight="40dp"
+            android:layout_marginTop="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/cancel" />
+
+        <Button
+            android:id="@+id/slotNumbersSubmitBT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="40dp"
+            android:layout_marginRight="40dp"
+            android:layout_marginTop="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/ok" />
+    </LinearLayout>
+
 
 </LinearLayout>

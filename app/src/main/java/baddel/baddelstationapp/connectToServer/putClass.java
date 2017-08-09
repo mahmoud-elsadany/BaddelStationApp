@@ -101,10 +101,16 @@ public class putClass {
             if (responseCode == HttpsURLConnection.HTTP_OK) {
                 BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
                 response.append(br.readLine());
-            }else if (responseCode == HttpsURLConnection.HTTP_MOVED_TEMP || responseCode == 400) {
+            }else if (responseCode == HttpsURLConnection.HTTP_MOVED_TEMP) {
                 BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
                 response.append(br.readLine());
-            }else if (responseCode == 404) {
+            }else if (responseCode == 400) {
+                BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                response.append(br.readLine());
+            }else if (responseCode == 500){
+                BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                response.append(br.readLine());
+            } else if (responseCode == 404) {
                 response.append("404");
             }else if (responseCode == 403) {
                 response.append("403");

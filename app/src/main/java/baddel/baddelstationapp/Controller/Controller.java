@@ -156,8 +156,14 @@ public class Controller extends Service implements responseDelegate {
 //                } else {
 //                    slotNumSTR = String.valueOf(trip_ds.startSlotId);
 //                }
+
                 Log.d(ControllerTag, slotNumSTR);
-                sendToTCP(slotNumSTR, trip_ds);
+                //initiate arrayList before adding items
+                Session.getInstance().getCurrentTripArrayListObjects().add(trip_ds);
+                if(trip_ds.startSlotNumber <= 9)
+                    sendToTCP("0"+slotNumSTR, trip_ds);
+                else
+                    sendToTCP(slotNumSTR, trip_ds);
             }
 
 //            @Override
@@ -173,12 +179,15 @@ public class Controller extends Service implements responseDelegate {
     }
 
     public void sendToTCP(String SlotNumber, final trip_DS tripObject) {
+        Session.getInstance().setSending(true);
+
         final String Message = "UNLOCK_BIKE_" + SlotNumber;
 
         //String Message = "UNLOCK_BIKE_1";
         Log.d("tcp", Message);
 
         if (mTcpClient != null) {
+
             mTcpClient.sendMessage(Message);
 
             Log.d("tcpSent", Message);
@@ -196,47 +205,37 @@ public class Controller extends Service implements responseDelegate {
                     if (message.contains("_TRUE_")) {
                         //split to get slotNumber { UNLOCK_SLOTNUMBER_TRUE_BIKEGUID }
                         String[] result = message.split("_");
-                        final String unlockSlotNumber = result[1];
-                        final String unlockBikeIMEI = result[3];
-
+                        String unlockSlotNumber = result[1];
+                        String unlockBikeIMEI = result[3];
 
                         if (currentTrips == null) {
                             //when it started from mobile
                             isMobile = true;
                             StartTripRequest(tripObject);
-                        } else {
+                        }
+
+                        else {
                             //when it started from station
                             isMobile = false;
-                            for (final trip_DS tripDsObj : currentTrips) {
-                                new Handler().postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-//                                        if (tripDsObj.startSlotNumber == Integer.parseInt(unlockSlotNumber) && tripDsObj.slotBikeDeviceIMEI.equals(unlockBikeIMEI)) {
-//                                            StartTripRequest(tripDsObj);
-//                                        }
-                                        if (tripDsObj.startSlotNumber == Integer.parseInt(unlockSlotNumber)) {
-                                            StartTripRequest(tripDsObj);
-                                        }
-                                    }
-                                }, 1000);
+                            for (trip_DS tripDsObj : currentTrips) {
+                                if (tripDsObj.startSlotNumber == Integer.parseInt(unlockSlotNumber)) {
+                                    StartTripRequest(tripDsObj);
+                                    currentTrips.remove(tripDsObj);
+                                }
+
                             }
                         }
 
-//                        for (trip_DS tripDsObj : currentTrips) {
-////                            if (tripDsObj.startSlotNumber == Integer.parseInt(unlockSlotNumber) && tripDsObj.slotBikeDeviceIMEI.equals(unlockBikeIMEI)) {
-////                                StartTripRequest(tripDsObj);
-////                            }
-//                            if (tripDsObj.startSlotNumber == Integer.parseInt(unlockSlotNumber)) {
-//                                StartTripRequest(tripDsObj);
-//                            }
-//                        }
 
                         String Message = "ack";
                         if (mTcpClient != null) {
                             mTcpClient.sendMessage(Message);
                         }
+                        Session.getInstance().setSending(false);
 
-                    } else if (message.contains("LOCK_BIKE")) {
+                    }
+
+                    if (message.contains("LOCK_BIKE")) {
                         //split to get slotNumber { LOCK_BIKE_SLOTNUMBER_BIKEGUID }
                         String[] result = message.split("_");
                         String lockedSlotNumber = result[2];
@@ -249,11 +248,15 @@ public class Controller extends Service implements responseDelegate {
                         if (mTcpClient != null) {
                             mTcpClient.sendMessage(Message);
                         }
+                        Session.getInstance().setSending(false);
+
                     } else if (message.equals("")) {
                         //when he send me nothing
                         if (mTcpClient != null) {
                             mTcpClient.sendMessage(Message);
                         }
+                        Session.getInstance().setSending(false);
+
                     }
 
 //                    else if (message.contains("TRUE")) {
@@ -344,6 +347,8 @@ public class Controller extends Service implements responseDelegate {
                         //this method calls the onProgressUpdate
                         Session.getInstance().setMessageResponse(message);
 
+//                        ArrayList<trip_DS> currentTrips = Session.getInstance().getCurrentTripArrayListObjects();
+
                         Log.d("tcpListenToSocket", message);
 
                         if (message.contains("LOCK_BIKE")) {
@@ -357,6 +362,75 @@ public class Controller extends Service implements responseDelegate {
                             if (mTcpClient != null) {
                                 mTcpClient.sendMessage(Message);
                             }
+                        }
+//                        else if (message.contains("_TRUE_")) {
+//                            //split to get slotNumber { UNLOCK_SLOTNUMBER_TRUE_BIKEGUID }
+//                            String[] result = message.split("_");
+//                            String unlockSlotNumber = result[1];
+//                            String unlockBikeIMEI = result[3];
+//
+//                            if (currentTrips != null){
+//                                //when it started from station
+//                                isMobile = false;
+//                                for (trip_DS tripDsObj : currentTrips) {
+//                                    if (tripDsObj.startSlotNumber == Integer.parseInt(unlockSlotNumber)) {
+//                                        StartTripRequest(tripDsObj);
+//                                    }
+//                                }
+//                            }
+//                            String Message = "ack";
+//                            if (mTcpClient != null) {
+//                                mTcpClient.sendMessage(Message);
+//                            }
+//                            Session.getInstance().setSending(false);
+//                        }
+//                        else if (message.contains("_TRUE_")) {
+//                            //split to get slotNumber { UNLOCK_SLOTNUMBER_TRUE_BIKEGUID }
+//                            String[] result = message.split("_");
+//                            final String unlockSlotNumber = result[1];
+//                            final String unlockBikeIMEI = result[3];
+//
+//
+//                            if (currentTrips == null) {
+//                                //when it started from mobile
+//                                isMobile = true;
+//                                StartTripRequest(tripObject);
+//                            } else {
+//                                //when it started from station
+//                                isMobile = false;
+//                                for (final trip_DS tripDsObj : currentTrips) {
+//                                    new Handler().postDelayed(new Runnable() {
+//                                        @Override
+//                                        public void run() {
+////                                        if (tripDsObj.startSlotNumber == Integer.parseInt(unlockSlotNumber) && tripDsObj.slotBikeDeviceIMEI.equals(unlockBikeIMEI)) {
+////                                            StartTripRequest(tripDsObj);
+////                                        }
+//                                            if (tripDsObj.startSlotNumber == Integer.parseInt(unlockSlotNumber)) {
+//                                                StartTripRequest(tripDsObj);
+//                                            }
+//                                        }
+//                                    }, 1000);
+//                                }
+//                            }
+//
+////                        for (trip_DS tripDsObj : currentTrips) {
+//////                            if (tripDsObj.startSlotNumber == Integer.parseInt(unlockSlotNumber) && tripDsObj.slotBikeDeviceIMEI.equals(unlockBikeIMEI)) {
+//////                                StartTripRequest(tripDsObj);
+//////                            }
+////                            if (tripDsObj.startSlotNumber == Integer.parseInt(unlockSlotNumber)) {
+////                                StartTripRequest(tripDsObj);
+////                            }
+////                        }
+//
+//                            String Message = "ack";
+//                            if (mTcpClient != null) {
+//                                mTcpClient.sendMessage(Message);
+//                            }
+//
+//                        }
+                        String Message = "ack";
+                        if (mTcpClient != null) {
+                            mTcpClient.sendMessage(Message);
                         }
 
                     }
@@ -417,7 +491,7 @@ public class Controller extends Service implements responseDelegate {
         data.put("startTrip", startTripObject.toString());
 
 
-        Log.d("startTrip", startTripObject.toString());
+        Log.d("startTripParameter", startTripObject.toString());
 
         String URL = myURL + apiMethod;
 
@@ -483,26 +557,12 @@ public class Controller extends Service implements responseDelegate {
         switch (ProcessNum) {
             case 4:
                 //putRequest StartTrip
-                Log.d("getStartTrip", response);
+                Log.d("getStartTripResponse", response);
 
                 if (!isMobile) {
-                    ArrayList<trip_DS> trips = Session.getInstance().getCurrentTripArrayListObjects();
 
-                    String reservedSlots = "";
 
-                    for (trip_DS tripObj : trips) {
-                        reservedSlots += "bike in slot " + tripObj.startSlotNumber + "\n";
-                    }
 
-                    final Dialog showReservedBikesDialog = customDialogs.ShowDialogAfterStartTrip(getApplicationContext(), reservedSlots);
-                    showReservedBikesDialog.show();
-
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            showReservedBikesDialog.cancel();
-                        }
-                    }, 5000);
                 }
 
                 break;

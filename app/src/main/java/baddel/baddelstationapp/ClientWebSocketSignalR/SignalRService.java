@@ -183,6 +183,14 @@ public class SignalRService extends Service {
                 }
             });
 
+
+            mHubConnection.closed(new Runnable() {
+                @Override
+                public void run() {
+                    startSignalR();
+                }
+            });
+
         } else {
             Log.d(LOGTAG, "stationID NULL");
         }

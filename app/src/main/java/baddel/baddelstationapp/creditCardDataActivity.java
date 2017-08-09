@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.PixelFormat;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
@@ -13,6 +14,7 @@ import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -40,6 +42,7 @@ import baddel.baddelstationapp.Models.trip_DS;
 import baddel.baddelstationapp.connectToServer.myAsyncTask;
 import baddel.baddelstationapp.connectToServer.responseDelegate;
 import baddel.baddelstationapp.customViews.customDialogs;
+import baddel.baddelstationapp.customViews.customViewGroup;
 import baddel.baddelstationapp.internalStorage.Session;
 import baddel.baddelstationapp.paymentClasses.SHA256Hashing;
 import baddel.baddelstationapp.paymentClasses.myWebClient;
@@ -67,6 +70,7 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         hideSystemUI();
+        disableStatusBar();
         setContentView(R.layout.activity_credit_card_data);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         myCounter = null;
@@ -83,9 +87,9 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
 
         NoOfMin = Session.getInstance().getChosenPeriodTime();
 
-        startService();
 
         getBundle();
+
 
     }
 
@@ -114,7 +118,7 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
     }
 
     private void returnToStartActivity() {
-        myCounter = new CountDownTimer(250000, 1000) {
+        myCounter = new CountDownTimer(200000, 1000) {
 
             public void onTick(long millisUntilFinished) {
                 //TODO: Do something every second
@@ -160,10 +164,6 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
             }
         }
         return super.onTouchEvent(event);
-    }
-
-    private void startService(){
-        callController = new callController(creditCardDataActivity.this);
     }
 
     private void setEditTexts(){
@@ -359,6 +359,9 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
         data.put("id",String.valueOf(myTripDS.tripId));
         data.put("tripPayment", setOrderObject.toString());
 
+        Log.d("setOrderParams","id: "+String.valueOf(myTripDS.tripId)+"\ntripPayment: "+setOrderObject.toString());
+
+
         String URL = myURL + apiMethod;
 
         if (isNetworkConnected()) {
@@ -374,6 +377,7 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
         }
     }
     private void cancelReservationTrip(trip_DS currentTrip){
+
         Session.getInstance().setCancelTrip(true);
         String myURL = Session.getInstance().getWebServicesBaseUrl();
         String apiMethod = Session.getInstance().getAPIMETHODPostCancelTrip();
@@ -450,33 +454,64 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
 
                 Session.getInstance().setCurrentTripArrayListObject(currentTrips);
 
+
                 if (currentTrips.size() > 0){
                     for (final trip_DS tripObject:currentTrips){
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                Controller controller = new Controller();
-                                controller.sendToTCP(String.valueOf(tripObject.startSlotNumber),confirmTrip.currentTripObjects.get(0));
-                            }
-                        }, 1000);
-
+                        Controller controller = new Controller();
+                        if(tripObject.startSlotNumber <= 9)
+                            controller.sendToTCP("0"+String.valueOf(tripObject.startSlotNumber),confirmTrip.currentTripObjects.get(0));
+                        else
+                            controller.sendToTCP(String.valueOf(tripObject.startSlotNumber),confirmTrip.currentTripObjects.get(0));
                     }
-                    startActivity(new Intent(creditCardDataActivity.this,startActivity.class));
+//                    callController.unBindController();
+
                 }else{
                     showToast("There Is Something Wrong");
                 }
+
+                showStartTripDialog();
                 break;
             case 5:
                 //cancel Trip
                 Log.d("cancelTripResponse",response);
 
                 showToast(response);
+//                callController.unBindController();
                 startActivity(new Intent(creditCardDataActivity.this,startActivity.class));
 
                 break;
             default:
                 break;
         }
+    }
+
+    private void showStartTripDialog(){
+        if (myCounter != null){
+            myCounter.cancel();
+            myCounter = null;
+//            callController.unBindController();
+//            callController = null;
+        }
+
+        ArrayList<trip_DS> trips = Session.getInstance().getCurrentTripArrayListObjects();
+
+        String reservedSlots = "";
+
+        for (trip_DS tripObj : trips) {
+            reservedSlots +=  tripObj.startSlotNumber + ", ";
+        }
+
+
+        final Dialog showReservedBikesDialog = customDialogs.ShowDialogAfterStartTrip(creditCardDataActivity.this, reservedSlots);
+        showReservedBikesDialog.show();
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                showReservedBikesDialog.cancel();
+                startActivity(new Intent(creditCardDataActivity.this, startActivity.class));
+            }
+        }, 20000);
     }
 
     //check the connection
@@ -504,8 +539,8 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
         if (myCounter != null){
             myCounter.cancel();
             myCounter = null;
-            callController.unBindController();
-            callController = null;
+//            callController.unBindController();
+//            callController = null;
         }
         super.onDestroy();
     }
@@ -525,9 +560,35 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
         if (myCounter != null){
             myCounter.cancel();
             myCounter = null;
-            callController.unBindController();
-            callController = null;
+//            callController.unBindController();
+//            callController = null;
         }
         super.onStop();
+    }
+
+    private void disableStatusBar() {
+        WindowManager manager = ((WindowManager) getApplicationContext()
+                .getSystemService(Context.WINDOW_SERVICE));
+
+        WindowManager.LayoutParams localLayoutParams = new WindowManager.LayoutParams();
+        localLayoutParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
+        localLayoutParams.gravity = Gravity.TOP;
+        localLayoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+
+                // this is to enable the notification to recieve touch events
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+
+                // Draws over status bar
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+
+        localLayoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+        localLayoutParams.height = (int) (50 * getResources()
+                .getDisplayMetrics().scaledDensity);
+        localLayoutParams.format = PixelFormat.TRANSPARENT;
+
+
+        customViewGroup view = new customViewGroup(this);
+
+        manager.addView(view, localLayoutParams);
     }
 }

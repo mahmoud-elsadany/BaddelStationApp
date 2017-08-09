@@ -22,13 +22,15 @@ public class Session {
     private ArrayList<trip_DS> currentTripArrayListObject;
     private ArrayList<Advert_DS> stationAdvertsList;
     private Boolean tcpDown = false;
+    private Boolean sending = false;
+    private int tcpInterval = 3000;
 
 
     public String getKioskPassword() {
         return KioskPassword;
     }
 
-    private String KioskPassword = "12345";
+    private String KioskPassword = "300594";
 
     public String getAndroidId() {
         return androidId;
@@ -68,8 +70,8 @@ public class Session {
 
 
     //TCPSocket constant Values
-//    private String tcpSocketIP = "192.168.1.5";
-//    private int tcpSocketPORT = 5001;
+//    private String tcpSocketIP = "192.168.1.4";
+//    private int tcpSocketPORT = 5002;
     private String tcpSocketIP = "192.168.1.100";
     private int tcpSocketPORT = 5001;
     private String messageResponse;
@@ -269,5 +271,22 @@ public class Session {
     public void setTcpDown(Boolean tcpDown) {
         this.tcpDown = tcpDown;
     }
+
+    public Boolean getSending() {
+        return sending;
+    }
+
+    public void setSending(Boolean sending) {
+        this.sending = sending;
+    }
+
+    public int getTcpInterval() {
+        return tcpInterval;
+    }
+
+    public void setTcpInterval(int tcpInterval) {
+        this.tcpInterval = tcpInterval;
+    }
+
 }
 

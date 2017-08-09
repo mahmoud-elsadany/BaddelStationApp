@@ -1,31 +1,32 @@
 package baddel.baddelstationapp.customViews;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
+import android.content.pm.PackageManager;
 import android.os.CountDownTimer;
-import android.os.Handler;
+import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.IOException;
 
-import baddel.baddelstationapp.Controller.Controller;
-import baddel.baddelstationapp.Controller.callController;
 import baddel.baddelstationapp.R;
-import baddel.baddelstationapp.chooseRentTimeActivity;
+import baddel.baddelstationapp.enterPhoneNumberActivity;
 import baddel.baddelstationapp.internalStorage.Session;
 import baddel.baddelstationapp.startActivity;
 import pl.droidsonroids.gif.GifDrawable;
+
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 /**
  * Created by mahmo on 2017-07-13.
@@ -40,7 +41,7 @@ public class customDialogs {
         dialog.setContentView(R.layout.loadingdialog);
         dialog.getWindow().setBackgroundDrawable(myContext.getResources().getDrawable(R.drawable.dialogshape));
         try {
-            GifDrawable gifFromResource = new GifDrawable( myContext.getResources(), R.drawable.baddelgif);
+            GifDrawable gifFromResource = new GifDrawable(myContext.getResources(), R.drawable.baddelgif);
             gifFromResource.start();
         } catch (IOException e) {
             e.printStackTrace();
@@ -48,22 +49,68 @@ public class customDialogs {
         return dialog;
     }
 
-    public static Dialog ShowConnectionExceptionDialog(final Context myContext){
+    public static Dialog ShowConnectionExceptionDialog(final Context myContext) {
+        final int[] counter = {0};
         final Dialog dialog = new Dialog(myContext);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.getWindow().setGravity(Gravity.CENTER);
+        dialog.getWindow().setGravity(Gravity.TOP);
         dialog.setCancelable(false);
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         dialog.setContentView(R.layout.tcpconnectionexception);
-        //dialog.getWindow().setBackgroundDrawable(myContext.getResources().getDrawable(R.drawable.dialogshape));
 
+        final EditText enterPasswordTcpConnectionET = (EditText) dialog.findViewById(R.id.enterPasswordTcpConnectionET);
+        Button exitToSettingsTcpConnectionBT = (Button) dialog.findViewById(R.id.exitToSettingsTcpConnectionBT);
+        final LinearLayout TcpConnectionLinearLayoutToGoOut = (LinearLayout) dialog.findViewById(R.id.TcpConnectionLinearLayoutToGoOut);
+
+
+        TextView exceptionTextView = (TextView) dialog.findViewById(R.id.textView5exeptionDialog);
+
+        exceptionTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (counter[0] >= 3) {
+                    TcpConnectionLinearLayoutToGoOut.setVisibility(View.VISIBLE);
+                    Log.d("exitTheOutOfService", "trueInif");
+                    Session.getInstance().setTcpInterval(20000);
+                }
+                Log.d("exitTheOutOfService", "true" + counter[0]);
+                counter[0]++;
+            }
+        });
+
+        exitToSettingsTcpConnectionBT.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (enterPasswordTcpConnectionET.getText().toString().equals("")) {
+                    dialog.cancel();
+                } else if (enterPasswordTcpConnectionET.getText().toString().equals(Session.getInstance().getKioskPassword())) {
+                    Intent goToSettingsIntent = new Intent(android.provider.Settings.ACTION_WIFI_SETTINGS);
+                    goToSettingsIntent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+                    myContext.startActivity(goToSettingsIntent);
+                }
+                Session.getInstance().setTcpInterval(3000);
+                dialog.cancel();
+            }
+        });
+
+        dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                counter[0] = 0;
+                enterPasswordTcpConnectionET.setText("");
+                TcpConnectionLinearLayoutToGoOut.setVisibility(View.GONE);
+            }
+        });
+
+        //dialog.getWindow().setBackgroundDrawable(myContext.getResources().getDrawable(R.drawable.dialogshape));
 //        Controller controller = new Controller(myContext);
 //        controller.requestMissedTrips();
+
 
         return dialog;
     }
 
-    public static Dialog ShowTimeoutWarningDialog(final CountDownTimer myCounterDownTime, final Context myContext, final Class classContext){
+    public static Dialog ShowTimeoutWarningDialog(final CountDownTimer myCounterDownTime, final Context myContext, final Class classContext) {
         final Dialog dialog = new Dialog(myContext);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.getWindow().setGravity(Gravity.CENTER);
@@ -74,7 +121,7 @@ public class customDialogs {
         dialog.setContentView(R.layout.time_out_exception_dialog);
 
 
-        Button doneReservedBikesBT = (Button)dialog.findViewById(R.id.cancelTimeOutBT);
+        Button doneReservedBikesBT = (Button) dialog.findViewById(R.id.cancelTimeOutBT);
         doneReservedBikesBT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -89,7 +136,7 @@ public class customDialogs {
         return dialog;
     }
 
-    public static Dialog ShowExitToSettingDialog(final Context myContext){
+    public static Dialog ShowExitToSettingDialog(final Context myContext) {
         final Dialog dialog = new Dialog(myContext);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.getWindow().setGravity(Gravity.TOP);
@@ -99,15 +146,15 @@ public class customDialogs {
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         dialog.setContentView(R.layout.exit_to_settings_dialog);
 
-        final EditText kioskPassword = (EditText)dialog.findViewById(R.id.enterKioskPasswordET);
+        final EditText kioskPassword = (EditText) dialog.findViewById(R.id.enterKioskPasswordET);
 
-        Button doneReservedBikesBT = (Button)dialog.findViewById(R.id.exitToSettingsBT);
+        Button doneReservedBikesBT = (Button) dialog.findViewById(R.id.exitToSettingsBT);
         doneReservedBikesBT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (kioskPassword.getText().toString().equals("")){
-
-                }else if (kioskPassword.getText().toString().equals(Session.getInstance().getKioskPassword())) {
+                if (kioskPassword.getText().toString().equals("")) {
+                    dialog.cancel();
+                } else if (kioskPassword.getText().toString().equals(Session.getInstance().getKioskPassword())) {
                     myContext.startActivity(new Intent(android.provider.Settings.ACTION_WIFI_SETTINGS));
                 }
                 dialog.cancel();
@@ -123,11 +170,17 @@ public class customDialogs {
 
         dialog.getWindow().setBackgroundDrawable(myContext.getResources().getDrawable(R.drawable.dialogshape));
 
+        dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                kioskPassword.setText("");
+            }
+        });
 
         return dialog;
     }
 
-    public static Dialog ShowReservedBikes(final Context myContext,final Class classContext,String slots){
+    public static Dialog ShowReservedBikes(final Context myContext, final Class classContext, String slots) {
         final Dialog dialog = new Dialog(myContext);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.getWindow().setGravity(Gravity.CENTER);
@@ -137,14 +190,25 @@ public class customDialogs {
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         dialog.setContentView(R.layout.reservedtripsdialog);
 
-        TextView reservedTextView = (TextView)dialog.findViewById(R.id.slotNumbersTV);
-        reservedTextView.setText(slots);
+        TextView reservedTextView = (TextView) dialog.findViewById(R.id.slotNumbersTV);
+        reservedTextView.setText(slots.substring(0, slots.length() - 2));
 
-        Button doneReservedBikesBT = (Button)dialog.findViewById(R.id.slotNumbersSubmitBT);
+        Button doneReservedBikesBT = (Button) dialog.findViewById(R.id.slotNumbersSubmitBT);
         doneReservedBikesBT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                myContext.startActivity(new Intent(myContext,classContext));
+                myContext.startActivity(new Intent(myContext, classContext));
+                dialog.cancel();
+            }
+        });
+
+        final Button cancelReservedBT = (Button) dialog.findViewById(R.id.slotNumbersCancelBT);
+        cancelReservedBT.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent cancelReservedTripsIntent = new Intent(myContext, myContext.getClass());
+                cancelReservedTripsIntent.putExtra("cancelTripIntent", true);
+                myContext.startActivity(cancelReservedTripsIntent);
                 dialog.cancel();
             }
         });
@@ -155,7 +219,7 @@ public class customDialogs {
         return dialog;
     }
 
-    public static Dialog ShowDialogAfterStartTrip(final Context myContext,String slots){
+    public static Dialog ShowDialogAfterStartTrip(final Context myContext, String slots) {
         final Dialog dialog = new Dialog(myContext);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.getWindow().setGravity(Gravity.CENTER);
@@ -165,13 +229,14 @@ public class customDialogs {
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         dialog.setContentView(R.layout.after_start_trip_dialog);
 
-        TextView reservedTextView = (TextView)dialog.findViewById(R.id.afterStartTripSlotsNumbersTV);
-        reservedTextView.setText(slots);
+        TextView reservedTextView = (TextView) dialog.findViewById(R.id.afterStartTripSlotsNumbersTV);
+        reservedTextView.setText(slots.substring(0, slots.length() - 2));
 
-        Button doneReservedBikesBT = (Button)dialog.findViewById(R.id.afterStartTripSlotNumbersSubmitBT);
+        Button doneReservedBikesBT = (Button) dialog.findViewById(R.id.afterStartTripSlotNumbersSubmitBT);
         doneReservedBikesBT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                myContext.startActivity(new Intent(myContext, startActivity.class));
                 dialog.cancel();
             }
         });
@@ -182,7 +247,7 @@ public class customDialogs {
         return dialog;
     }
 
-    public static Dialog ShowNoBikesAvailable(final Context myContext){
+    public static Dialog ShowNoBikesAvailable(final Context myContext) {
         final Dialog dialog = new Dialog(myContext);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.getWindow().setGravity(Gravity.CENTER);
@@ -192,7 +257,7 @@ public class customDialogs {
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         dialog.setContentView(R.layout.no_avaliable_bikes__dialog);
 
-        Button noAvaliableBikesDialogSubmitBT = (Button)dialog.findViewById(R.id.noAvaliableBikesDialogSubmitBT);
+        Button noAvaliableBikesDialogSubmitBT = (Button) dialog.findViewById(R.id.noAvaliableBikesDialogSubmitBT);
         noAvaliableBikesDialogSubmitBT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -207,6 +272,7 @@ public class customDialogs {
 
         return dialog;
     }
+
 //    public static Dialog ShowHelpDialog(final Context myContext){
 //        final Dialog dialog = new Dialog(myContext);
 //        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);

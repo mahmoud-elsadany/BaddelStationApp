@@ -157,23 +157,9 @@ public class SignalRService extends Service {
                 }
             };
 
-//            SubscriptionHandler1 UpdateAppHandler = new SubscriptionHandler1<String>() {
-//                @Override
-//                public void runTCP(String response) {
-//                    //Here is where we get back the response from the server. Do stuffs
-//                    Log.d(LOGTAG, "updateUrl:"+response);
-//
-//                    if (responseDelegate != null)
-//                        responseDelegate.getAppUrlResponse(response);
-//
-//                }
-//            };
-
-
 
             mHubProxy.on(webSocketStartTripOnMethod, StartTripHandler, Object.class,Object.class);
 
-//            mHubProxy.on(webSocketUpdateAppOnMethod, UpdateAppHandler, Object.class);
 
             mHubConnection.error(new ErrorCallback() {
                 @Override
@@ -194,7 +180,6 @@ public class SignalRService extends Service {
         } else {
             Log.d(LOGTAG, "stationID NULL");
         }
-
 
     }
 }

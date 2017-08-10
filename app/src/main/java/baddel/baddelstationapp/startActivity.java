@@ -115,10 +115,10 @@ public class startActivity extends AppCompatActivity implements responseDelegate
         if (sQliteDB.numberOfStations() > 0) {
             callController = new callController(startActivity.this);
             getStationDetails();
+            sendAppStationVersion(sQliteDB.getStationID());
         } else {
             getStationID();
         }
-
 
         startService(new Intent(startActivity.this, TCPcheck.class));
         //startService(new Intent(startActivity.this,internetCheck.class));
@@ -259,6 +259,8 @@ public class startActivity extends AppCompatActivity implements responseDelegate
         });
     }
 
+
+
     @Override
     protected void onStop() {
         // Unbind from the service
@@ -340,7 +342,7 @@ public class startActivity extends AppCompatActivity implements responseDelegate
 
     private void sendAppStationVersion(String stationID) {
         String myURL = Session.getInstance().getWebServicesBaseUrl();
-        String apiMethod = Session.getInstance().getWebSocketUpdateAppMethod();
+        String apiMethod = Session.getInstance().getAPIMETHODPostAppVersion();
         PackageInfo pInfo = null;
         try {
             pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
@@ -351,16 +353,24 @@ public class startActivity extends AppCompatActivity implements responseDelegate
 
         int myProcessNum = 2;
 
+        JSONObject appVersionJson = new JSONObject();
+        try {
+            appVersionJson.put("id",stationID);
+            appVersionJson.put("appVersion",version);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         HashMap<String, String> data = new HashMap<>();
-        data.put("id", stationID);
-        data.put("appVersion", version);
+        data.put("stationdata", appVersionJson.toString());
+
+        Log.d("sendApkVerParameters",appVersionJson.toString());
 
         String URL = myURL + apiMethod;
 
         if (isNetworkConnected()) {
 
             asyncTask = new myAsyncTask(startActivity.this, data, URL, myProcessNum, Session.getInstance().getTokenUserName(), Session.getInstance().getTokenPassword(), null, 1);
-
 
             asyncTask.delegate = this;
 

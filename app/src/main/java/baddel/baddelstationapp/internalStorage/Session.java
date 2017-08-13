@@ -24,6 +24,7 @@ public class Session {
     private Boolean tcpDown = false;
     private Boolean sending = false;
     private int tcpInterval = 3000;
+    private Boolean finished = false;
 
 
     public String getKioskPassword() {
@@ -70,7 +71,7 @@ public class Session {
 
 
     //TCPSocket constant Values
-//    private String tcpSocketIP = "192.168.1.4";
+//    private String tcpSocketIP = "192.168.1.106";
 //    private int tcpSocketPORT = 5002;
     private String tcpSocketIP = "192.168.1.100";
     private int tcpSocketPORT = 5001;
@@ -286,6 +287,14 @@ public class Session {
 
     public void setTcpInterval(int tcpInterval) {
         this.tcpInterval = tcpInterval;
+    }
+
+    public Boolean getFinished() {
+        return finished;
+    }
+
+    public void setFinished(Boolean finished) {
+        this.finished = finished;
     }
 
 }

@@ -23,7 +23,10 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.concurrent.RunnableFuture;
 
+import baddel.baddelstationapp.ClientTCPSocketing.TCPClient;
+import baddel.baddelstationapp.ClientTCPSocketing.TCPcheck;
 import baddel.baddelstationapp.Controller.callController;
+import baddel.baddelstationapp.Models.trip_DS;
 import baddel.baddelstationapp.customViews.CircularSeekBar;
 import baddel.baddelstationapp.customViews.customDialogs;
 import baddel.baddelstationapp.customViews.customViewGroup;
@@ -64,6 +67,19 @@ public class chooseRentTimeActivity extends AppCompatActivity {
         setCircularSeekBar();
 
         startService();
+
+        getBundle();
+    }
+
+    private void getBundle() {
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            if (bundle.getBoolean("EXITKIOSK")){
+                startActivity(new Intent(android.provider.Settings.ACTION_WIFI_SETTINGS));
+                finish();
+                finishAffinity();
+            }
+        }
     }
 
     private void hideSystemUI() {
@@ -269,6 +285,9 @@ public class chooseRentTimeActivity extends AppCompatActivity {
         if (myCounter != null){
             myCounter.cancel();
             myCounter = null;
+
+        }
+        if (callController != null){
             callController.unBindController();
             callController = null;
         }

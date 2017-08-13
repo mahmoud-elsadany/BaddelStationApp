@@ -98,7 +98,7 @@ public class Controller extends Service implements responseDelegate {
         handler = new Handler(getApplicationContext().getMainLooper());
 
         sQliteDB = new SQliteDB(Controller.this);
-        startWebSocketService();
+        //startWebSocketService();
         getStartTripDelegate();
 
         // connect to the server
@@ -129,9 +129,9 @@ public class Controller extends Service implements responseDelegate {
     }
 
     private void startWebSocketService() {
-        Intent intent = new Intent();
-        intent.setClass(this, SignalRService.class);
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+//        Intent intent = new Intent();
+//        intent.setClass(this, SignalRService.class);
+//        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         startService(new Intent(this, SignalRService.class));
     }
 //    private void startTCPClient() {

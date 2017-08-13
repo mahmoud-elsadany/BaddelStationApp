@@ -34,7 +34,7 @@ public class TCPcheck extends Service {
     public void onCreate() {
         super.onCreate();
 
-        TCPExceptionDialog = customDialogs.ShowConnectionExceptionDialog(getBaseContext());
+        TCPExceptionDialog = customDialogs.ShowConnectionExceptionDialog(this);
 
         mHandler = new Handler();
         startRepeatingTask();

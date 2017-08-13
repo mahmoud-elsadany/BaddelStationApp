@@ -21,6 +21,7 @@ import android.widget.TextView;
 import java.io.IOException;
 
 import baddel.baddelstationapp.R;
+import baddel.baddelstationapp.chooseRentTimeActivity;
 import baddel.baddelstationapp.enterPhoneNumberActivity;
 import baddel.baddelstationapp.internalStorage.Session;
 import baddel.baddelstationapp.startActivity;
@@ -81,16 +82,27 @@ public class customDialogs {
         exitToSettingsTcpConnectionBT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (enterPasswordTcpConnectionET.getText().toString().equals("")) {
-                    dialog.cancel();
-                } else if (enterPasswordTcpConnectionET.getText().toString().equals(Session.getInstance().getKioskPassword())) {
-                    Intent goToSettingsIntent = new Intent(android.provider.Settings.ACTION_WIFI_SETTINGS);
-                    goToSettingsIntent.setFlags(FLAG_ACTIVITY_NEW_TASK);
-                    myContext.startActivity(goToSettingsIntent);
-                }
-                Session.getInstance().setTcpInterval(3000);
+                Log.d("iam here","hola");
+                Session.getInstance().setFinished(true);
+                Intent closeApp = new Intent(myContext, startActivity.class);
+                closeApp.setFlags(FLAG_ACTIVITY_NEW_TASK);
+                myContext.startActivity(closeApp);
                 dialog.cancel();
             }
+
+//            @Override
+//            public void onClick(View v) {
+//                if (enterPasswordTcpConnectionET.getText().toString().equals("")) {
+//                    dialog.cancel();
+//                } else if (enterPasswordTcpConnectionET.getText().toString().equals(Session.getInstance().getKioskPassword())) {
+//                    Intent closeApp = new Intent(myContext,startActivity.class);
+//                    closeApp.setFlags(FLAG_ACTIVITY_NEW_TASK);
+//                    closeApp.putExtra("EXIT",1);
+//                    myContext.startActivity(closeApp);
+//                }
+//                Session.getInstance().setTcpInterval(3000);
+//                dialog.cancel();
+//            }
         });
 
         dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -155,6 +167,10 @@ public class customDialogs {
                 if (kioskPassword.getText().toString().equals("")) {
                     dialog.cancel();
                 } else if (kioskPassword.getText().toString().equals(Session.getInstance().getKioskPassword())) {
+//                    Intent closeAppWithKioskIntent = new Intent(myContext,chooseRentTimeActivity.class);
+//                    closeAppWithKioskIntent.putExtra("EXITKIOSK",true);
+//                    closeAppWithKioskIntent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+//                    myContext.startActivity(closeAppWithKioskIntent);
                     myContext.startActivity(new Intent(android.provider.Settings.ACTION_WIFI_SETTINGS));
                 }
                 dialog.cancel();

@@ -127,6 +127,7 @@ public class startActivity extends AppCompatActivity implements responseDelegate
         setLogoImageView();
 
         getBundle();
+        toFinishApp();
 
     }
 
@@ -150,8 +151,17 @@ public class startActivity extends AppCompatActivity implements responseDelegate
                         showReservedBikesDialog.cancel();
                     }
                 }, 5000);
+            }else if (bundle.getBoolean("EXITKIOSK")){
+                startActivity(new Intent(android.provider.Settings.ACTION_WIFI_SETTINGS));
+                finish();
+                finishAffinity();
             }
         }
+    }
+
+    private void toFinishApp(){
+        if (Session.getInstance().getFinished())
+            finish();
     }
 
     private void setLogoImageView() {
@@ -167,7 +177,8 @@ public class startActivity extends AppCompatActivity implements responseDelegate
                         public void run() {
                             slotsDialog.cancel();
                         }
-                    }, 10000);
+                    }, 20000);
+                    count = 0;
                 }
             }
         });

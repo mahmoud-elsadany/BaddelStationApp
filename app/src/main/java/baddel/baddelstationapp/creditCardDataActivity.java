@@ -207,6 +207,13 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
                 else{
                     String editedCardHolderName = cardHolderName.replace(" ","+");
 
+                    int cardValidMonthInt = Integer.parseInt(cardValidMonth);
+                    if (cardValidMonthInt <= 9){
+                        cardValidMonth = "0"+cardValidMonthInt;
+                    }else{
+                        cardValidMonth = String.valueOf(cardValidMonthInt);
+                    }
+
                     setPayFortHashMap(editedCardHolderName, cardNumber, cardCVV,cardValidYear + cardValidMonth);
 
                     postNewOrder(NoOfMin);

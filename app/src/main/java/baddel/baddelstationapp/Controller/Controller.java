@@ -113,7 +113,8 @@ public class Controller extends Service implements responseDelegate {
     @Override
     public void onDestroy() {
         stopService(new Intent(Controller.this, TCPClient.class));
-        unbindService(mConnection);
+        stopService(new Intent(Controller.this, SignalRService.class));
+        //unbindService(mConnection);
         super.onDestroy();
     }
 
@@ -443,20 +444,20 @@ public class Controller extends Service implements responseDelegate {
         handler.post(r);
     }
 
-    private final ServiceConnection mConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            SignalRService.LocalBinder binder = (SignalRService.LocalBinder) service;
-            mService = binder.getService();
-            mBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            mBound = false;
-        }
-    };
+//    private final ServiceConnection mConnection = new ServiceConnection() {
+//        @Override
+//        public void onServiceConnected(ComponentName className,
+//                                       IBinder service) {
+//            SignalRService.LocalBinder binder = (SignalRService.LocalBinder) service;
+//            mService = binder.getService();
+//            mBound = true;
+//        }
+//
+//        @Override
+//        public void onServiceDisconnected(ComponentName arg0) {
+//            mBound = false;
+//        }
+//    };
 
 //    private final ServiceConnection TCPConnection = new ServiceConnection() {
 //        @Override

@@ -117,7 +117,7 @@ public class enterPhoneNumberActivity extends AppCompatActivity implements respo
             }
 
             public void onFinish() {
-                final Dialog timeoutWarningDialog = customDialogs.ShowTimeoutWarningDialog(myCounter,enterPhoneNumberActivity.this,enterPhoneNumberActivity.class);
+                Dialog timeoutWarningDialog = customDialogs.ShowTimeoutWarningDialog(myCounter,enterPhoneNumberActivity.this,enterPhoneNumberActivity.class);
                 timeoutWarningDialog.show();
 
                 final Handler mHandler = new Handler();
@@ -147,9 +147,11 @@ public class enterPhoneNumberActivity extends AppCompatActivity implements respo
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            myCounter.cancel();
-            myCounter = null;
-            returnToStartActivity();
+            if(myCounter != null) {
+                myCounter.cancel();
+                myCounter = null;
+                returnToStartActivity();
+            }
         }
         return super.onTouchEvent(event);
     }

@@ -83,11 +83,18 @@ public class customDialogs {
             @Override
             public void onClick(View v) {
                 Log.d("iam here","hola");
-                Session.getInstance().setFinished(true);
-                Intent closeApp = new Intent(myContext, startActivity.class);
-                closeApp.setFlags(FLAG_ACTIVITY_NEW_TASK);
-                myContext.startActivity(closeApp);
+
+                if (enterPasswordTcpConnectionET.getText().toString().equals("")) {
+                    dialog.cancel();
+                } else if (enterPasswordTcpConnectionET.getText().toString().equals(Session.getInstance().getKioskPassword())) {
+                    Intent closeAppWithKioskIntent = new Intent(myContext,chooseRentTimeActivity.class);
+                    closeAppWithKioskIntent.putExtra("EXITKIOSK",true);
+                    closeAppWithKioskIntent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+                    myContext.startActivity(closeAppWithKioskIntent);
+//                    myContext.startActivity(new Intent(android.provider.Settings.ACTION_WIFI_SETTINGS));
+                }
                 dialog.cancel();
+
             }
 
 //            @Override
@@ -263,7 +270,7 @@ public class customDialogs {
         return dialog;
     }
 
-    public static Dialog ShowNoBikesAvailable(final Context myContext) {
+    public static Dialog ShowWarningMessage(final Context myContext, String warningMessage) {
         final Dialog dialog = new Dialog(myContext);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.getWindow().setGravity(Gravity.CENTER);
@@ -272,6 +279,9 @@ public class customDialogs {
 
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         dialog.setContentView(R.layout.no_avaliable_bikes__dialog);
+
+        TextView noAvaliableBikesDialogTV = (TextView) dialog.findViewById(R.id.noAvaliableBikesDialogTV);
+        noAvaliableBikesDialogTV.setText(warningMessage);
 
         Button noAvaliableBikesDialogSubmitBT = (Button) dialog.findViewById(R.id.noAvaliableBikesDialogSubmitBT);
         noAvaliableBikesDialogSubmitBT.setOnClickListener(new View.OnClickListener() {

@@ -116,7 +116,7 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
             }
 
             public void onFinish() {
-                final Dialog timeoutWarningDialog = customDialogs.ShowTimeoutWarningDialog(myCounter, verifyMobileNumberActivity.this, verifyMobileNumberActivity.class);
+                Dialog timeoutWarningDialog = customDialogs.ShowTimeoutWarningDialog(myCounter, verifyMobileNumberActivity.this, verifyMobileNumberActivity.class);
                 timeoutWarningDialog.show();
 
                 final Handler mHandler = new Handler();

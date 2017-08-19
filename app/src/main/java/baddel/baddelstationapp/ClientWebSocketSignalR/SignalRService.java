@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -24,6 +23,7 @@ import microsoft.aspnet.signalr.client.LogLevel;
 import microsoft.aspnet.signalr.client.Logger;
 import microsoft.aspnet.signalr.client.Platform;
 import microsoft.aspnet.signalr.client.SignalRFuture;
+import microsoft.aspnet.signalr.client.StateChangedCallback;
 import microsoft.aspnet.signalr.client.http.Request;
 import microsoft.aspnet.signalr.client.http.android.AndroidPlatformComponent;
 import microsoft.aspnet.signalr.client.hubs.HubConnection;
@@ -45,9 +45,9 @@ public class SignalRService extends Service {
 
     public static signalRDelegate responseDelegate;
 
-    //private int mInterval = 3000; // 2 min by default, can be changed later
-    private int mInterval = 1800000; // 30 min by interval
-
+    //private int mInterval = 3000; // 3 sec by default, can be changed later
+    private int mInterval = 300000; // 5 min by interval
+    //private int mInterval = 1800000; // 30 min by interval
 
     public void setOnResponseListener(signalRDelegate listener) {
         responseDelegate = listener;
@@ -61,7 +61,7 @@ public class SignalRService extends Service {
         super.onCreate();
         //mHandler = new Handler(Looper.getMainLooper());
         startSignalR();
-        mHandler = new Handler(Looper.getMainLooper());
+        mHandler = new Handler();
     }
 
     @Override
@@ -69,6 +69,7 @@ public class SignalRService extends Service {
         int result = super.onStartCommand(intent, flags, startId);
 
         startRepeatingTask();
+        //startSignalR();
 
         return result;
     }
@@ -83,6 +84,8 @@ public class SignalRService extends Service {
             } catch (Exception e) {
                 Log.d(LOGTAG, "test fail");
             }
+
+
             mHandler.postDelayed(mStatusChecker, mInterval);
         }
     };
@@ -98,12 +101,23 @@ public class SignalRService extends Service {
     private void testConnection() {
         //State  Disconnected
         startSignalR();
-        if (mHubConnection.getState().equals("Disconnected")) {
-            // disconnect was expected, for example, application is being shut down
-            Log.d(LOGTAG, "after Disconnected");
-            startSignalR();
-            return;
-        }
+        mHubConnection.stateChanged(new StateChangedCallback() {
+            @Override
+            public void stateChanged(ConnectionState connectionState, ConnectionState connectionState1) {
+                if (connectionState.equals("Disconnected")) {
+                    // disconnect was expected, for example, application is being shut down
+                    Log.d(LOGTAG, "after Disconnected");
+                    startSignalR();
+                    return;
+                }
+            }
+        });
+//        if (mHubConnection.getState().equals("Disconnected")) {
+//            // disconnect was expected, for example, application is being shut down
+//            Log.d(LOGTAG, "after Disconnected");
+//            startSignalR();
+//            return;
+//        }
         mHubConnection.error(new ErrorCallback() {
             @Override
             public void onError(Throwable throwable) {
@@ -114,7 +128,9 @@ public class SignalRService extends Service {
         mHubConnection.closed(new Runnable() {
             @Override
             public void run() {
+
                 Log.d(LOGTAG,"Socket has been closed");
+
                 if (mHubConnection.getState().equals("Disconnected")) {
                     // disconnect was expected, for example, application is being shut down
                     Log.d(LOGTAG, "after Disconnected");
@@ -128,6 +144,7 @@ public class SignalRService extends Service {
 //                    });
                     return;
                 }
+
                 new Timer(false).schedule(new TimerTask() {
                     @Override
                     public void run() {
@@ -139,9 +156,28 @@ public class SignalRService extends Service {
                         });
                     }
                 }, 5000);
+
             }
         });
-        Log.d(LOGTAG,"Socket finish test");
+
+
+        //send heartBit to test connection
+//        Log.d(LOGTAG, "receive message");
+//
+//        mHubProxy.invoke(String.class, "iAmAvailable", "Ack").done(new Action<String>() {
+//            @Override
+//            public void run(String returnValue) {
+//                Log.d(LOGTAG, "receive message: " + returnValue);
+//            }
+//        }).onError(new ErrorCallback() {
+//            @Override
+//            public void onError(Throwable throwable) {
+//                startSignalR();
+//                Log.d(LOGTAG, "invoke error occurred");
+//            }
+//        });
+//
+//        Log.d(LOGTAG, "Socket in test connection");
     }
 
     @Override
@@ -155,7 +191,6 @@ public class SignalRService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         //startSignalR();
-
         return mBinder;
     }
 
@@ -197,12 +232,13 @@ public class SignalRService extends Service {
             mHubProxy = mHubConnection.createHubProxy(SERVER_HUB_CHAT);
 
             ClientTransport clientTransport = new ServerSentEventsTransport(mHubConnection.getLogger());
+            //ClientTransport clientTransport = new WebsocketTransport(mHubConnection.getLogger());
             clientTransport.supportKeepAlive();
 
             SignalRFuture<Void> signalRFuture = mHubConnection.start().done(new Action<Void>() {
                 @Override
-                public void run(Void obj) throws Exception {
-                    Log.d(LOGTAG, "SignalRSocket connection started");
+                public void run(Void v) throws Exception {
+                    Log.d(LOGTAG, "test SignalRSocket connection started");
                 }
             });
 
@@ -235,21 +271,12 @@ public class SignalRService extends Service {
 
             mHubProxy.on(webSocketStartTripOnMethod, StartTripHandler, Object.class, Object.class);
 
-            ConnectionState state = mHubConnection.getState();
-
-            Log.d(LOGTAG, "state: " + state.toString());
-
-            mHubConnection.error(new ErrorCallback() {
-                @Override
-                public void onError(Throwable throwable) {
-                    Log.d(LOGTAG, "SignalR Socket Error in start :" + throwable.toString());
-                    startSignalR();
-                }
-            });
 
         } else {
             Log.d(LOGTAG, "stationID NULL");
         }
 
     }
+
+
 }

@@ -104,7 +104,7 @@ public class chooseRentTimeActivity extends AppCompatActivity {
             }
 
             public void onFinish() {
-                final Dialog timeoutWarningDialog = customDialogs.ShowTimeoutWarningDialog(myCounter,chooseRentTimeActivity.this,chooseRentTimeActivity.class);
+                Dialog timeoutWarningDialog = customDialogs.ShowTimeoutWarningDialog(myCounter,chooseRentTimeActivity.this,chooseRentTimeActivity.class);
                 timeoutWarningDialog.show();
 
                 final Handler mHandler = new Handler();
@@ -175,7 +175,8 @@ public class chooseRentTimeActivity extends AppCompatActivity {
 
                 sliderCounterTV.setText(String.valueOf(actualProgress));
                 //rentingDetailsTV.setText("reserve " + numberPicker.getValue() + " bikes for " + actualProgress + " min costs " + costEquation(actualProgress)*actualProgress*numberPicker.getValue()+" egp");
-                Session.getInstance().setChosenPeriodTime(progress*bikeNumbers);
+//                Session.getInstance().setChosenPeriodTime(progress*bikeNumbers);
+                Session.getInstance().setChosenPeriodTime(actualProgress);
             }
 
             @Override
@@ -256,7 +257,8 @@ public class chooseRentTimeActivity extends AppCompatActivity {
         chooseRentTimeNextBT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Session.getInstance().setChosenPeriodTime(30*bikeNumbers);
+                Session.getInstance().setChosenPeriodTime(actualProgress);
+                //Session.getInstance().setChosenPeriodTime(30*bikeNumbers);
                 if (Session.getInstance().getChosenPeriodTime() > 0) {
                     //go to enter phone Number
                     startActivity(new Intent(chooseRentTimeActivity.this, enterPhoneNumberActivity.class));

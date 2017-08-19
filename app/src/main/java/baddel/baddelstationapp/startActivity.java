@@ -1,9 +1,7 @@
 package baddel.baddelstationapp;
 
-import android.app.ActionBar;
 import android.app.ActivityManager;
 import android.app.Dialog;
-import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -12,14 +10,12 @@ import android.graphics.PixelFormat;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Handler;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -34,16 +30,11 @@ import com.daimajia.slider.library.SliderTypes.TextSliderView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Random;
 
 import baddel.baddelstationapp.ClientTCPSocketing.TCPClient;
 import baddel.baddelstationapp.ClientTCPSocketing.TCPcheck;
-import baddel.baddelstationapp.Controller.Controller;
 import baddel.baddelstationapp.Controller.callController;
 import baddel.baddelstationapp.Models.Advert_DS;
 import baddel.baddelstationapp.Models.Station_DS;
@@ -55,7 +46,6 @@ import baddel.baddelstationapp.customViews.customDialogs;
 import baddel.baddelstationapp.customViews.customViewGroup;
 import baddel.baddelstationapp.internalStorage.SQliteDB;
 import baddel.baddelstationapp.internalStorage.Session;
-import pl.droidsonroids.gif.GifDrawable;
 
 @SuppressWarnings("WrongConstant")
 public class startActivity extends AppCompatActivity implements responseDelegate {
@@ -127,8 +117,6 @@ public class startActivity extends AppCompatActivity implements responseDelegate
         setLogoImageView();
 
         getBundle();
-        toFinishApp();
-
     }
 
     private void getBundle() {
@@ -157,11 +145,6 @@ public class startActivity extends AppCompatActivity implements responseDelegate
                 finishAffinity();
             }
         }
-    }
-
-    private void toFinishApp(){
-        if (Session.getInstance().getFinished())
-            finish();
     }
 
     private void setLogoImageView() {
@@ -242,7 +225,7 @@ public class startActivity extends AppCompatActivity implements responseDelegate
             textSliderView
                     .description(name)
                     .image(file_maps.get(name))
-                    .setScaleType(BaseSliderView.ScaleType.FitCenterCrop);
+                    .setScaleType(BaseSliderView.ScaleType.Fit);
 
             textSliderView.bundle(new Bundle());
             textSliderView.getBundle()
@@ -269,8 +252,6 @@ public class startActivity extends AppCompatActivity implements responseDelegate
             }
         });
     }
-
-
 
     @Override
     protected void onStop() {
@@ -447,7 +428,7 @@ public class startActivity extends AppCompatActivity implements responseDelegate
                 if (isRentBicycle && Session.getInstance().getNumberOfAvailableBikes() != 0)
                     startActivity(new Intent(startActivity.this, chooseRentTimeActivity.class));
                 else if (isRentBicycle && Session.getInstance().getNumberOfAvailableBikes() == 0) {
-                    final Dialog noAvailableBikesDialog = customDialogs.ShowNoBikesAvailable(getApplicationContext());
+                    final Dialog noAvailableBikesDialog = customDialogs.ShowWarningMessage(getApplicationContext(),"Sorry No available bikes at the time \n please come back later");
                     noAvailableBikesDialog.show();
 
                     new Handler().postDelayed(new Runnable() {
@@ -467,7 +448,6 @@ public class startActivity extends AppCompatActivity implements responseDelegate
                 break;
         }
     }
-
 
     @Override
     public void onBackPressed() {

@@ -25,13 +25,12 @@ public class Session {
     private Boolean sending = false;
     private int tcpInterval = 3000;
     private Boolean finished = false;
-
+    private String KioskPassword = "300594";
+    private String androidId;
 
     public String getKioskPassword() {
         return KioskPassword;
     }
-
-    private String KioskPassword = "300594";
 
     public String getAndroidId() {
         return androidId;
@@ -40,8 +39,6 @@ public class Session {
     public void setAndroidId(String androidId) {
         this.androidId = androidId;
     }
-
-    private String androidId;
 
     //webSocket constant Values
     //private String webSocketBaseUrl = "http://104.197.104.190:8081/realtime";
@@ -54,6 +51,7 @@ public class Session {
     //HTTP API constant Values
     //private String webServicesBaseUrl = "http://104.197.104.190:8081/api/";
     //private String webServicesBaseUrl = "http://dev.api.baddelonline.com/api/";
+    //private String webServicesBaseUrl = "http://192.168.1.6:28824";
     private String webServicesBaseUrl = "http://api.baddelonline.com/api/";
     //private String webServicesBaseUrl = "http://staging.api.baddelonline.com/api/";
     private String tokenUserName = "station";
@@ -71,10 +69,10 @@ public class Session {
 
 
     //TCPSocket constant Values
-//    private String tcpSocketIP = "192.168.1.106";
-//    private int tcpSocketPORT = 5002;
-    private String tcpSocketIP = "192.168.1.100";
-    private int tcpSocketPORT = 5001;
+    private String tcpSocketIP = "192.168.1.102";
+    private int tcpSocketPORT = 5002;
+//    private String tcpSocketIP = "192.168.1.100";
+//    private int tcpSocketPORT = 5001;
     private String messageResponse;
 
     //payment values

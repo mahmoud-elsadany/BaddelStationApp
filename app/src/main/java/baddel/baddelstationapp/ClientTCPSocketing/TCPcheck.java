@@ -20,7 +20,7 @@ public class TCPcheck extends Service {
 
     private final String internetTag = "checkTCPTag";
 
-    private int mInterval = 3000; // 10 seconds by default, can be changed later
+    private int mInterval = 60000; // 10 seconds by default, can be changed later
     private Handler mHandler;
 
     private Dialog TCPExceptionDialog;

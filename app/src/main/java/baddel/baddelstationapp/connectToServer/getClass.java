@@ -46,6 +46,8 @@ public class getClass {
             }
 
 
+            int responseCode = httpConnection.getResponseCode();
+
             BufferedReader br = new BufferedReader(new InputStreamReader(httpConnection.getInputStream()));
             current.append(br.readLine());
 
@@ -61,7 +63,7 @@ public class getClass {
             return current.toString();
         } catch (Exception e) {
             e.printStackTrace();
-            return "Error"+e.toString();
+            return "GetRequestError"+e.toString();
         } finally {
             if (httpConnection != null) {
                 httpConnection.disconnect();

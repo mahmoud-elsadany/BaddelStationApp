@@ -35,14 +35,15 @@ public class internetCheck extends Service {
         TCPExceptionDialog = customDialogs.ShowConnectionExceptionDialog(getApplicationContext());
 
         mHandler = new Handler();
-        startRepeatingTask();
+
+        //startRepeatingTask();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
         int result = super.onStartCommand(intent, flags, startId);
 
-        //startRepeatingTask();
+        startRepeatingTask();
 
         return result;
     }

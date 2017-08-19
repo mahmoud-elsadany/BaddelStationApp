@@ -44,7 +44,7 @@ public class TCPClient extends Service {
 
     private Socket socket;
 
-    private int mInterval = 3000; // 2 seconds by default, can be changed later
+    private int mInterval = 5000; // 5 seconds by default, can be changed later
     private Handler mHandler;
 
     private Controller controller;

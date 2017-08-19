@@ -13,6 +13,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -22,6 +24,7 @@ import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 import baddel.baddelstationapp.ClientTCPSocketing.TCPClient;
 import baddel.baddelstationapp.Controller.Controller;
@@ -49,15 +54,19 @@ import baddel.baddelstationapp.paymentClasses.myWebClient;
 
 public class creditCardDataActivity extends AppCompatActivity implements responseDelegate {
     //UI references
+    private String a;
+    private int keyDel;
     private Button creditCardDataCancelBT,creditCardDataNextBT;
     private EditText creditCardNumberET,creditCardValidYearET,creditCardValidMonthET,creditCardHolderNameET,creditCardCVVET;
+    private ImageView creditCardNumberErrorIV,creditCardHolderNameErrorIV,monthYearErrorIV,cvvErrorIV;
+
     //private TextView creditCardPeriodPriceTV;
 
     //HTTP asyncTask
     private myAsyncTask asyncTask;
     private HashMap<String, String> payFortData;
     private WebView webView;
-    private int NoOfMin;
+    private int NoOfMin,NoOfBikes;
 
     //TcpSocket
     private callController callController;
@@ -86,6 +95,7 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
 
 
         NoOfMin = Session.getInstance().getChosenPeriodTime();
+        NoOfBikes = Session.getInstance().getNumberOfChosenBikes();
 
 
         getBundle();
@@ -111,7 +121,7 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
                 ArrayList<trip_DS> trips_Array = Session.getInstance().getCurrentTripArrayListObjects();
                 putSetOrder(trips_Array.get(0));
             }else {
-                Dialog errorDialog = customDialogs.ShowReservedBikes(creditCardDataActivity.this,creditCardDataActivity.class,"Sorry you have a problem with your Card !!");
+                Dialog errorDialog = customDialogs.ShowReservedBikes(creditCardDataActivity.this,creditCardDataActivity.class,"Sorry you have a problem \n with your Card !!");
                 errorDialog.show();
             }
         }
@@ -125,7 +135,7 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
             }
 
             public void onFinish() {
-                final Dialog timeoutWarningDialog = customDialogs.ShowTimeoutWarningDialog(myCounter,creditCardDataActivity.this,creditCardDataActivity.class);
+                Dialog timeoutWarningDialog = customDialogs.ShowTimeoutWarningDialog(myCounter,creditCardDataActivity.this,creditCardDataActivity.class);
                 timeoutWarningDialog.show();
 
                 final Handler mHandler = new Handler();
@@ -170,11 +180,113 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
         //creditCardPeriodPriceTV = (TextView)findViewById(R.id.creditCardPeriodPriceTV);
         //String periodPriceSTR = Session.getInstance().getChosenPeriodTime()+" * minPrice";
         //creditCardPeriodPriceTV.setText(periodPriceSTR);
+        creditCardNumberErrorIV = (ImageView) findViewById(R.id.creditCardNumberErrorIV);
+        creditCardHolderNameErrorIV = (ImageView) findViewById(R.id.creditCardHolderNameErrorIV);
+        monthYearErrorIV = (ImageView)findViewById(R.id.monthYearErrorIV);
+        cvvErrorIV = (ImageView)findViewById(R.id.cvvErrorIV);
+
         creditCardNumberET = (EditText)findViewById(R.id.creditCardNumberET1);
-        creditCardValidYearET = (EditText)findViewById(R.id.creditCardValidYearET1);
+        creditCardNumberET.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                boolean flag = true;
+                String eachBlock[] = creditCardNumberET.getText().toString().split("-");
+                for (int i = 0; i < eachBlock.length; i++) {
+                    if (eachBlock[i].length() > 4) {
+                        flag = false;
+                    }
+                }
+                if (flag) {
+                    creditCardNumberET.setOnKeyListener(new View.OnKeyListener() {
+                        @Override
+                        public boolean onKey(View v, int keyCode, KeyEvent event) {
+                            if (keyCode == KeyEvent.KEYCODE_DEL)
+                                keyDel = 1;
+                            return false;
+                        }
+                    });
+                    if (keyDel == 0) {
+                        if (((creditCardNumberET.getText().length() + 1) % 5) == 0) {
+                            if (creditCardNumberET.getText().toString().split("-").length <= 3) {
+                                creditCardNumberET.setText(creditCardNumberET.getText() + "-");
+                                creditCardNumberET.setSelection(creditCardNumberET.getText().length());
+                            }
+                        }
+                        a = creditCardNumberET.getText().toString();
+                    } else {
+                        a = creditCardNumberET.getText().toString();
+                        keyDel = 0;
+                    }
+
+                } else {
+                    creditCardNumberET.setText(a);
+                }
+
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count,
+                                          int after) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
         creditCardValidMonthET = (EditText)findViewById(R.id.creditCardValidMonthET1);
+        creditCardValidMonthET.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus){
+                    String creditValidation = creditCardNumberET.getText().toString();
+                    if (creditValidation.length() < 19)
+                        creditCardNumberErrorIV.setVisibility(View.VISIBLE);
+                    else
+                        creditCardNumberErrorIV.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+
+        creditCardValidYearET = (EditText)findViewById(R.id.creditCardValidYearET1);
+
+
         creditCardHolderNameET = (EditText)findViewById(R.id.creditCardHolderNameET1);
+        creditCardHolderNameET.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus){
+                    String creditValidationYear = creditCardValidYearET.getText().toString();
+                    String creditValidationMonth = creditCardValidMonthET.getText().toString();
+
+                    if (creditValidationYear.length() < 2 ||creditValidationMonth.length() < 2  )
+                        monthYearErrorIV.setVisibility(View.VISIBLE);
+                    else
+                        monthYearErrorIV.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+
         creditCardCVVET = (EditText)findViewById(R.id.creditCardCVVET1);
+        creditCardCVVET.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus){
+                    String creditValidationName = creditCardHolderNameET.getText().toString();
+
+                    if (creditValidationName.length() < 1)
+                        creditCardHolderNameErrorIV.setVisibility(View.VISIBLE);
+                    else
+                        creditCardHolderNameErrorIV.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+
+
+
         creditCardNumberET.requestFocus();
         webView = (WebView) findViewById(R.id.webView2);
 
@@ -206,6 +318,7 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
                     showToast("please fill all values");
                 else{
                     String editedCardHolderName = cardHolderName.replace(" ","+");
+                    String editedCardNumber = cardNumber.replace("-","");
 
                     int cardValidMonthInt = Integer.parseInt(cardValidMonth);
                     if (cardValidMonthInt <= 9){
@@ -213,10 +326,8 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
                     }else{
                         cardValidMonth = String.valueOf(cardValidMonthInt);
                     }
-
-                    setPayFortHashMap(editedCardHolderName, cardNumber, cardCVV,cardValidYear + cardValidMonth);
-
-                    postNewOrder(NoOfMin);
+                    setPayFortHashMap(editedCardHolderName, editedCardNumber, cardCVV,cardValidYear + cardValidMonth);
+                    postNewOrder(NoOfMin,NoOfBikes);
                 }
 
             }
@@ -240,7 +351,7 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
         payFortData.put("return_url", Session.getInstance().getWebServicesBaseUrl()+"payment/request-token");
         payFortData.put("service_command", "TOKENIZATION");
     }
-    private void postNewOrder(int NoOfMin) {
+    private void postNewOrder(int NoOfMin,int NoOfBikes) {
         //POST Request for minutes
         String myURL = Session.getInstance().getWebServicesBaseUrl();
         String apiMethod = Session.getInstance().getAPIMETHODPostPaymentOrder();
@@ -248,9 +359,12 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
         JSONObject NoOfMinutesJsonObject = new JSONObject();
         try {
             NoOfMinutesJsonObject.put("NoOfMinutes", NoOfMin);
+            NoOfMinutesJsonObject.put("NoOfBikes",NoOfBikes);
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        Log.d("APIOrderJsonObject",NoOfMinutesJsonObject.toString());
 
         int myProcessNum = 1;
 
@@ -439,17 +553,21 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
                 //payfort bank url
                 Log.d("payfort_website_url", response);
 
-                String payfortUrl = response.substring(1, response.length() - 1);
+                if (response.contains("GetRequestError")){
+                    Dialog errorDialog = customDialogs.ShowWarningMessage(getApplicationContext(),"Sorry you have entered \n wrong Data !!");
+                    errorDialog.show();
+                }else{
+                    String payfortUrl = response.substring(1, response.length() - 1);
 
-
-                webView.setWebViewClient(new myWebClient(creditCardDataActivity.this,creditCardDataActivity.class));
-                webView.getSettings().setJavaScriptEnabled(true);
-                webView.setVisibility(View.VISIBLE);
-                webView.getSettings().setBuiltInZoomControls(true);
-                webView.getSettings().setTextZoom(20);
-                webView.getSettings().setSupportZoom(true);
-                webView.getSettings().setLoadWithOverviewMode(true);
-                webView.loadUrl(payfortUrl);
+                    webView.setWebViewClient(new myWebClient(creditCardDataActivity.this,creditCardDataActivity.class));
+                    webView.getSettings().setJavaScriptEnabled(true);
+                    webView.setVisibility(View.VISIBLE);
+                    webView.getSettings().setBuiltInZoomControls(true);
+                    webView.getSettings().setTextZoom(20);
+                    webView.getSettings().setSupportZoom(true);
+                    webView.getSettings().setLoadWithOverviewMode(true);
+                    webView.loadUrl(payfortUrl);
+                }
 
                 break;
             case 4:

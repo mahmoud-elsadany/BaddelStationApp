@@ -2,15 +2,19 @@ package baddel.baddelstationapp;
 
 import android.app.ActivityManager;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.Handler;
+import android.os.IBinder;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -30,12 +34,18 @@ import com.daimajia.slider.library.SliderTypes.TextSliderView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import baddel.baddelstationapp.ClientTCPSocketing.TCPClient;
 import baddel.baddelstationapp.ClientTCPSocketing.TCPcheck;
-import baddel.baddelstationapp.Controller.callController;
+import baddel.baddelstationapp.Controller.Controller;
 import baddel.baddelstationapp.Models.Advert_DS;
 import baddel.baddelstationapp.Models.Station_DS;
 import baddel.baddelstationapp.Models.trip_DS;
@@ -46,9 +56,14 @@ import baddel.baddelstationapp.customViews.customDialogs;
 import baddel.baddelstationapp.customViews.customViewGroup;
 import baddel.baddelstationapp.internalStorage.SQliteDB;
 import baddel.baddelstationapp.internalStorage.Session;
+import baddel.baddelstationapp.saveLogs.myLogs;
+
+import static android.R.attr.data;
 
 @SuppressWarnings("WrongConstant")
 public class startActivity extends AppCompatActivity implements responseDelegate {
+
+    private static final String startActivityTag = "startActivtyTag";
 
     //UI references
     private Button rentBicycleBT, helpBT, downloadBT;
@@ -57,7 +72,7 @@ public class startActivity extends AppCompatActivity implements responseDelegate
     private Typeface font;
 
     //controller Class
-    private callController callController;
+//    private callController callController;
 
     //HTTP asyncTask
     private myAsyncTask asyncTask;
@@ -73,12 +88,16 @@ public class startActivity extends AppCompatActivity implements responseDelegate
 
     private ArrayList<trip_DS> initiateArrayList = new ArrayList<>();
 
+    private Controller Controller;
+    private boolean mBound = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         hideSystemUI();
         disableStatusBar();
         setContentView(R.layout.activity_start);
+
         count = 0;
         isRentBicycle = false;
         Session.getInstance().setCurrentTripArrayListObject(initiateArrayList);
@@ -103,7 +122,8 @@ public class startActivity extends AppCompatActivity implements responseDelegate
 
 
         if (sQliteDB.numberOfStations() > 0) {
-            callController = new callController(startActivity.this);
+            callController(startActivity.this);
+            //callController = new callController(startActivity.this);
             getStationDetails();
             sendAppStationVersion(sQliteDB.getStationID());
         } else {
@@ -273,10 +293,11 @@ public class startActivity extends AppCompatActivity implements responseDelegate
     @Override
     protected void onDestroy() {
         // Unbind from the service
-        Log.d("appDestroyed","Stop services");
+        myLogs.logMyLog("appDestroyed","Stop services");
+        //Log.d("appDestroyed","Stop services");
         stopService(new Intent(startActivity.this, TCPClient.class));
         stopService(new Intent(startActivity.this, TCPcheck.class));
-        callController.unBindController();
+        //callController.unBindController();
         super.onDestroy();
     }
 
@@ -315,7 +336,8 @@ public class startActivity extends AppCompatActivity implements responseDelegate
         HashMap<String, String> data = new HashMap<>();
         data.put("imei", android_id);
 
-        Log.d("config", android_id);
+        myLogs.logMyLog("config", android_id);
+        //Log.d("config", android_id);
 
         String URL = myURL + apiMethod;
 
@@ -356,7 +378,8 @@ public class startActivity extends AppCompatActivity implements responseDelegate
         HashMap<String, String> data = new HashMap<>();
         data.put("stationdata", appVersionJson.toString());
 
-        Log.d("sendApkVerParameters",appVersionJson.toString());
+        myLogs.logMyLog("sendApkVerParameters",appVersionJson.toString());
+        //Log.d("sendApkVerParameters",appVersionJson.toString());
 
         String URL = myURL + apiMethod;
 
@@ -388,7 +411,8 @@ public class startActivity extends AppCompatActivity implements responseDelegate
         switch (ProcessNum) {
             case 1:
                 //getStationID by byimei
-                Log.d("getStationID", response);
+                myLogs.logMyLog("getStationID", response);
+                //Log.d("getStationID", response);
                 Station_DS station_ds = new Station_DS(response);
 
                 if (sQliteDB.numberOfStations() > 0) {
@@ -398,7 +422,8 @@ public class startActivity extends AppCompatActivity implements responseDelegate
                     sQliteDB.insertStationID(String.valueOf(station_ds.stationID));
                 }
 
-                callController = new callController(startActivity.this);
+                callController(startActivity.this);
+                //callController = new callController(startActivity.this);
                 sendAppStationVersion(String.valueOf(station_ds.stationID));
 
                 getStationDetails();
@@ -411,11 +436,13 @@ public class startActivity extends AppCompatActivity implements responseDelegate
                 break;
             case 2:
                 //sendAPKVersion
-                Log.d("sendAPKversion", response);
+                myLogs.logMyLog("sendAPKversion", response);
+                //Log.d("sendAPKversion", response);
                 break;
             case 3:
                 //get Station Details
-                Log.d("getStationDetails", response);
+                myLogs.logMyLog("getStationDetails", response);
+                //Log.d("getStationDetails", response);
 
                 Station_DS stationDs = new Station_DS(response);
 
@@ -453,4 +480,30 @@ public class startActivity extends AppCompatActivity implements responseDelegate
     public void onBackPressed() {
 
     }
+
+
+    private void callController(Context myContext) {
+        Intent intent = new Intent();
+        intent.setClass(myContext, Controller.class);
+        myContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        Controller = new Controller(myContext);
+    }
+
+    private final ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            Controller.tripControllerBinder binder = (Controller.tripControllerBinder) service;
+            Controller = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
+
+
 }

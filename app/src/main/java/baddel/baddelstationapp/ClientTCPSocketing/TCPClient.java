@@ -24,6 +24,7 @@ import baddel.baddelstationapp.Controller.Controller;
 import baddel.baddelstationapp.chooseRentTimeActivity;
 import baddel.baddelstationapp.customViews.customDialogs;
 import baddel.baddelstationapp.internalStorage.Session;
+import baddel.baddelstationapp.saveLogs.myLogs;
 
 /**
  * Created by mahmo on 2017-06-18.
@@ -129,10 +130,12 @@ public class TCPClient extends Service {
 //                }
                 if (!Session.getInstance().getSending())
                     sendMessage("@");
-                Log.d("TCPtestsend", "@");
+                myLogs.logMyLog("TCPtestsend", "@");
+                //Log.d("TCPtestsend", "@");
 
             } catch (Exception e) {
-                Log.d("TCPtestsend", "test fail");
+                myLogs.logMyLog("TCPtestsend", "test fail");
+                //Log.d("TCPtestsend", "test fail");
                 runTCP();
             } finally {
                 mHandler.postDelayed(mStatusChecker, mInterval);
@@ -151,7 +154,8 @@ public class TCPClient extends Service {
 
     public void sendMessage(String message) {
         if (out != null && !out.checkError()) {
-            Log.d("tcpReallySent", message);
+            myLogs.logMyLog("tcpReallySent", message);
+            //Log.d("tcpReallySent", message);
             out.println(message);
             out.flush();
 
@@ -187,15 +191,19 @@ public class TCPClient extends Service {
 
                     socket.setKeepAlive(true);
 
-                    Log.d(TCPTAG, "C: Connecting...");
+                    myLogs.logMyLog(TCPTAG, "C: Connecting...");
+                    //Log.d(TCPTAG, "C: Connecting...");
 
                     try {
                         String serverMessage = "";
                         out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
 
-                        Log.d(TCPTAG, "C: Sent.");
+                        myLogs.logMyLog(TCPTAG, "C: Sent.");
+                        //Log.d(TCPTAG, "C: Sent.");
 
-                        Log.d(TCPTAG, "C: Done.");
+
+                        myLogs.logMyLog(TCPTAG, "C: Done.");
+                        //Log.d(TCPTAG, "C: Done.");
 
                         sendMessage("REQUEST_MISSED_TRIPS");
 
@@ -220,22 +228,26 @@ public class TCPClient extends Service {
                                 //call the method messageReceived from MyActivity class
                                 if (responseDelegate != null)
                                     responseDelegate.messageReceived(serverMessage);
-                                Log.d(TCPTAG, "message:" + serverMessage);
+                                myLogs.logMyLog(TCPTAG, "message:" + serverMessage);
+                                //Log.d(TCPTAG, "message:" + serverMessage);
                             }
                         }
 
 
-                        Log.d(TCPTAG, "S: Received Message: '" + serverMessage + "'");
+                        myLogs.logMyLog(TCPTAG, "S: Received Message: '" + serverMessage + "'");
+                        //Log.d(TCPTAG, "S: Received Message: '" + serverMessage + "'");
 
 
                     } catch (Exception e) {
 
-                        Log.d(TCPTAG, "S: Error", e);
+                        myLogs.logMyLog(TCPTAG, "S: Error"+ e);
+                        //Log.d(TCPTAG, "S: Error", e);
 
                     } finally {
                         //the socket must be closed. It is not possible to reconnect to this socket
                         // after it is closed, which means a new socket instance has to be created.
-                        Log.d(TCPTAG, "here in finally");
+                        myLogs.logMyLog(TCPTAG, "here in finally");
+                        //Log.d(TCPTAG, "here in finally");
 
                         if (socket != null) {
                             //mHandler = new Handler();
@@ -247,10 +259,11 @@ public class TCPClient extends Service {
                     }
 
                 } catch (Exception e) {
+                    myLogs.logMyLog(TCPTAG, "C: Error"+e);
+                    //Log.d(TCPTAG, "C: Error"+e);
 
-                    Log.d(TCPTAG, "C: Error", e);
-
-                    Log.d(TCPTAG, "Device is Out Of Service");
+                    myLogs.logMyLog(TCPTAG, "Device is Out Of Service");
+                    //Log.d(TCPTAG, "Device is Out Of Service");
 
                     //startRepeatingTask();
 
@@ -270,7 +283,8 @@ public class TCPClient extends Service {
                     //runTCP();
                 }
 
-                Log.d(TCPTAG, "done connecting --> " + message);
+                myLogs.logMyLog(TCPTAG, "done connecting --> " + message);
+                //Log.d(TCPTAG, "done connecting --> " + message);
             }
         }.execute();
     }
@@ -372,7 +386,8 @@ public class TCPClient extends Service {
 
         stopSelf();
 
-        Log.d(internetTag, "internet destroyed");
+        myLogs.logMyLog(internetTag, "internet destroyed");
+        //Log.d(internetTag, "internet destroyed");
 
         if (socket != null) {
             if (socket.isConnected()) {
@@ -390,7 +405,8 @@ public class TCPClient extends Service {
 
 //        stopSelf();
 
-        Log.d(TCPTAG, "Socket destroyed");
+        myLogs.logMyLog(TCPTAG, "Socket destroyed");
+        //Log.d(TCPTAG, "Socket destroyed");
         super.onDestroy();
     }
 

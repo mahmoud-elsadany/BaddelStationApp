@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 
 import baddel.baddelstationapp.customViews.customDialogs;
+import baddel.baddelstationapp.saveLogs.myLogs;
 
 /**
  * Created by mahmoud on 2016-11-28.
@@ -43,7 +44,8 @@ public class myAsyncTask extends AsyncTask<String, Void, String> {
     public myAsyncTask(Context context, HashMap<String, String> dataSend, String myURL,int ProcessNum, String userNameToken,String passwordToken,JSONObject putJsonObject,int postORget){
         this.myContext = context;
 
-        Log.d("baddelContext",myContext.toString());
+        myLogs.logMyLog("baddelContext",myContext.toString());
+        //Log.d("baddelContext",myContext.toString());
         if (myContext.toString().contains("creditCardDataActivity")||myContext.toString().contains("verifyMobileNumberActivity")||myContext.toString().contains("startActivity")||myContext.toString().contains("creditCardDataActivity")||myContext.toString().contains("enterPhoneNumberActivity")){
             DialogExist = true;
         }

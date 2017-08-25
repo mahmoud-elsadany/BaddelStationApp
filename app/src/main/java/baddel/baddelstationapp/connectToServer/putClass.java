@@ -26,6 +26,7 @@ import java.util.TreeMap;
 import javax.net.ssl.HttpsURLConnection;
 
 import baddel.baddelstationapp.internalStorage.Session;
+import baddel.baddelstationapp.saveLogs.myLogs;
 
 /**
  * Created by mahmo on 2017-06-18.
@@ -58,7 +59,8 @@ public class putClass {
             }
 
 
-            Log.d("payment", urlToRequest.toString());
+            myLogs.logMyLog("payment", urlToRequest.toString());
+            //Log.d("payment", urlToRequest.toString());
 
             urlConnection = (HttpURLConnection) urlToRequest.openConnection();
             /*basic Authentication*/
@@ -96,7 +98,8 @@ public class putClass {
             urlConnection.connect();
             int responseCode = urlConnection.getResponseCode();
 
-            Log.d("putResponseCodeTag", String.valueOf(responseCode));
+            myLogs.logMyLog("putResponseCodeTag", String.valueOf(responseCode));
+            //Log.d("putResponseCodeTag", String.valueOf(responseCode));
 
             if (responseCode == HttpsURLConnection.HTTP_OK) {
                 BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));

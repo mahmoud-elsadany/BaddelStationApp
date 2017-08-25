@@ -12,6 +12,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import baddel.baddelstationapp.saveLogs.myLogs;
+
 
 public class getClass {
 
@@ -29,7 +31,8 @@ public class getClass {
             }
         }
 
-        Log.d("getTestConnection: ", "get url:" + getUrl);
+        myLogs.logMyLog("getTestConnection: ", "get url:" + getUrl);
+        //Log.d("getTestConnection: ", "get url:" + getUrl);
 
         URL url;
         HttpURLConnection httpConnection = null;

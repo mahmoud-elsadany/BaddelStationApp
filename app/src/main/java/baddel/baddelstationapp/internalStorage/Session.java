@@ -43,6 +43,7 @@ public class Session {
     //webSocket constant Values
     //private String webSocketBaseUrl = "http://104.197.104.190:8081/realtime";
     //private String webSocketBaseUrl = "http://dev.api.baddelonline.com/realtime";
+    //private String webSocketBaseUrl = "http://192.168.1.12:8888/realtime";
     private String webSocketBaseUrl = "http://api.baddelonline.com/realtime";
     private String webSocketStartTripOnMethod = "startTrip";
     private String webSocketUpdateAppMethod = "updateApp";
@@ -69,10 +70,10 @@ public class Session {
 
 
     //TCPSocket constant Values
-    private String tcpSocketIP = "192.168.1.102";
-    private int tcpSocketPORT = 5002;
-//    private String tcpSocketIP = "192.168.1.100";
-//    private int tcpSocketPORT = 5001;
+//    private String tcpSocketIP = "192.168.1.3";
+//    private int tcpSocketPORT = 5002;
+    private String tcpSocketIP = "192.168.1.100";
+    private int tcpSocketPORT = 5001;
     private String messageResponse;
 
     //payment values

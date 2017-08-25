@@ -34,6 +34,7 @@ import baddel.baddelstationapp.connectToServer.responseDelegate;
 import baddel.baddelstationapp.creditCardDataActivity;
 import baddel.baddelstationapp.customViews.customDialogs;
 import baddel.baddelstationapp.internalStorage.Session;
+import baddel.baddelstationapp.saveLogs.myLogs;
 import baddel.baddelstationapp.startActivity;
 import baddel.baddelstationapp.verifyMobileNumberActivity;
 
@@ -73,7 +74,8 @@ public class myWebClient extends WebViewClient{
     public void onLoadResource(WebView view, String url) {
         // Check to see if there is a progress dialog
 
-        Log.d(payFortTag, "onLoadResource");
+        myLogs.logMyLog(payFortTag, "onLoadResource");
+        //Log.d(payFortTag, "onLoadResource");
         //loadingDialog.show();
 
     }
@@ -81,16 +83,19 @@ public class myWebClient extends WebViewClient{
     @Override
     public void onPageFinished(WebView view, String url) {
         super.onPageFinished(view, url);
-        Log.d(payFortTag, "onPageFinished");
+        myLogs.logMyLog(payFortTag, "onPageFinished");
+        //Log.d(payFortTag, "onPageFinished");
         //String cookies = CookieManager.getInstance().getCookie(url);
         view.evaluateJavascript(javaScriptFunction(), new ValueCallback<String>() {
             @Override
             public void onReceiveValue(String sessionResponse) {
-                Log.d(payFortTag, "onPageFinishedInResponse");
+                myLogs.logMyLog(payFortTag, "onPageFinishedInResponse");
+                //Log.d(payFortTag, "onPageFinishedInResponse");
                 loadingDialog.cancel();
                 if (sessionResponse != null){
                     if (sessionResponse.contains("success")){
-                        Log.d(payFortTag, sessionResponse);
+                        myLogs.logMyLog(payFortTag, sessionResponse);
+                        //Log.d(payFortTag, sessionResponse);
 
                         Intent successPayfortIntent = new Intent(sourceContext,destContext);
                         successPayfortIntent.putExtra("payfort",true);
@@ -99,14 +104,16 @@ public class myWebClient extends WebViewClient{
                         //Toast.makeText(sourceContext,"Error in Response",Toast.LENGTH_SHORT).show();
 
                     }else if (sessionResponse.contains("error")){
-                        Log.d(payFortTag, sessionResponse);
+                        myLogs.logMyLog(payFortTag, sessionResponse);
+                        //Log.d(payFortTag, sessionResponse);
 
                         Intent successPayfortIntent = new Intent(sourceContext,destContext);
                         successPayfortIntent.putExtra("payfort",false);
                         sourceContext.startActivity(successPayfortIntent);
 
                     } else{
-                        Log.d(payFortTag, sessionResponse);
+                        myLogs.logMyLog(payFortTag, sessionResponse);
+                        //Log.d(payFortTag, sessionResponse);
                         //sourceContext.startActivity(new Intent(sourceContext,destContext));
                         //Toast.makeText(sourceContext,"Error in Response",Toast.LENGTH_SHORT).show();
                     }
@@ -124,15 +131,16 @@ public class myWebClient extends WebViewClient{
     @Override
     public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
         super.onReceivedError(view, request, error);
+        myLogs.logMyLog(payFortTag, "payfortError"+ error.toString());
 
-        Log.d(payFortTag, "payfortError"+ error.toString());
+        //Log.d(payFortTag, "payfortError"+ error.toString());
     }
 
     @Override
     public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
         super.onReceivedHttpError(view, request, errorResponse);
-
-        Log.d(payFortTag, "responseError"+ errorResponse);
+        myLogs.logMyLog(payFortTag, "responseError"+ errorResponse);
+        //Log.d(payFortTag, "responseError"+ errorResponse);
 
     }
 

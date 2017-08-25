@@ -9,6 +9,7 @@ import android.util.Log;
 
 import baddel.baddelstationapp.customViews.customDialogs;
 import baddel.baddelstationapp.internalStorage.Session;
+import baddel.baddelstationapp.saveLogs.myLogs;
 
 /**
  * Created by mahmo on 2017-07-18.
@@ -53,10 +54,12 @@ public class internetCheck extends Service {
         public void run() {
             try {
                 if(isOnline()){
-                    Log.d(internetTag,"is online");
+                    myLogs.logMyLog(internetTag, "is online");
+                    //Log.d(internetTag,"is online");
                     TCPExceptionDialog.cancel();
                 }else{
-                    Log.d(internetTag,"is offline");
+                    myLogs.logMyLog(internetTag,"is offline");
+                    //Log.d(internetTag,"is offline");
                     TCPExceptionDialog.show();
                 }
             } finally {
@@ -92,8 +95,11 @@ public class internetCheck extends Service {
 
         stopSelf();
 
-        Log.d(internetTag, "internet destroyed");
+        myLogs.logMyLog(internetTag, "internet destroyed");
+        //Log.d(internetTag, "internet destroyed");
+
         super.onDestroy();
+
     }
 
 }

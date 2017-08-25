@@ -24,6 +24,7 @@ import baddel.baddelstationapp.R;
 import baddel.baddelstationapp.chooseRentTimeActivity;
 import baddel.baddelstationapp.enterPhoneNumberActivity;
 import baddel.baddelstationapp.internalStorage.Session;
+import baddel.baddelstationapp.saveLogs.myLogs;
 import baddel.baddelstationapp.startActivity;
 import pl.droidsonroids.gif.GifDrawable;
 
@@ -71,10 +72,12 @@ public class customDialogs {
             public void onClick(View v) {
                 if (counter[0] >= 3) {
                     TcpConnectionLinearLayoutToGoOut.setVisibility(View.VISIBLE);
-                    Log.d("exitTheOutOfService", "trueInif");
+                    myLogs.logMyLog("exitTheOutOfService", "trueInif");
+                    //Log.d("exitTheOutOfService", "trueInif");
                     Session.getInstance().setTcpInterval(20000);
                 }
-                Log.d("exitTheOutOfService", "true" + counter[0]);
+                myLogs.logMyLog("exitTheOutOfService", "true" + counter[0]);
+                //Log.d("exitTheOutOfService", "true" + counter[0]);
                 counter[0]++;
             }
         });
@@ -82,7 +85,8 @@ public class customDialogs {
         exitToSettingsTcpConnectionBT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("iam here","hola");
+                myLogs.logMyLog("iam here","hola");
+                //Log.d("iam here","hola");
 
                 if (enterPasswordTcpConnectionET.getText().toString().equals("")) {
                     dialog.cancel();

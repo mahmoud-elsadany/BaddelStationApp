@@ -18,6 +18,7 @@ import java.util.TreeMap;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import baddel.baddelstationapp.saveLogs.myLogs;
 import info.guardianproject.netcipher.NetCipher;
 
 /**
@@ -96,7 +97,8 @@ public class postClass {
 
                 URL url = new URL(requestURL+"?"+parameters);
 
-                Log.d("payment",url.toString());
+                myLogs.logMyLog("payment",url.toString());
+                //Log.d("payment",url.toString());
 
                 HttpsURLConnection conn = NetCipher.getHttpsURLConnection(url);
 
@@ -122,7 +124,8 @@ public class postClass {
                     response.append("Error Registering");
                 }
 
-                Log.d("postResponse",url.toString());
+                myLogs.logMyLog("postResponse",url.toString());
+                //Log.d("postResponse",url.toString());
 
 
             }

@@ -31,13 +31,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import baddel.baddelstationapp.ClientTCPSocketing.TCPClient;
-import baddel.baddelstationapp.Controller.callController;
 import baddel.baddelstationapp.Models.trip_DS;
 import baddel.baddelstationapp.connectToServer.myAsyncTask;
 import baddel.baddelstationapp.connectToServer.responseDelegate;
 import baddel.baddelstationapp.customViews.customDialogs;
 import baddel.baddelstationapp.customViews.customViewGroup;
 import baddel.baddelstationapp.internalStorage.Session;
+import baddel.baddelstationapp.saveLogs.myLogs;
 
 public class enterPhoneNumberActivity extends AppCompatActivity implements responseDelegate {
 
@@ -51,7 +51,7 @@ public class enterPhoneNumberActivity extends AppCompatActivity implements respo
     private String phoneNumberWithCode = "";
 
     //TcpSocket
-    private callController callController;
+//    private callController callController;
 
     //countDown object
     private CountDownTimer myCounter;
@@ -209,7 +209,8 @@ public class enterPhoneNumberActivity extends AppCompatActivity implements respo
             e.printStackTrace();
         }
 
-        Log.d("requestTrip",JsonObject.toString());
+        myLogs.logMyLog("requestTrip",JsonObject.toString());
+        //Log.d("requestTrip",JsonObject.toString());
 
 
         int myProcessNum = 3;
@@ -220,8 +221,10 @@ public class enterPhoneNumberActivity extends AppCompatActivity implements respo
 
         String URL = myURL + apiMethod;
 
-        Log.d("urll",URL);
-        Log.d("requestTripObject",JsonObject.toString());
+        myLogs.logMyLog("urll",URL);
+        //Log.d("urll",URL);
+        myLogs.logMyLog("requestTripObject",JsonObject.toString());
+        //Log.d("requestTripObject",JsonObject.toString());
 
         if (isNetworkConnected()) {
             asyncTask = new myAsyncTask(enterPhoneNumberActivity.this, data, URL, myProcessNum, Session.getInstance().getTokenUserName(), Session.getInstance().getTokenPassword(), null, 1);
@@ -252,7 +255,8 @@ public class enterPhoneNumberActivity extends AppCompatActivity implements respo
     @Override
     public void getServerResponse(String response, int ProcessNum) {
         if (ProcessNum == 3){
-            Log.d("requestTripResponse",response);
+            myLogs.logMyLog("requestTripResponse",response);
+            //Log.d("requestTripResponse",response);
 
             if (response.contains("phone_number_missed")){
                 showToast("phone Number is Missed");

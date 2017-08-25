@@ -30,13 +30,13 @@ import java.util.HashMap;
 
 import baddel.baddelstationapp.ClientTCPSocketing.TCPClient;
 import baddel.baddelstationapp.Controller.Controller;
-import baddel.baddelstationapp.Controller.callController;
 import baddel.baddelstationapp.Models.trip_DS;
 import baddel.baddelstationapp.connectToServer.myAsyncTask;
 import baddel.baddelstationapp.connectToServer.responseDelegate;
 import baddel.baddelstationapp.customViews.customDialogs;
 import baddel.baddelstationapp.customViews.customViewGroup;
 import baddel.baddelstationapp.internalStorage.Session;
+import baddel.baddelstationapp.saveLogs.myLogs;
 
 public class verifyMobileNumberActivity extends AppCompatActivity implements responseDelegate {
 
@@ -50,7 +50,7 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
     private Boolean modifyPhoneNumber = false;
 
     //TCP service
-    private callController callController;
+//    private callController callController;
 
     //Async objects
     private myAsyncTask myAsyncTask;
@@ -243,7 +243,8 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
         data.put("id", String.valueOf(currentTrip.tripId));
         data.put("confirmUser", confirmUserObject.toString());
 
-        Log.d("confirmTag", "id: " + String.valueOf(currentTrip.tripId) + "\nconfirmUser: " + confirmUserObject.toString());
+        myLogs.logMyLog("confirmTag", "id: " + String.valueOf(currentTrip.tripId) + "\nconfirmUser: " + confirmUserObject.toString());
+        //Log.d("confirmTag", "id: " + String.valueOf(currentTrip.tripId) + "\nconfirmUser: " + confirmUserObject.toString());
 
         String URL = myURL + apiMethod;
 
@@ -278,8 +279,10 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
         data.put("id", String.valueOf(currentTrip.tripId));
         data.put("refreshToken", refreshTokenObject.toString());
 
-        Log.d("refreshTokenTag", "id: " + String.valueOf(currentTrip.tripId)
+        myLogs.logMyLog("refreshTokenTag", "id: " + String.valueOf(currentTrip.tripId)
                 + "\nrefreshToken: " + refreshTokenObject.toString());
+//        Log.d("refreshTokenTag", "id: " + String.valueOf(currentTrip.tripId)
+//                + "\nrefreshToken: " + refreshTokenObject.toString());
 
         String URL = myURL + apiMethod;
 
@@ -305,7 +308,8 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
         HashMap<String, String> data = new HashMap<>();
         data.put("id", String.valueOf(currentTrip.tripId));
 
-        Log.d("cancelTrip", "id: " + String.valueOf(currentTrip.tripId));
+        myLogs.logMyLog("cancelTrip", "id: " + String.valueOf(currentTrip.tripId));
+        //Log.d("cancelTrip", "id: " + String.valueOf(currentTrip.tripId));
 
         String URL = myURL + apiMethod;
 
@@ -347,7 +351,8 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
     public void getServerResponse(String response, int ProcessNum) {
         if (ProcessNum == 1) {
             //confirm sms api
-            Log.d("confirmSMSResponse", response);
+            myLogs.logMyLog("confirmSMSResponse", response);
+            //Log.d("confirmSMSResponse", response);
 
             String reservedSlots = "";
 
@@ -372,7 +377,8 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
 
         } else if (ProcessNum == 2) {
             //refresh token api
-            Log.d("refreshTokenResponse", response);
+            myLogs.logMyLog("refreshTokenResponse", response);
+            //Log.d("refreshTokenResponse", response);
 
             if (response.equals("403"))
                 showToast("Check your SMS");
@@ -381,7 +387,8 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
 
         } else if (ProcessNum == 3) {
             //cancel trip
-            Log.d("cancelTripResponse", response);
+            myLogs.logMyLog("cancelTripResponse", response);
+            //Log.d("cancelTripResponse", response);
 
             showToast(response);
 

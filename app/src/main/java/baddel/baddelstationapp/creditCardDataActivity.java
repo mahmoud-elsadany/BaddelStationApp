@@ -41,7 +41,6 @@ import java.util.regex.Pattern;
 
 import baddel.baddelstationapp.ClientTCPSocketing.TCPClient;
 import baddel.baddelstationapp.Controller.Controller;
-import baddel.baddelstationapp.Controller.callController;
 import baddel.baddelstationapp.Models.orderDetailsObject;
 import baddel.baddelstationapp.Models.trip_DS;
 import baddel.baddelstationapp.connectToServer.myAsyncTask;
@@ -51,6 +50,7 @@ import baddel.baddelstationapp.customViews.customViewGroup;
 import baddel.baddelstationapp.internalStorage.Session;
 import baddel.baddelstationapp.paymentClasses.SHA256Hashing;
 import baddel.baddelstationapp.paymentClasses.myWebClient;
+import baddel.baddelstationapp.saveLogs.myLogs;
 
 public class creditCardDataActivity extends AppCompatActivity implements responseDelegate {
     //UI references
@@ -69,7 +69,7 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
     private int NoOfMin,NoOfBikes;
 
     //TcpSocket
-    private callController callController;
+//    private callController callController;
 
     //countDown object
     private CountDownTimer myCounter;
@@ -364,7 +364,8 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
             e.printStackTrace();
         }
 
-        Log.d("APIOrderJsonObject",NoOfMinutesJsonObject.toString());
+        myLogs.logMyLog("APIOrderJsonObject",NoOfMinutesJsonObject.toString());
+        //Log.d("APIOrderJsonObject",NoOfMinutesJsonObject.toString());
 
         int myProcessNum = 1;
 
@@ -431,15 +432,18 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
 
         String signaturePhrase = requestPhrase + keysArrayListStringOneLine + requestPhrase;
 
-        Log.d("paymentLog", "ArrayListWithoutInputs: " + signaturePhrase);
+        myLogs.logMyLog("paymentLog", "ArrayListWithoutInputs: " + signaturePhrase);
+        //Log.d("paymentLog", "ArrayListWithoutInputs: " + signaturePhrase);
 
         try {
             signaturePhrase = SHA256Hashing.hash256(signaturePhrase);
         } catch (NoSuchAlgorithmException e) {
-            Log.d("paymentLog", e.toString());
+            myLogs.logMyLog("paymentLog", e.toString());
+            //Log.d("paymentLog", e.toString());
         }
 
-        Log.d("paymentLog", "signatureAfterHashing: " + signaturePhrase);
+        myLogs.logMyLog("paymentLog", "signatureAfterHashing: " + signaturePhrase);
+        //Log.d("paymentLog", "signatureAfterHashing: " + signaturePhrase);
 
 
         return signaturePhrase;
@@ -473,14 +477,15 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-        Log.d("jsonOrder",setOrderObject.toString());
+        myLogs.logMyLog("jsonOrder",setOrderObject.toString());
+        //Log.d("jsonOrder",setOrderObject.toString());
 
         HashMap<String, String> data = new HashMap<>();
         data.put("id",String.valueOf(myTripDS.tripId));
         data.put("tripPayment", setOrderObject.toString());
 
-        Log.d("setOrderParams","id: "+String.valueOf(myTripDS.tripId)+"\ntripPayment: "+setOrderObject.toString());
+        myLogs.logMyLog("setOrderParams","id: "+String.valueOf(myTripDS.tripId)+"\ntripPayment: "+setOrderObject.toString());
+        //Log.d("setOrderParams","id: "+String.valueOf(myTripDS.tripId)+"\ntripPayment: "+setOrderObject.toString());
 
 
         String URL = myURL + apiMethod;
@@ -507,7 +512,8 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
         HashMap<String, String> data = new HashMap<>();
         data.put("id",String.valueOf(currentTrip.tripId));
 
-        Log.d("cancelTrip","id: "+String.valueOf(currentTrip.tripId));
+        myLogs.logMyLog("cancelTrip","id: "+String.valueOf(currentTrip.tripId));
+        //Log.d("cancelTrip","id: "+String.valueOf(currentTrip.tripId));
 
         String URL = myURL + apiMethod;
 
@@ -529,7 +535,8 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
         switch (ProcessNum) {
             case 1:
                 //order response
-                Log.d("orderDetailsResponse", response);
+                myLogs.logMyLog("orderDetailsResponse", response);
+                //Log.d("orderDetailsResponse", response);
 
                 orderDetailsObject orderDetailsObject = new orderDetailsObject(response);
 
@@ -537,21 +544,24 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
 
                 payFortData.put("merchant_reference", String.valueOf(orderDetailsObject.orderDetailsId));
 
-                Log.d("creditCardResponse",String.valueOf(orderDetailsObject.orderDetailsId));
+                myLogs.logMyLog("creditCardResponse",String.valueOf(orderDetailsObject.orderDetailsId));
+                //Log.d("creditCardResponse",String.valueOf(orderDetailsObject.orderDetailsId));
 
                 postDataToPayFort();
 
                 break;
             case 2:
                 //payfort_response
-                Log.d("payfort_response", response);
+                myLogs.logMyLog("payfort_response", response);
+                //Log.d("payfort_response", response);
 
                 getPayfortUrl(response);
 
                 break;
             case 3:
                 //payfort bank url
-                Log.d("payfort_website_url", response);
+                myLogs.logMyLog("payfort_website_url", response);
+                //Log.d("payfort_website_url", response);
 
                 if (response.contains("GetRequestError")){
                     Dialog errorDialog = customDialogs.ShowWarningMessage(getApplicationContext(),"Sorry you have entered \n wrong Data !!");
@@ -572,7 +582,8 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
                 break;
             case 4:
                 //setOrder
-                Log.d("confirmSetOrder",response);
+                myLogs.logMyLog("confirmSetOrder",response);
+                //Log.d("confirmSetOrder",response);
                 final trip_DS confirmTrip = new trip_DS(response);
 
                 ArrayList<trip_DS> currentTrips = confirmTrip.currentTripObjects;
@@ -598,7 +609,8 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
                 break;
             case 5:
                 //cancel Trip
-                Log.d("cancelTripResponse",response);
+                myLogs.logMyLog("cancelTripResponse",response);
+                //Log.d("cancelTripResponse",response);
 
                 showToast(response);
 //                callController.unBindController();

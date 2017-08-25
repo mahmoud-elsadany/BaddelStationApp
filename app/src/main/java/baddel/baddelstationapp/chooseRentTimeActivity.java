@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.CountDownTimer;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,20 +21,24 @@ import android.widget.Toast;
 
 //import com.github.channguyen.rsv.RangeSliderView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.RunnableFuture;
 
 import baddel.baddelstationapp.ClientTCPSocketing.TCPClient;
 import baddel.baddelstationapp.ClientTCPSocketing.TCPcheck;
-import baddel.baddelstationapp.Controller.callController;
 import baddel.baddelstationapp.Models.trip_DS;
 import baddel.baddelstationapp.customViews.CircularSeekBar;
 import baddel.baddelstationapp.customViews.customDialogs;
 import baddel.baddelstationapp.customViews.customViewGroup;
 import baddel.baddelstationapp.internalStorage.Session;
+import baddel.baddelstationapp.saveLogs.myLogs;
 
 
 public class chooseRentTimeActivity extends AppCompatActivity {
+
+    private static final String chooseRentTimeActivityTag = "chooseRentTimeActivity";
+
     //UI references
     private TextView tripCostTV, sliderCounterTV, numberOfBikesTV, priceOfEachBikeTV;
     private CircularSeekBar circularSeekBar;
@@ -44,7 +49,7 @@ public class chooseRentTimeActivity extends AppCompatActivity {
     private int actualProgress = 30;
 
     //TcpSocket
-    private callController callController;
+//    private callController callController;
 
     //countDown object
     private CountDownTimer myCounter;
@@ -248,7 +253,8 @@ public class chooseRentTimeActivity extends AppCompatActivity {
             }
         });
 
-        Log.d("numberBikesTag",String.valueOf(Session.getInstance().getNumberOfChosenBikes()));
+        myLogs.logMyLog("numberBikesTag",String.valueOf(Session.getInstance().getNumberOfChosenBikes()));
+        //Log.d("numberBikesTag",String.valueOf(Session.getInstance().getNumberOfChosenBikes()));
 
     }
 
@@ -289,10 +295,10 @@ public class chooseRentTimeActivity extends AppCompatActivity {
             myCounter = null;
 
         }
-        if (callController != null){
-            callController.unBindController();
-            callController = null;
-        }
+//        if (callController != null){
+//            callController.unBindController();
+//            callController = null;
+//        }
         super.onDestroy();
     }
 

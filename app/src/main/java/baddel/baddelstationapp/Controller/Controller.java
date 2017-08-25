@@ -1,6 +1,5 @@
 package baddel.baddelstationapp.Controller;
 
-import android.app.Dialog;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -11,7 +10,6 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -22,6 +20,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import baddel.baddelstationapp.ClientTCPSocketing.OnMessageReceived;
 import baddel.baddelstationapp.ClientTCPSocketing.TCPClient;
@@ -30,18 +30,17 @@ import baddel.baddelstationapp.ClientWebSocketSignalR.signalRDelegate;
 import baddel.baddelstationapp.Models.trip_DS;
 import baddel.baddelstationapp.connectToServer.myAsyncTask;
 import baddel.baddelstationapp.connectToServer.responseDelegate;
-import baddel.baddelstationapp.creditCardDataActivity;
-import baddel.baddelstationapp.customViews.customDialogs;
 import baddel.baddelstationapp.internalStorage.SQliteDB;
 import baddel.baddelstationapp.internalStorage.Session;
-import baddel.baddelstationapp.startActivity;
-import baddel.baddelstationapp.verifyMobileNumberActivity;
+import baddel.baddelstationapp.saveLogs.myLogs;
 
 /**
  * Created by mahmo on 2017-06-16.
  */
 
 public class Controller extends Service implements responseDelegate {
+
+    private static final String controllerTag = "controllerTAG";
 
     //tcp Socket variables
     private static TCPClient mTcpClient;
@@ -62,6 +61,13 @@ public class Controller extends Service implements responseDelegate {
     private myAsyncTask asyncTask;
     private SQliteDB sQliteDB;
 
+    //tripObjects queue
+    private Queue startedTripsQueue;
+    private Queue finishedTripsQueue;
+
+    //to send the trips postponed
+    private int mInterval = 5000; // 5 seconds by default, can be changed later
+    private Handler mHandler;
 
     //request from mobile
     private Boolean isMobile = false;
@@ -78,6 +84,12 @@ public class Controller extends Service implements responseDelegate {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        startedTripsQueue = new LinkedList();
+        finishedTripsQueue = new LinkedList();
+
+        mHandler = new Handler();
+
 
         handler = new Handler(getApplicationContext().getMainLooper());
 
@@ -107,11 +119,56 @@ public class Controller extends Service implements responseDelegate {
         //startTCPClient();
         listenToSocket();
 
+        startRepeatingTask();
+
+
         return result;
+    }
+
+    Runnable mStatusChecker = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                if(isOnline()){
+                    myLogs.logMyLog(controllerTag, "is online So send all in queue");
+                    while (startedTripsQueue.size() > 0){
+                        //to startTrips
+                        String myURL = Session.getInstance().getWebServicesBaseUrl();
+                        String apiMethod = Session.getInstance().getAPIMETHODPutStartTrip();
+                        int myProcessNum = 4;
+                        commonInRequest(myURL,apiMethod,"startTrip",startedTripsQueue,myProcessNum);
+                    }
+                    while (finishedTripsQueue.size() > 0){
+                        //to finishTrips
+                        String myURL = Session.getInstance().getWebServicesBaseUrl();
+                        String apiMethod = Session.getInstance().getAPIMETHODPutFinishTrip();
+                        int myProcessNum = 5;
+                        commonInRequest(myURL,apiMethod,"finishTrip",finishedTripsQueue,myProcessNum);
+                    }
+                }else{
+                    myLogs.logMyLog(controllerTag,"is offline So see all in queue");
+
+                    myLogs.logMyLog(controllerTag,"startQueue size: "+startedTripsQueue.size());
+
+                    myLogs.logMyLog(controllerTag,"finishQueue size: "+finishedTripsQueue.size());
+                }
+            } finally {
+                mHandler.postDelayed(mStatusChecker, mInterval);
+            }
+        }
+    };
+
+    private void startRepeatingTask() {
+        mStatusChecker.run();
+    }
+
+    private void stopRepeatingTask() {
+        mHandler.removeCallbacks(mStatusChecker);
     }
 
     @Override
     public void onDestroy() {
+        stopRepeatingTask();
         stopService(new Intent(Controller.this, TCPClient.class));
         stopService(new Intent(Controller.this, SignalRService.class));
         //unbindService(mConnection);
@@ -135,6 +192,7 @@ public class Controller extends Service implements responseDelegate {
 //        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         startService(new Intent(this, SignalRService.class));
     }
+
 //    private void startTCPClient() {
 //        Intent intent = new Intent();
 //        intent.setClass(this, TCPClient.class);
@@ -146,11 +204,13 @@ public class Controller extends Service implements responseDelegate {
         new SignalRService().setOnResponseListener(new signalRDelegate() {
             @Override
             public void getOnStartTripResponse(String response) {
-                Log.d(ControllerTag, "fromMobile" + response);
+                myLogs.logMyLog(ControllerTag, "fromMobile" + response);
+                //Log.d(ControllerTag, "fromMobile" + response);
                 trip_DS trip_ds = new trip_DS(response, 1);
 
                 //add 0 before numbers of one digit to send two digits for all values
-                Log.d(ControllerTag, String.valueOf(trip_ds.startSlotNumber));
+                myLogs.logMyLog(ControllerTag, String.valueOf(trip_ds.startSlotNumber));
+                //Log.d(ControllerTag, String.valueOf(trip_ds.startSlotNumber));
                 String slotNumSTR = String.valueOf(trip_ds.startSlotNumber);
 //                if (trip_ds.startSlotId > 0 && trip_ds.startSlotId < 10) {
 //                    slotNumSTR = String.valueOf(trip_ds.startSlotId);
@@ -158,7 +218,8 @@ public class Controller extends Service implements responseDelegate {
 //                    slotNumSTR = String.valueOf(trip_ds.startSlotId);
 //                }
 
-                Log.d(ControllerTag, slotNumSTR);
+                myLogs.logMyLog(ControllerTag, slotNumSTR);
+                //Log.d(ControllerTag, slotNumSTR);
                 //initiate arrayList before adding items
                 Session.getInstance().getCurrentTripArrayListObjects().add(trip_ds);
                 if(trip_ds.startSlotNumber <= 9)
@@ -184,14 +245,15 @@ public class Controller extends Service implements responseDelegate {
 
         final String Message = "UNLOCK_BIKE_" + SlotNumber;
 
-        //String Message = "UNLOCK_BIKE_1";
-        Log.d("tcp", Message);
+        //String Message = "UNLOCK_BIKE_01";
+        myLogs.logMyLog(controllerTag, "tcp: "+Message);
+        //Log.d(controllerTag, "tcp: "+Message);
 
         if (mTcpClient != null) {
 
             mTcpClient.sendMessage(Message);
-
-            Log.d("tcpSent", Message);
+            myLogs.logMyLog(controllerTag, "tcpSent: "+Message);
+            //Log.d(controllerTag, "tcpSent: "+Message);
 
             mTcpClient.setOnResponseListener(new OnMessageReceived() {
                 @Override
@@ -201,7 +263,8 @@ public class Controller extends Service implements responseDelegate {
 
                     ArrayList<trip_DS> currentTrips = Session.getInstance().getCurrentTripArrayListObjects();
 
-                    Log.d("receiveFromTCP", message);
+                    myLogs.logMyLog(controllerTag, "receiveFromTCP: "+message);
+                    //Log.d(controllerTag, "receiveFromTCP: "+message);
 
                     if (message.contains("_TRUE_")) {
                         //split to get slotNumber { UNLOCK_SLOTNUMBER_TRUE_BIKEGUID }
@@ -213,9 +276,7 @@ public class Controller extends Service implements responseDelegate {
                             //when it started from mobile
                             isMobile = true;
                             StartTripRequest(tripObject);
-                        }
-
-                        else {
+                        } else {
                             //when it started from station
                             isMobile = false;
                             for (trip_DS tripDsObj : currentTrips) {
@@ -227,15 +288,12 @@ public class Controller extends Service implements responseDelegate {
                             }
                         }
 
-
                         String Message = "ack";
                         if (mTcpClient != null) {
                             mTcpClient.sendMessage(Message);
                         }
                         Session.getInstance().setSending(false);
-
                     }
-
                     if (message.contains("LOCK_BIKE")) {
                         //split to get slotNumber { LOCK_BIKE_SLOTNUMBER_BIKEGUID }
                         String[] result = message.split("_");
@@ -350,7 +408,8 @@ public class Controller extends Service implements responseDelegate {
 
 //                        ArrayList<trip_DS> currentTrips = Session.getInstance().getCurrentTripArrayListObjects();
 
-                        Log.d("tcpListenToSocket", message);
+                        myLogs.logMyLog(controllerTag, "tcpListenToSocket: "+message);
+                        //Log.d(controllerTag, "tcpListenToSocket: "+message);
 
                         if (message.contains("LOCK_BIKE")) {
                             String[] result = message.split("_");
@@ -491,23 +550,38 @@ public class Controller extends Service implements responseDelegate {
         HashMap<String, String> data = new HashMap<>();
         data.put("startTrip", startTripObject.toString());
 
+        startedTripsQueue.add(startTripObject.toString());
+//        myLogs.logMyLog(controllerTag, "startTripParameter: "+startTripObject.toString());
+//        //Log.d(controllerTag, "startTripParameter: "+startTripObject.toString());
+//
+//        String URL = myURL + apiMethod;
+//
+//        if (isNetworkConnected() && isOnline()) {
+//
+//            while (startedTripsQueue.size() > 0) {
+//
+//                HashMap<String,String> exceptionData = new HashMap<>();
+//                exceptionData.put("startTrip", startedTripsQueue.remove().toString());
+//
+//                myLogs.logMyLog(controllerTag, "trips_queue_size"+String.valueOf(startedTripsQueue.size()));
+//                //Log.d(controllerTag, "trips_queue_size"+String.valueOf(startedTripsQueue.size()));
+//
+//                asyncTask = new myAsyncTask(Controller.this, exceptionData, URL, myProcessNum, Session.getInstance().getTokenUserName(), Session.getInstance().getTokenPassword(), null, 3);
+//
+//                asyncTask.delegate = this;
+//
+//                asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+//            }
+//
+//        } else {
+//            //showToast("No Internet Connection");
+//            myLogs.logMyLog(controllerTag, "trips_queue_size_NoNet"+String.valueOf(startedTripsQueue.size()));
+//            //Log.d(controllerTag, "trips_queue_size_NoNet"+String.valueOf(startedTripsQueue.size()));
+//
+//        }
 
-        Log.d("startTripParameter", startTripObject.toString());
+        commonInRequest(myURL,apiMethod,"startTrip",startedTripsQueue,myProcessNum);
 
-        String URL = myURL + apiMethod;
-
-        if (true) {
-
-            asyncTask = new myAsyncTask(Controller.this, data, URL, myProcessNum, Session.getInstance().getTokenUserName(), Session.getInstance().getTokenPassword(), null, 3);
-
-            asyncTask.delegate = this;
-
-//            asyncTask.execute();
-            asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-        } else {
-            showToast("No Internet Connection");
-        }
     }
 
     private void FinishTripRequest(String slotNumber, String BikeIMEI) {
@@ -515,7 +589,8 @@ public class Controller extends Service implements responseDelegate {
         String apiMethod = Session.getInstance().getAPIMETHODPutFinishTrip();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         String date = df.format(new Date());
-        Log.d(ControllerTag, "time: " + date);
+        myLogs.logMyLog(ControllerTag, "time: " + date);
+        //Log.d(ControllerTag, "time: " + date);
         //String android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
         String android_id = Session.getInstance().getAndroidId();
         int myProcessNum = 5;
@@ -533,19 +608,61 @@ public class Controller extends Service implements responseDelegate {
         HashMap<String, String> data = new HashMap<>();
         data.put("finishTrip", finishTripObject.toString());
 
-        Log.d("finishTripObjectSTR", finishTripObject.toString());
+        finishedTripsQueue.add(finishTripObject.toString());
 
+        commonInRequest(myURL,apiMethod,"finishTrip",finishedTripsQueue,myProcessNum);
+//        myLogs.logMyLog(controllerTag, "finishTripObjectSTR: "+finishTripObject.toString());
+//        //Log.d(controllerTag, "finishTripObjectSTR: "+finishTripObject.toString());
+//
+//        String URL = myURL + apiMethod;
+//        if (isNetworkConnected() && isOnline()) {
+//            while (finishedTripsQueue.size() > 0) {
+//
+//                HashMap<String, String> exceptionData = new HashMap<>();
+//                exceptionData.put("finishTrip", finishedTripsQueue.remove().toString());
+//
+//                myLogs.logMyLog(controllerTag, "trips_queue_size"+String.valueOf(finishedTripsQueue.size()));
+//                //Log.d(controllerTag, "trips_queue_size"+String.valueOf(finishedTripsQueue.size()));
+//
+//                asyncTask = new myAsyncTask(Controller.this, exceptionData, URL, myProcessNum, Session.getInstance().getTokenUserName(), Session.getInstance().getTokenPassword(), null, 3);
+//
+//                asyncTask.delegate = this;
+//
+//                asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+//
+//            }
+//
+//
+//
+//        } else {
+//            //showToast("No Internet Connection");
+//            myLogs.logMyLog(controllerTag, "trips_queue_size_NoNet"+String.valueOf(finishedTripsQueue.size()));
+//            //Log.d(controllerTag, "trips_queue_size_NoNet"+String.valueOf(finishedTripsQueue.size()));
+//        }
+    }
+
+    private void commonInRequest(String myURL,String apiMethod,String hashMapKey,Queue myQueue,int myProcessNum){
         String URL = myURL + apiMethod;
+
         if (true) {
-            asyncTask = new myAsyncTask(Controller.this, data, URL, myProcessNum, Session.getInstance().getTokenUserName(), Session.getInstance().getTokenPassword(), null, 3);
 
-            asyncTask.delegate = this;
+            while (myQueue.size() > 0) {
 
-            //asyncTask.execute();
-            asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                HashMap<String,String> exceptionData = new HashMap<>();
+                exceptionData.put(hashMapKey, myQueue.remove().toString());
+
+                myLogs.logMyLog(controllerTag, "trips_queue_size"+String.valueOf(myQueue.size()));
+                //Log.d(controllerTag, "trips_queue_size"+String.valueOf(startedTripsQueue.size()));
+
+                asyncTask = new myAsyncTask(Controller.this, exceptionData, URL, myProcessNum, Session.getInstance().getTokenUserName(), Session.getInstance().getTokenPassword(), null, 3);
+
+                asyncTask.delegate = this;
+
+                asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            }
 
         } else {
-            showToast("No Internet Connection");
+            myLogs.logMyLog(controllerTag, "trips_queue_size_NoNet"+String.valueOf(startedTripsQueue.size()));
         }
     }
 
@@ -558,7 +675,8 @@ public class Controller extends Service implements responseDelegate {
         switch (ProcessNum) {
             case 4:
                 //putRequest StartTrip
-                Log.d("getStartTripResponse", response);
+                myLogs.logMyLog("getStartTripResponse", response);
+                //Log.d("getStartTripResponse", response);
 
                 if (!isMobile) {
 
@@ -569,7 +687,8 @@ public class Controller extends Service implements responseDelegate {
                 break;
             case 5:
                 //putRequest finishTrip
-                Log.d("getFinishTrip", response);
+                myLogs.logMyLog("getFinishTrip", response);
+                //Log.d("getFinishTrip", response);
 //                String Message = "finished";
 //                if (mTcpClient != null) {
 //                    mTcpClient.sendMessage(Message);
@@ -580,14 +699,24 @@ public class Controller extends Service implements responseDelegate {
         }
     }
 
-    public int countCommas(String haystack, char needle) {
-        int count = 0;
-        for (int i = 0; i < haystack.length(); i++) {
-            if (haystack.charAt(i) == needle) {
-                count++;
-            }
-        }
-        return count;
+    //check the connection
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(this.CONNECTIVITY_SERVICE);
+        return cm.getActiveNetworkInfo() != null;
     }
+
+    private Boolean isOnline() {
+        try {
+            Process p1 = java.lang.Runtime.getRuntime().exec("ping -c 1 www.google.com");
+            int returnVal = p1.waitFor();
+            boolean reachable = (returnVal==0);
+            return reachable;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
 
 }

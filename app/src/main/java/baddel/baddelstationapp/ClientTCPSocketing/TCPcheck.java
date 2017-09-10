@@ -11,6 +11,7 @@ import android.util.Log;
 import baddel.baddelstationapp.Controller.Controller;
 import baddel.baddelstationapp.customViews.customDialogs;
 import baddel.baddelstationapp.internalStorage.Session;
+import baddel.baddelstationapp.startActivity;
 
 /**
  * Created by mahmo on 2017-07-25.
@@ -18,9 +19,9 @@ import baddel.baddelstationapp.internalStorage.Session;
 
 public class TCPcheck extends Service {
 
-    private final String internetTag = "checkTCPTag";
+    private final String internetTag = "TCPtagCheck";
 
-    private int mInterval = 60000; // 10 seconds by default, can be changed later
+    private int mInterval = 6000; // 6 seconds by default, can be changed later
     private Handler mHandler;
 
     private Dialog TCPExceptionDialog;
@@ -34,7 +35,7 @@ public class TCPcheck extends Service {
     public void onCreate() {
         super.onCreate();
 
-        TCPExceptionDialog = customDialogs.ShowConnectionExceptionDialog(this);
+        TCPExceptionDialog = customDialogs.ShowConnectionExceptionDialog(getApplicationContext());
 
         mHandler = new Handler();
         startRepeatingTask();

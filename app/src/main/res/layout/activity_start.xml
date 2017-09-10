@@ -64,13 +64,32 @@
             android:id="@+id/textView4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="69dp"
             android:gravity="center"
             android:text="@string/needHelpSTR"
             android:textColor="@color/baddelGreen"
-            android:textSize="30dp" />
+            android:textSize="30dp"
+            android:layout_above="@+id/textView6SupportNumber"
+            android:layout_centerHorizontal="true" />
+
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="48dp"
+            android:text="version 2"
+            android:textColor="@color/baddelGreen" />
+
+        <TextView
+            android:id="@+id/textView6SupportNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="30dp"
+            android:text="01288662741"
+            android:textColor="@color/baddelGreen"
+            android:layout_above="@+id/textView5"
+            android:layout_centerHorizontal="true" />
 
         <!--<Button-->
         <!--android:id="@+id/downloadBT"-->

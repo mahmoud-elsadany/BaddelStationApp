@@ -141,7 +141,6 @@ public class myWebClient extends WebViewClient{
         super.onReceivedHttpError(view, request, errorResponse);
         myLogs.logMyLog(payFortTag, "responseError"+ errorResponse);
         //Log.d(payFortTag, "responseError"+ errorResponse);
-
     }
 
     @Override

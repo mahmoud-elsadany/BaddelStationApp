@@ -354,25 +354,29 @@ public class verifyMobileNumberActivity extends AppCompatActivity implements res
             myLogs.logMyLog("confirmSMSResponse", response);
             //Log.d("confirmSMSResponse", response);
 
-            String reservedSlots = "";
+            if (response.contains("{")) {
+                String reservedSlots = "";
 
-            trip_DS trip_ds = new trip_DS(response);
-            ArrayList<trip_DS> trips = trip_ds.currentTripObjects;
+                trip_DS trip_ds = new trip_DS(response);
+                ArrayList<trip_DS> trips = trip_ds.currentTripObjects;
 
-            if (trips.size() > 0) {
-                Session.getInstance().setCurrentTripArrayListObject(trips);
-                showToast("Verify code is Accepted");
+                if (trips.size() > 0) {
+                    Session.getInstance().setCurrentTripArrayListObject(trips);
+                    showToast("Verify code is Accepted");
 
-                for (trip_DS tripObj : trips) {
-                    reservedSlots += tripObj.startSlotNumber + ", ";
+                    for (trip_DS tripObj : trips) {
+                        reservedSlots += tripObj.startSlotNumber + ", ";
+                    }
+
+                    Dialog slotsDialog = customDialogs.ShowReservedBikes(verifyMobileNumberActivity.this, creditCardDataActivity.class, reservedSlots);
+
+                    slotsDialog.show();
+                    //startActivity(new Intent(verifyMobileNumberActivity.this,creditCardDataActivity.class));
+                } else {
+                    showToast("There Is Something Wrong");
                 }
-
-                Dialog slotsDialog = customDialogs.ShowReservedBikes(verifyMobileNumberActivity.this, creditCardDataActivity.class, reservedSlots);
-
-                slotsDialog.show();
-                //startActivity(new Intent(verifyMobileNumberActivity.this,creditCardDataActivity.class));
-            } else {
-                showToast("There Is Something Wrong");
+            }else{
+                showToast(response);
             }
 
         } else if (ProcessNum == 2) {

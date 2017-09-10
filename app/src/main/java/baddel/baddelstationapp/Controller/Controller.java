@@ -47,7 +47,7 @@ public class Controller extends Service implements responseDelegate {
     private Handler handler;
 
     //general variables
-    private String ControllerTag = "tcp";
+    private String ControllerTag = "controllerTag";
     private Context myContext;
 
     //signalR service
@@ -62,8 +62,8 @@ public class Controller extends Service implements responseDelegate {
     private SQliteDB sQliteDB;
 
     //tripObjects queue
-    private Queue startedTripsQueue;
-    private Queue finishedTripsQueue;
+//    private Queue startedTripsQueue;
+//    private Queue finishedTripsQueue;
 
     //to send the trips postponed
     private int mInterval = 5000; // 5 seconds by default, can be changed later
@@ -74,8 +74,7 @@ public class Controller extends Service implements responseDelegate {
 
     private final IBinder mBinder = new tripControllerBinder(); // Binder given to clients
 
-    public Controller() {
-    }
+    public Controller() {}
 
     public Controller(Context myContext) {
         this.myContext = myContext;
@@ -85,8 +84,8 @@ public class Controller extends Service implements responseDelegate {
     public void onCreate() {
         super.onCreate();
 
-        startedTripsQueue = new LinkedList();
-        finishedTripsQueue = new LinkedList();
+//        startedTripsQueue = new LinkedList();
+//        finishedTripsQueue = new LinkedList();
 
         mHandler = new Handler();
 
@@ -119,56 +118,55 @@ public class Controller extends Service implements responseDelegate {
         //startTCPClient();
         listenToSocket();
 
-        startRepeatingTask();
-
+        //startRepeatingTask();
 
         return result;
     }
 
-    Runnable mStatusChecker = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                if(isOnline()){
-                    myLogs.logMyLog(controllerTag, "is online So send all in queue");
-                    while (startedTripsQueue.size() > 0){
-                        //to startTrips
-                        String myURL = Session.getInstance().getWebServicesBaseUrl();
-                        String apiMethod = Session.getInstance().getAPIMETHODPutStartTrip();
-                        int myProcessNum = 4;
-                        commonInRequest(myURL,apiMethod,"startTrip",startedTripsQueue,myProcessNum);
-                    }
-                    while (finishedTripsQueue.size() > 0){
-                        //to finishTrips
-                        String myURL = Session.getInstance().getWebServicesBaseUrl();
-                        String apiMethod = Session.getInstance().getAPIMETHODPutFinishTrip();
-                        int myProcessNum = 5;
-                        commonInRequest(myURL,apiMethod,"finishTrip",finishedTripsQueue,myProcessNum);
-                    }
-                }else{
-                    myLogs.logMyLog(controllerTag,"is offline So see all in queue");
+//    Runnable mStatusChecker = new Runnable() {
+//        @Override
+//        public void run() {
+//            try {
+//                if (isOnline()) {
+//                    myLogs.logMyLog(controllerTag, "is online So send all in queue");
+//                    while (startedTripsQueue.size() > 0) {
+//                        //to startTrips
+//                        String myURL = Session.getInstance().getWebServicesBaseUrl();
+//                        String apiMethod = Session.getInstance().getAPIMETHODPutStartTrip();
+//                        int myProcessNum = 4;
+//                        commonInRequest(myURL, apiMethod, "startTrip", startedTripsQueue, myProcessNum);
+//                    }
+//                    while (finishedTripsQueue.size() > 0) {
+//                        //to finishTrips
+//                        String myURL = Session.getInstance().getWebServicesBaseUrl();
+//                        String apiMethod = Session.getInstance().getAPIMETHODPutFinishTrip();
+//                        int myProcessNum = 5;
+//                        commonInRequest(myURL, apiMethod, "finishTrip", finishedTripsQueue, myProcessNum);
+//                    }
+//                } else {
+//                    myLogs.logMyLog(controllerTag, "is offline So see all in queue");
+//
+//                    myLogs.logMyLog(controllerTag, "startQueue size: " + startedTripsQueue.size());
+//
+//                    myLogs.logMyLog(controllerTag, "finishQueue size: " + finishedTripsQueue.size());
+//                }
+//            } finally {
+//                mHandler.postDelayed(mStatusChecker, mInterval);
+//            }
+//        }
+//    };
 
-                    myLogs.logMyLog(controllerTag,"startQueue size: "+startedTripsQueue.size());
-
-                    myLogs.logMyLog(controllerTag,"finishQueue size: "+finishedTripsQueue.size());
-                }
-            } finally {
-                mHandler.postDelayed(mStatusChecker, mInterval);
-            }
-        }
-    };
-
-    private void startRepeatingTask() {
-        mStatusChecker.run();
-    }
-
-    private void stopRepeatingTask() {
-        mHandler.removeCallbacks(mStatusChecker);
-    }
+//    private void startRepeatingTask() {
+//        mStatusChecker.run();
+//    }
+//
+//    private void stopRepeatingTask() {
+//        mHandler.removeCallbacks(mStatusChecker);
+//    }
 
     @Override
     public void onDestroy() {
-        stopRepeatingTask();
+        //stopRepeatingTask();
         stopService(new Intent(Controller.this, TCPClient.class));
         stopService(new Intent(Controller.this, SignalRService.class));
         //unbindService(mConnection);
@@ -208,22 +206,14 @@ public class Controller extends Service implements responseDelegate {
                 //Log.d(ControllerTag, "fromMobile" + response);
                 trip_DS trip_ds = new trip_DS(response, 1);
 
-                //add 0 before numbers of one digit to send two digits for all values
                 myLogs.logMyLog(ControllerTag, String.valueOf(trip_ds.startSlotNumber));
-                //Log.d(ControllerTag, String.valueOf(trip_ds.startSlotNumber));
                 String slotNumSTR = String.valueOf(trip_ds.startSlotNumber);
-//                if (trip_ds.startSlotId > 0 && trip_ds.startSlotId < 10) {
-//                    slotNumSTR = String.valueOf(trip_ds.startSlotId);
-//                } else {
-//                    slotNumSTR = String.valueOf(trip_ds.startSlotId);
-//                }
 
                 myLogs.logMyLog(ControllerTag, slotNumSTR);
-                //Log.d(ControllerTag, slotNumSTR);
                 //initiate arrayList before adding items
                 Session.getInstance().getCurrentTripArrayListObjects().add(trip_ds);
-                if(trip_ds.startSlotNumber <= 9)
-                    sendToTCP("0"+slotNumSTR, trip_ds);
+                if (trip_ds.startSlotNumber <= 9)
+                    sendToTCP("0" + slotNumSTR, trip_ds);
                 else
                     sendToTCP(slotNumSTR, trip_ds);
             }
@@ -246,13 +236,13 @@ public class Controller extends Service implements responseDelegate {
         final String Message = "UNLOCK_BIKE_" + SlotNumber;
 
         //String Message = "UNLOCK_BIKE_01";
-        myLogs.logMyLog(controllerTag, "tcp: "+Message);
+        myLogs.logMyLog(controllerTag, "tcp: " + Message);
         //Log.d(controllerTag, "tcp: "+Message);
 
         if (mTcpClient != null) {
 
             mTcpClient.sendMessage(Message);
-            myLogs.logMyLog(controllerTag, "tcpSent: "+Message);
+            myLogs.logMyLog(controllerTag, "tcpSent: " + Message);
             //Log.d(controllerTag, "tcpSent: "+Message);
 
             mTcpClient.setOnResponseListener(new OnMessageReceived() {
@@ -263,7 +253,7 @@ public class Controller extends Service implements responseDelegate {
 
                     ArrayList<trip_DS> currentTrips = Session.getInstance().getCurrentTripArrayListObjects();
 
-                    myLogs.logMyLog(controllerTag, "receiveFromTCP: "+message);
+                    myLogs.logMyLog(controllerTag, "receiveFromTCP: " + message);
                     //Log.d(controllerTag, "receiveFromTCP: "+message);
 
                     if (message.contains("_TRUE_")) {
@@ -300,7 +290,11 @@ public class Controller extends Service implements responseDelegate {
                         String lockedSlotNumber = result[2];
                         String lockedBikeIMEI = result[3];
 
-                        FinishTripRequest(lockedSlotNumber, lockedBikeIMEI);
+                        if (lockedBikeIMEI.contains("LOCK_BIKE")){
+                            myLogs.logMyLog(controllerTag,"tcp sent shit"+message);
+                        }else {
+                            FinishTripRequest(lockedSlotNumber, lockedBikeIMEI);
+                        }
 
                         //String Message = "ENDTRIP_" + lockedSlotNumber + "_OK";
                         String Message = "ack";
@@ -350,52 +344,6 @@ public class Controller extends Service implements responseDelegate {
         }
     }
 
-//    public void requestMissedTrips() {
-//        if (mTcpClient != null) {
-//            String Message = "REQUEST_MISSED_TRIPS";
-//            mTcpClient.sendMessage(Message);
-//
-//            Log.d("tcpSendToTCP", Message);
-//
-//            mTcpClient.setOnResponseListener(new OnMessageReceived() {
-//                @Override
-//                public void messageReceived(String message) {
-//                    //this method calls the onProgressUpdate
-//                    Session.getInstance().setMessageResponse(message);
-//
-//                    Log.d("tcpSendToTCP", message);
-//
-//                    if (message.contains(",LOCK_BIKE_")) {
-//                        //split Missed requests LOCK_BIKE_SlotNumber_BIKEGUID,LOCK_BIKE_SlotNumber_BIKEGUID
-//                        String[] missedTripsObjects = message.split(",");
-//                        for (int i = 0; i < missedTripsObjects.length; i++) {
-//                            if (message.contains("LOCK_BIKE")) {
-//                                //split to get slotNumber { LOCK_BIKE_SLOTNUMBER_BIKEGUID }
-//                                String[] result = message.split("_");
-//                                String lockedSlotNumber = result[2];
-//                                String lockedBikeIMEI = result[3];
-//
-//                                FinishTripRequest(lockedSlotNumber, lockedBikeIMEI);
-//                            }
-//                        }
-//                    }else if (message.contains("LOCK_BIKE")){
-//                        //missed requests with no array
-//                        String[] result = message.split("_");
-//                        String lockedSlotNumber = result[2];
-//                        String lockedBikeIMEI = result[3];
-//                        FinishTripRequest(lockedSlotNumber, lockedBikeIMEI);
-//
-//                        //String Message = "ENDTRIP_" + lockedSlotNumber + "_OK";
-//                        String Message = "ack";
-//                        if (mTcpClient != null) {
-//                            mTcpClient.sendMessage(Message);
-//                        }
-//                    }
-//                }
-//            });
-//        }
-//    }
-
     private void listenToSocket() {
         runOnUiThread(new Runnable() {
             @Override
@@ -408,7 +356,7 @@ public class Controller extends Service implements responseDelegate {
 
 //                        ArrayList<trip_DS> currentTrips = Session.getInstance().getCurrentTripArrayListObjects();
 
-                        myLogs.logMyLog(controllerTag, "tcpListenToSocket: "+message);
+                        myLogs.logMyLog(controllerTag, "tcpListenToSocket: " + message);
                         //Log.d(controllerTag, "tcpListenToSocket: "+message);
 
                         if (message.contains("LOCK_BIKE")) {
@@ -538,6 +486,13 @@ public class Controller extends Service implements responseDelegate {
         String apiMethod = Session.getInstance().getAPIMETHODPutStartTrip();
         int myProcessNum = 4;
 
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        String date = df.format(new Date());
+
+        myLogs.logMyLog(ControllerTag, "start_time: " + date);
+
+        String TOTALURL = myURL+apiMethod;
+
         JSONObject startTripObject = new JSONObject();
         try {
             startTripObject.put("tripId", tripObj.tripId);
@@ -550,38 +505,27 @@ public class Controller extends Service implements responseDelegate {
         HashMap<String, String> data = new HashMap<>();
         data.put("startTrip", startTripObject.toString());
 
-        startedTripsQueue.add(startTripObject.toString());
-//        myLogs.logMyLog(controllerTag, "startTripParameter: "+startTripObject.toString());
-//        //Log.d(controllerTag, "startTripParameter: "+startTripObject.toString());
-//
-//        String URL = myURL + apiMethod;
-//
-//        if (isNetworkConnected() && isOnline()) {
-//
-//            while (startedTripsQueue.size() > 0) {
-//
-//                HashMap<String,String> exceptionData = new HashMap<>();
-//                exceptionData.put("startTrip", startedTripsQueue.remove().toString());
-//
-//                myLogs.logMyLog(controllerTag, "trips_queue_size"+String.valueOf(startedTripsQueue.size()));
-//                //Log.d(controllerTag, "trips_queue_size"+String.valueOf(startedTripsQueue.size()));
-//
-//                asyncTask = new myAsyncTask(Controller.this, exceptionData, URL, myProcessNum, Session.getInstance().getTokenUserName(), Session.getInstance().getTokenPassword(), null, 3);
-//
-//                asyncTask.delegate = this;
-//
-//                asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-//            }
-//
-//        } else {
-//            //showToast("No Internet Connection");
-//            myLogs.logMyLog(controllerTag, "trips_queue_size_NoNet"+String.valueOf(startedTripsQueue.size()));
-//            //Log.d(controllerTag, "trips_queue_size_NoNet"+String.valueOf(startedTripsQueue.size()));
-//
-//        }
+        myLogs.logMyLog(ControllerTag,"startObject: "+startTripObject.toString());
 
-        commonInRequest(myURL,apiMethod,"startTrip",startedTripsQueue,myProcessNum);
 
+        if (Session.getInstance().getInternetAvailability()) {
+
+            myLogs.logMyLog(controllerTag, "apiMethod: "+apiMethod);
+            //Log.d(controllerTag, "trips_queue_size"+String.valueOf(startedTripsQueue.size()));
+
+            asyncTask = new myAsyncTask(Controller.this, data, TOTALURL, myProcessNum, Session.getInstance().getTokenUserName(), Session.getInstance().getTokenPassword(), null, 3);
+
+            asyncTask.delegate = this;
+
+            asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        } else {
+            myLogs.logMyLog(controllerTag, "NoInternetNet");
+
+            sQliteDB.insertStartedTrip(startTripObject.toString());
+
+            //Session.getInstance().setStartTripsOfflineObject(startTripObject.toString());
+        }
     }
 
     private void FinishTripRequest(String slotNumber, String BikeIMEI) {
@@ -589,12 +533,13 @@ public class Controller extends Service implements responseDelegate {
         String apiMethod = Session.getInstance().getAPIMETHODPutFinishTrip();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         String date = df.format(new Date());
-        myLogs.logMyLog(ControllerTag, "time: " + date);
-        //Log.d(ControllerTag, "time: " + date);
+        myLogs.logMyLog(ControllerTag, "finish_time: " + date);
         //String android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
         String android_id = Session.getInstance().getAndroidId();
         int myProcessNum = 5;
         JSONObject finishTripObject = new JSONObject();
+
+        String TOTALURL = myURL+apiMethod;
 
         try {
             finishTripObject.put("SlotNumber", slotNumber);
@@ -608,62 +553,27 @@ public class Controller extends Service implements responseDelegate {
         HashMap<String, String> data = new HashMap<>();
         data.put("finishTrip", finishTripObject.toString());
 
-        finishedTripsQueue.add(finishTripObject.toString());
+        myLogs.logMyLog(ControllerTag,"finishObject: "+finishTripObject.toString());
 
-        commonInRequest(myURL,apiMethod,"finishTrip",finishedTripsQueue,myProcessNum);
-//        myLogs.logMyLog(controllerTag, "finishTripObjectSTR: "+finishTripObject.toString());
-//        //Log.d(controllerTag, "finishTripObjectSTR: "+finishTripObject.toString());
-//
-//        String URL = myURL + apiMethod;
-//        if (isNetworkConnected() && isOnline()) {
-//            while (finishedTripsQueue.size() > 0) {
-//
-//                HashMap<String, String> exceptionData = new HashMap<>();
-//                exceptionData.put("finishTrip", finishedTripsQueue.remove().toString());
-//
-//                myLogs.logMyLog(controllerTag, "trips_queue_size"+String.valueOf(finishedTripsQueue.size()));
-//                //Log.d(controllerTag, "trips_queue_size"+String.valueOf(finishedTripsQueue.size()));
-//
-//                asyncTask = new myAsyncTask(Controller.this, exceptionData, URL, myProcessNum, Session.getInstance().getTokenUserName(), Session.getInstance().getTokenPassword(), null, 3);
-//
-//                asyncTask.delegate = this;
-//
-//                asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-//
-//            }
-//
-//
-//
-//        } else {
-//            //showToast("No Internet Connection");
-//            myLogs.logMyLog(controllerTag, "trips_queue_size_NoNet"+String.valueOf(finishedTripsQueue.size()));
-//            //Log.d(controllerTag, "trips_queue_size_NoNet"+String.valueOf(finishedTripsQueue.size()));
-//        }
-    }
+        if (Session.getInstance().getInternetAvailability()) {
 
-    private void commonInRequest(String myURL,String apiMethod,String hashMapKey,Queue myQueue,int myProcessNum){
-        String URL = myURL + apiMethod;
+            myLogs.logMyLog(controllerTag, "apiMethod: "+apiMethod);
+            //Log.d(controllerTag, "trips_queue_size"+String.valueOf(startedTripsQueue.size()));
 
-        if (true) {
+            asyncTask = new myAsyncTask(Controller.this, data, TOTALURL, myProcessNum, Session.getInstance().getTokenUserName(), Session.getInstance().getTokenPassword(), null, 3);
 
-            while (myQueue.size() > 0) {
+            asyncTask.delegate = this;
 
-                HashMap<String,String> exceptionData = new HashMap<>();
-                exceptionData.put(hashMapKey, myQueue.remove().toString());
-
-                myLogs.logMyLog(controllerTag, "trips_queue_size"+String.valueOf(myQueue.size()));
-                //Log.d(controllerTag, "trips_queue_size"+String.valueOf(startedTripsQueue.size()));
-
-                asyncTask = new myAsyncTask(Controller.this, exceptionData, URL, myProcessNum, Session.getInstance().getTokenUserName(), Session.getInstance().getTokenPassword(), null, 3);
-
-                asyncTask.delegate = this;
-
-                asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            }
+            asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         } else {
-            myLogs.logMyLog(controllerTag, "trips_queue_size_NoNet"+String.valueOf(startedTripsQueue.size()));
+            myLogs.logMyLog(controllerTag, "NoInternetNet");
+
+            sQliteDB.insertFinishedTrip(finishTripObject.toString());
+
+            //Session.getInstance().setFinishTripsOfflineObject(finishTripObject.toString());
         }
+
     }
 
     private void showToast(String msg) {
@@ -679,7 +589,6 @@ public class Controller extends Service implements responseDelegate {
                 //Log.d("getStartTripResponse", response);
 
                 if (!isMobile) {
-
 
 
                 }
@@ -698,25 +607,5 @@ public class Controller extends Service implements responseDelegate {
                 break;
         }
     }
-
-    //check the connection
-    private boolean isNetworkConnected() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(this.CONNECTIVITY_SERVICE);
-        return cm.getActiveNetworkInfo() != null;
-    }
-
-    private Boolean isOnline() {
-        try {
-            Process p1 = java.lang.Runtime.getRuntime().exec("ping -c 1 www.google.com");
-            int returnVal = p1.waitFor();
-            boolean reachable = (returnVal==0);
-            return reachable;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-
 
 }

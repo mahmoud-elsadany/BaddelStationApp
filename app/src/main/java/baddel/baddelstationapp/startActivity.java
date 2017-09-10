@@ -2,9 +2,11 @@ package baddel.baddelstationapp;
 
 import android.app.ActivityManager;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -24,6 +26,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.daimajia.slider.library.Animations.DescriptionAnimation;
@@ -41,6 +44,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 
 import baddel.baddelstationapp.ClientTCPSocketing.TCPClient;
@@ -48,6 +52,7 @@ import baddel.baddelstationapp.ClientTCPSocketing.TCPcheck;
 import baddel.baddelstationapp.Controller.Controller;
 import baddel.baddelstationapp.Models.Advert_DS;
 import baddel.baddelstationapp.Models.Station_DS;
+import baddel.baddelstationapp.Models.systemSettingDS;
 import baddel.baddelstationapp.Models.trip_DS;
 import baddel.baddelstationapp.connectToServer.internetCheck;
 import baddel.baddelstationapp.connectToServer.myAsyncTask;
@@ -57,6 +62,7 @@ import baddel.baddelstationapp.customViews.customViewGroup;
 import baddel.baddelstationapp.internalStorage.SQliteDB;
 import baddel.baddelstationapp.internalStorage.Session;
 import baddel.baddelstationapp.saveLogs.myLogs;
+import baddel.baddelstationapp.saveLogs.timeBroadCast;
 
 import static android.R.attr.data;
 
@@ -67,6 +73,7 @@ public class startActivity extends AppCompatActivity implements responseDelegate
 
     //UI references
     private Button rentBicycleBT, helpBT, downloadBT;
+    private TextView supportNumberTV;
     private ImageView logoImageView;
     private SliderLayout imageSlider;
     private Typeface font;
@@ -91,6 +98,10 @@ public class startActivity extends AppCompatActivity implements responseDelegate
     private Controller Controller;
     private boolean mBound = false;
 
+    private Station_DS station_ds;
+
+    private static BroadcastReceiver tickReceiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,6 +109,20 @@ public class startActivity extends AppCompatActivity implements responseDelegate
         disableStatusBar();
         setContentView(R.layout.activity_start);
 
+        startService(new Intent(startActivity.this, internetCheck.class));
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                checkConnectivity();
+            }
+        },4000);
+
+        timeTicking();
+
+    }
+
+    private void startingActivity(){
         count = 0;
         isRentBicycle = false;
         Session.getInstance().setCurrentTripArrayListObject(initiateArrayList);
@@ -113,6 +138,7 @@ public class startActivity extends AppCompatActivity implements responseDelegate
 
         Session.getInstance().setChosenPeriodTime(0);
 
+        supportNumberTV = (TextView)findViewById(R.id.textView6SupportNumber);
         rentBicycleBT = (Button) findViewById(R.id.rentBicycleBT);
         imageSlider = (SliderLayout) findViewById(R.id.imageSlider);
 
@@ -130,13 +156,17 @@ public class startActivity extends AppCompatActivity implements responseDelegate
             getStationID();
         }
 
-        startService(new Intent(startActivity.this, TCPcheck.class));
-        //startService(new Intent(startActivity.this,internetCheck.class));
-        startService(new Intent(startActivity.this, TCPClient.class));
+        //startService(new Intent(startActivity.this, TCPcheck.class));
+        //startService(new Intent(startActivity.this, TCPClient.class));
 
         setLogoImageView();
 
         getBundle();
+    }
+
+    private void timeTicking() {
+        tickReceiver = new timeBroadCast();
+        registerReceiver(tickReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
     }
 
     private void getBundle() {
@@ -159,7 +189,7 @@ public class startActivity extends AppCompatActivity implements responseDelegate
                         showReservedBikesDialog.cancel();
                     }
                 }, 5000);
-            }else if (bundle.getBoolean("EXITKIOSK")){
+            } else if (bundle.getBoolean("EXITKIOSK")) {
                 startActivity(new Intent(android.provider.Settings.ACTION_WIFI_SETTINGS));
                 finish();
                 finishAffinity();
@@ -267,6 +297,7 @@ public class startActivity extends AppCompatActivity implements responseDelegate
             @Override
             public void onClick(View view) {
                 //Session.getInstance().setCurrentTripArrayListObject(null);
+                getSystemSettings();
                 isRentBicycle = true;
                 getStationDetails();
             }
@@ -293,12 +324,49 @@ public class startActivity extends AppCompatActivity implements responseDelegate
     @Override
     protected void onDestroy() {
         // Unbind from the service
-        myLogs.logMyLog("appDestroyed","Stop services");
+        myLogs.logMyLog("appDestroyed", "Stop services");
         //Log.d("appDestroyed","Stop services");
         stopService(new Intent(startActivity.this, TCPClient.class));
         stopService(new Intent(startActivity.this, TCPcheck.class));
         //callController.unBindController();
+        unbindService(mConnection);
         super.onDestroy();
+    }
+
+    private void checkConnectivity(){
+        if (!isNetworkConnected()){
+            Dialog TCPExceptionDialog = customDialogs.ShowConnectionExceptionDialog(getApplicationContext());
+            TCPExceptionDialog.show();
+        }
+//        else if (isNetworkConnected()&&Session.getInstance().getInternetAvailability()){
+//            startingActivity();
+//        }
+        else{
+            startingActivity();
+        }
+    }
+
+    private void getSystemSettings(){
+        String myURL = Session.getInstance().getWebServicesBaseUrl();
+        String apiMethod = Session.getInstance().getAPIMETHODGetStationSystemSettings();
+        int myProcessNum = 4;
+
+        HashMap<String, String> data = null;
+
+        String URL = myURL + apiMethod;
+
+        if (isNetworkConnected()) {
+
+            asyncTask = new myAsyncTask(startActivity.this, data, URL, myProcessNum, Session.getInstance().getTokenUserName(), Session.getInstance().getTokenPassword(), null, 2);
+
+            asyncTask.delegate = this;
+
+            //asyncTask.execute();
+            asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        } else {
+            showToast("No Internet Connection");
+        }
+
     }
 
     private void getStationDetails() {
@@ -369,8 +437,8 @@ public class startActivity extends AppCompatActivity implements responseDelegate
 
         JSONObject appVersionJson = new JSONObject();
         try {
-            appVersionJson.put("id",stationID);
-            appVersionJson.put("appVersion",version);
+            appVersionJson.put("id", stationID);
+            appVersionJson.put("appVersion", version);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -378,7 +446,7 @@ public class startActivity extends AppCompatActivity implements responseDelegate
         HashMap<String, String> data = new HashMap<>();
         data.put("stationdata", appVersionJson.toString());
 
-        myLogs.logMyLog("sendApkVerParameters",appVersionJson.toString());
+        myLogs.logMyLog("sendApkVerParameters", appVersionJson.toString());
         //Log.d("sendApkVerParameters",appVersionJson.toString());
 
         String URL = myURL + apiMethod;
@@ -411,66 +479,89 @@ public class startActivity extends AppCompatActivity implements responseDelegate
         switch (ProcessNum) {
             case 1:
                 //getStationID by byimei
-                myLogs.logMyLog("getStationID", response);
-                //Log.d("getStationID", response);
-                Station_DS station_ds = new Station_DS(response);
+                if (Session.getInstance().getResponseCode() == 200) {
+                    myLogs.logMyLog("getStationID", response);
+                    station_ds = new Station_DS(response);
 
-                if (sQliteDB.numberOfStations() > 0) {
-                    sQliteDB.deleteAllStationRows();
-                    sQliteDB.insertStationID(String.valueOf(station_ds.stationID));
-                } else {
-                    sQliteDB.insertStationID(String.valueOf(station_ds.stationID));
+                    if (sQliteDB.numberOfStations() > 0) {
+                        sQliteDB.deleteAllStationRows();
+                        sQliteDB.insertStationID(String.valueOf(station_ds.stationID));
+                    } else {
+                        sQliteDB.insertStationID(String.valueOf(station_ds.stationID));
+                    }
+
+                    callController(startActivity.this);
+                    //callController = new callController(startActivity.this);
+                    sendAppStationVersion(String.valueOf(station_ds.stationID));
+
+                    getStationDetails();
+
+                    //startService();
+                }else{
+                    getStationID();
                 }
-
-                callController(startActivity.this);
-                //callController = new callController(startActivity.this);
-                sendAppStationVersion(String.valueOf(station_ds.stationID));
-
-                getStationDetails();
-
-//                if (!Session.getInstance().isTCPConnection())
-//                    customDialogs.ShowConnectionExceptionDialog(startActivity.this);
-
-                //startService();
 
                 break;
             case 2:
                 //sendAPKVersion
-                myLogs.logMyLog("sendAPKversion", response);
+                if (Session.getInstance().getResponseCode() == 200) {
+                    myLogs.logMyLog("sendAPKversion", response);
+                } else {
+                    if (sQliteDB.numberOfStations() > 0) {
+                        sQliteDB.deleteAllStationRows();
+                        sQliteDB.insertStationID(String.valueOf(station_ds.stationID));
+                    } else {
+                        sQliteDB.insertStationID(String.valueOf(station_ds.stationID));
+                    }
+                    sendAppStationVersion(String.valueOf(station_ds.stationID));
+                }
                 //Log.d("sendAPKversion", response);
                 break;
             case 3:
                 //get Station Details
                 myLogs.logMyLog("getStationDetails", response);
                 //Log.d("getStationDetails", response);
+                if (Session.getInstance().getResponseCode() == 200) {
+                    Station_DS stationDs = new Station_DS(response);
 
-                Station_DS stationDs = new Station_DS(response);
+                    Session.getInstance().setNumberOfAvailableBikes(stationDs.stationNumberOfAvailableBikes);
 
-                Session.getInstance().setNumberOfAvailableBikes(stationDs.stationNumberOfAvailableBikes);
+                    //Session.getInstance().setNumberOfAvailableBikes(0);
 
-                //Session.getInstance().setNumberOfAvailableBikes(0);
+                    Session.getInstance().setStationAdvertsList(stationDs.stationAdvertDS_ArrayList());
 
-                Session.getInstance().setStationAdvertsList(stationDs.stationAdvertDS_ArrayList());
+                    if (isRentBicycle && Session.getInstance().getNumberOfAvailableBikes() != 0)
+                        startActivity(new Intent(startActivity.this, chooseRentTimeActivity.class));
+                    else if (isRentBicycle && Session.getInstance().getNumberOfAvailableBikes() == 0) {
+                        final Dialog noAvailableBikesDialog = customDialogs.ShowWarningMessage(getApplicationContext(), "Sorry No available bikes at the time \n please come back later");
+                        noAvailableBikesDialog.show();
 
-                if (isRentBicycle && Session.getInstance().getNumberOfAvailableBikes() != 0)
-                    startActivity(new Intent(startActivity.this, chooseRentTimeActivity.class));
-                else if (isRentBicycle && Session.getInstance().getNumberOfAvailableBikes() == 0) {
-                    final Dialog noAvailableBikesDialog = customDialogs.ShowWarningMessage(getApplicationContext(),"Sorry No available bikes at the time \n please come back later");
-                    noAvailableBikesDialog.show();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                noAvailableBikesDialog.cancel();
+                            }
+                        }, 5000);
 
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            noAvailableBikesDialog.cancel();
-                        }
-                    }, 5000);
+                    } else {
+                        setImageSlider();
 
-                }else {
-                    setImageSlider();
+                    }
+                } else {
+                    getStationDetails();
                 }
+
 
                 break;
 
+            case 4:
+                //getSystemSettings
+                myLogs.logMyLog("systemSettings",response);
+                systemSettingDS systemSettingDS = new systemSettingDS(response);
+
+                supportNumberTV.setText(systemSettingDS.currentSupportNumberSystemSettings());
+
+                break;
             default:
                 break;
         }
@@ -480,7 +571,6 @@ public class startActivity extends AppCompatActivity implements responseDelegate
     public void onBackPressed() {
 
     }
-
 
     private void callController(Context myContext) {
         Intent intent = new Intent();

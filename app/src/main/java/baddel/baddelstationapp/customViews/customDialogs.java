@@ -1,5 +1,6 @@
 package baddel.baddelstationapp.customViews;
 
+import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -20,6 +21,8 @@ import android.widget.TextView;
 
 import java.io.IOException;
 
+import baddel.baddelstationapp.ClientTCPSocketing.TCPClient;
+import baddel.baddelstationapp.ClientWebSocketSignalR.SignalRService;
 import baddel.baddelstationapp.R;
 import baddel.baddelstationapp.chooseRentTimeActivity;
 import baddel.baddelstationapp.enterPhoneNumberActivity;
@@ -52,6 +55,11 @@ public class customDialogs {
     }
 
     public static Dialog ShowConnectionExceptionDialog(final Context myContext) {
+
+
+        myContext.stopService(new Intent(myContext,SignalRService.class));
+        myContext.stopService(new Intent(myContext,TCPClient.class));
+
         final int[] counter = {0};
         final Dialog dialog = new Dialog(myContext);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -85,17 +93,19 @@ public class customDialogs {
         exitToSettingsTcpConnectionBT.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                myLogs.logMyLog("iam here","hola");
+                myLogs.logMyLog("iam here", "hola");
                 //Log.d("iam here","hola");
 
                 if (enterPasswordTcpConnectionET.getText().toString().equals("")) {
                     dialog.cancel();
                 } else if (enterPasswordTcpConnectionET.getText().toString().equals(Session.getInstance().getKioskPassword())) {
-                    Intent closeAppWithKioskIntent = new Intent(myContext,chooseRentTimeActivity.class);
-                    closeAppWithKioskIntent.putExtra("EXITKIOSK",true);
+                    Intent closeAppWithKioskIntent = new Intent(myContext, chooseRentTimeActivity.class);
+                    closeAppWithKioskIntent.putExtra("EXITKIOSK", true);
                     closeAppWithKioskIntent.setFlags(FLAG_ACTIVITY_NEW_TASK);
                     myContext.startActivity(closeAppWithKioskIntent);
-//                    myContext.startActivity(new Intent(android.provider.Settings.ACTION_WIFI_SETTINGS));
+
+                    //android.os.Process.killProcess(android.os.Process.myPid());
+
                 }
                 dialog.cancel();
 
@@ -119,9 +129,15 @@ public class customDialogs {
         dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
+                myContext.startService(new Intent(myContext,SignalRService.class));
+                myContext.startService(new Intent(myContext,TCPClient.class));
+
                 counter[0] = 0;
                 enterPasswordTcpConnectionET.setText("");
                 TcpConnectionLinearLayoutToGoOut.setVisibility(View.GONE);
+                Intent refreshStartActivity = new Intent(myContext,startActivity.class);
+                refreshStartActivity.setFlags(FLAG_ACTIVITY_NEW_TASK);
+                myContext.startActivity(refreshStartActivity);
             }
         });
 
@@ -182,7 +198,11 @@ public class customDialogs {
 //                    closeAppWithKioskIntent.putExtra("EXITKIOSK",true);
 //                    closeAppWithKioskIntent.setFlags(FLAG_ACTIVITY_NEW_TASK);
 //                    myContext.startActivity(closeAppWithKioskIntent);
-                    myContext.startActivity(new Intent(android.provider.Settings.ACTION_WIFI_SETTINGS));
+
+//                    myContext.startActivity(new Intent(android.provider.Settings.ACTION_WIFI_SETTINGS));
+
+                    android.os.Process.killProcess(android.os.Process.myPid());
+
                 }
                 dialog.cancel();
             }

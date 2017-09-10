@@ -10,32 +10,41 @@ import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import baddel.baddelstationapp.internalStorage.SQliteDB;
+import baddel.baddelstationapp.internalStorage.Session;
+
 /**
  * Created by mahmo on 2017-08-23.
  */
 
 public class myLogs {
 
-    public static void logMyLog(String tag,String data){
-        Log.d(tag,data);
+    public static void logMyLog(String tag, String data) {
+        Log.d(tag, data);
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         String format = simpleDateFormat.format(new Date());
 
-        String savingData = "**In: "+format+" , Tag: "+tag+" , "+"Data: "+data+"\n\n";
-        try
-        {
+        String oldData = Session.getInstance().getSavingLogs();
+        String newData = oldData+"**In: " + format + " , Tag: " + tag + " , " + "Data: " + data + "\n\n";
+
+        Session.getInstance().setSavingLogs(newData);
+    }
+
+    public static void saveLogsToFile() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        String format = simpleDateFormat.format(new Date());
+
+        try {
             File sdCard = Environment.getExternalStorageDirectory();
-            File directory = new File (sdCard.getAbsolutePath() +
+            File directory = new File(sdCard.getAbsolutePath() +
                     "/stationLogs");
-            if (!directory.exists())
-            {
+            if (!directory.exists()) {
                 directory.mkdirs();
             }
 
-            File file = new File(directory, "mytext.txt");
-            if (!file.exists())
-            {
+            File file = new File(directory, "logs_" + format + ".txt");
+            if (!file.exists()) {
                 file.createNewFile();
             }
             //FileOutputStream fOut = new FileOutputStream(file);
@@ -46,16 +55,14 @@ public class myLogs {
                     OutputStreamWriter(fOut);
 
 //---write the string to the file---
-            osw.write(savingData);
+            String myLogs = Session.getInstance().getSavingLogs();
+
+            osw.write(myLogs);
             osw.flush();
             osw.close();
 
-        }
-        catch (IOException ioe)
-        {
+        } catch (IOException ioe) {
             ioe.printStackTrace();
         }
-
-
     }
 }

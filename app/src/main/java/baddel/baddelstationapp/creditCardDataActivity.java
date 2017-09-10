@@ -60,16 +60,11 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
     private EditText creditCardNumberET,creditCardValidYearET,creditCardValidMonthET,creditCardHolderNameET,creditCardCVVET;
     private ImageView creditCardNumberErrorIV,creditCardHolderNameErrorIV,monthYearErrorIV,cvvErrorIV;
 
-    //private TextView creditCardPeriodPriceTV;
-
     //HTTP asyncTask
     private myAsyncTask asyncTask;
     private HashMap<String, String> payFortData;
     private WebView webView;
     private int NoOfMin,NoOfBikes;
-
-    //TcpSocket
-//    private callController callController;
 
     //countDown object
     private CountDownTimer myCounter;
@@ -84,8 +79,6 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         myCounter = null;
 
-//        if (!Session.getInstance().isTCPConnection())
-//            customDialogs.ShowConnectionExceptionDialog(creditCardDataActivity.this);
 
         setEditTexts();
         setCreditCardDataNextBT();
@@ -186,56 +179,56 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
         cvvErrorIV = (ImageView)findViewById(R.id.cvvErrorIV);
 
         creditCardNumberET = (EditText)findViewById(R.id.creditCardNumberET1);
-        creditCardNumberET.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                boolean flag = true;
-                String eachBlock[] = creditCardNumberET.getText().toString().split("-");
-                for (int i = 0; i < eachBlock.length; i++) {
-                    if (eachBlock[i].length() > 4) {
-                        flag = false;
-                    }
-                }
-                if (flag) {
-                    creditCardNumberET.setOnKeyListener(new View.OnKeyListener() {
-                        @Override
-                        public boolean onKey(View v, int keyCode, KeyEvent event) {
-                            if (keyCode == KeyEvent.KEYCODE_DEL)
-                                keyDel = 1;
-                            return false;
-                        }
-                    });
-                    if (keyDel == 0) {
-                        if (((creditCardNumberET.getText().length() + 1) % 5) == 0) {
-                            if (creditCardNumberET.getText().toString().split("-").length <= 3) {
-                                creditCardNumberET.setText(creditCardNumberET.getText() + "-");
-                                creditCardNumberET.setSelection(creditCardNumberET.getText().length());
-                            }
-                        }
-                        a = creditCardNumberET.getText().toString();
-                    } else {
-                        a = creditCardNumberET.getText().toString();
-                        keyDel = 0;
-                    }
-
-                } else {
-                    creditCardNumberET.setText(a);
-                }
-
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count,
-                                          int after) {
-                // TODO Auto-generated method stub
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
+//        creditCardNumberET.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//
+//                boolean flag = true;
+//                String eachBlock[] = creditCardNumberET.getText().toString().split("-");
+//                for (int i = 0; i < eachBlock.length; i++) {
+//                    if (eachBlock[i].length() > 4) {
+//                        flag = false;
+//                    }
+//                }
+//                if (flag) {
+//                    creditCardNumberET.setOnKeyListener(new View.OnKeyListener() {
+//                        @Override
+//                        public boolean onKey(View v, int keyCode, KeyEvent event) {
+//                            if (keyCode == KeyEvent.KEYCODE_DEL)
+//                                keyDel = 1;
+//                            return false;
+//                        }
+//                    });
+//                    if (keyDel == 0) {
+//                        if (((creditCardNumberET.getText().length() + 1) % 5) == 0) {
+//                            if (creditCardNumberET.getText().toString().split("-").length <= 3) {
+//                                creditCardNumberET.setText(creditCardNumberET.getText() + "-");
+//                                creditCardNumberET.setSelection(creditCardNumberET.getText().length());
+//                            }
+//                        }
+//                        a = creditCardNumberET.getText().toString();
+//                    } else {
+//                        a = creditCardNumberET.getText().toString();
+//                        keyDel = 0;
+//                    }
+//
+//                } else {
+//                    creditCardNumberET.setText(a);
+//                }
+//
+//            }
+//
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count,
+//                                          int after) {
+//                // TODO Auto-generated method stub
+//
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {
+//            }
+//        });
 
         creditCardValidMonthET = (EditText)findViewById(R.id.creditCardValidMonthET1);
         creditCardValidMonthET.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -243,7 +236,7 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus){
                     String creditValidation = creditCardNumberET.getText().toString();
-                    if (creditValidation.length() < 19)
+                    if (creditValidation.length() < 16)
                         creditCardNumberErrorIV.setVisibility(View.VISIBLE);
                     else
                         creditCardNumberErrorIV.setVisibility(View.INVISIBLE);
@@ -313,7 +306,6 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
                 String cardHolderName = creditCardHolderNameET.getText().toString();
                 String cardCVV = creditCardCVVET.getText().toString();
 
-
                 if (cardCVV.equals("")||cardHolderName.equals("")||cardNumber.equals("")||cardValidYear.equals("")||cardValidMonth.equals(""))
                     showToast("please fill all values");
                 else{
@@ -329,6 +321,27 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
                     setPayFortHashMap(editedCardHolderName, editedCardNumber, cardCVV,cardValidYear + cardValidMonth);
                     postNewOrder(NoOfMin,NoOfBikes);
                 }
+
+
+                //TESTINGGGGGGGGGGGGGGGGG
+
+
+                //TESTING\\
+//                ArrayList<trip_DS> currentTrips =  Session.getInstance().getCurrentTripArrayListObjects();
+//
+//                if (currentTrips.size() > 0){
+//                    for (final trip_DS tripObject:currentTrips){
+//                        myLogs.logMyLog("creditTAG","TripId: "+tripObject.tripId+"\nslotNumber: "+tripObject.startSlotNumber);
+//                        Controller controller = new Controller();
+//                        if(tripObject.startSlotNumber <= 9)
+//                            controller.sendToTCP("0"+String.valueOf(tripObject.startSlotNumber),currentTrips.get(0));
+//                        else
+//                            controller.sendToTCP(String.valueOf(tripObject.startSlotNumber),currentTrips.get(0));
+//                    }
+//                }else{
+//                    showToast("There Is Something Wrong");
+//                }
+                //TESTING\\
 
             }
         });
@@ -518,7 +531,6 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
         String URL = myURL + apiMethod;
 
         if (isNetworkConnected()) {
-
             asyncTask = new myAsyncTask(creditCardDataActivity.this, data, URL, myProcessNum, Session.getInstance().getTokenUserName(), Session.getInstance().getTokenPassword(), null, 3);
 
             asyncTask.delegate = this;
@@ -528,7 +540,6 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
             showToast("No Internet Connection");
         }
     }
-
 
     @Override
     public void getServerResponse(String response, int ProcessNum) {
@@ -563,10 +574,15 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
                 myLogs.logMyLog("payfort_website_url", response);
                 //Log.d("payfort_website_url", response);
 
-                if (response.contains("GetRequestError")){
+                if (!response.contains("https://")){
                     Dialog errorDialog = customDialogs.ShowWarningMessage(getApplicationContext(),"Sorry you have entered \n wrong Data !!");
                     errorDialog.show();
-                }else{
+                }
+
+//                if (response.contains("GetRequestError") || response.contains("unhandled_error")){
+//
+//                }
+                else{
                     String payfortUrl = response.substring(1, response.length() - 1);
 
                     webView.setWebViewClient(new myWebClient(creditCardDataActivity.this,creditCardDataActivity.class));
@@ -590,9 +606,9 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
 
                 Session.getInstance().setCurrentTripArrayListObject(currentTrips);
 
-
                 if (currentTrips.size() > 0){
                     for (final trip_DS tripObject:currentTrips){
+                        myLogs.logMyLog("creditTAG","TripId: "+tripObject.tripId+"\nslotNumber: "+tripObject.startSlotNumber);
                         Controller controller = new Controller();
                         if(tripObject.startSlotNumber <= 9)
                             controller.sendToTCP("0"+String.valueOf(tripObject.startSlotNumber),confirmTrip.currentTripObjects.get(0));
@@ -656,6 +672,7 @@ public class creditCardDataActivity extends AppCompatActivity implements respons
         ConnectivityManager cm = (ConnectivityManager) getSystemService(this.CONNECTIVITY_SERVICE);
         return cm.getActiveNetworkInfo() != null;
     }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK) && webView.canGoBack()) {

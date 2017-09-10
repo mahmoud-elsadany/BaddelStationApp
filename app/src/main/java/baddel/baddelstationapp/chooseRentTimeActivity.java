@@ -81,8 +81,9 @@ public class chooseRentTimeActivity extends AppCompatActivity {
         if (bundle != null) {
             if (bundle.getBoolean("EXITKIOSK")){
                 startActivity(new Intent(android.provider.Settings.ACTION_WIFI_SETTINGS));
-                finish();
-                finishAffinity();
+//                finish();
+//                finishAffinity();
+                android.os.Process.killProcess(android.os.Process.myPid());
             }
         }
     }

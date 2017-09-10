@@ -18,6 +18,7 @@ import java.util.TreeMap;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import baddel.baddelstationapp.internalStorage.Session;
 import baddel.baddelstationapp.saveLogs.myLogs;
 import info.guardianproject.netcipher.NetCipher;
 
@@ -68,26 +69,45 @@ public class postClass {
                 int responseCode = conn.getResponseCode();
 
                 if (responseCode == HttpsURLConnection.HTTP_OK) {
+                    Session.getInstance().setResponseCode(responseCode);
                     BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     response.append(br.readLine());
                 }else if (responseCode == HttpsURLConnection.HTTP_CLIENT_TIMEOUT){
+                    Session.getInstance().setResponseCode(responseCode);
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+                    response.append(br.readLine());
                     response.append("TimeOut");
+                    myLogs.logMyLog("postResponse","responseCode: "+responseCode+"**"+response);
                 } else if (responseCode == HttpsURLConnection.HTTP_MOVED_TEMP) {
                     //302
+                    Session.getInstance().setResponseCode(responseCode);
                     response.append(conn.getHeaderField("location"));
+                    myLogs.logMyLog("postResponse","responseCode: "+responseCode+"**"+response);
                 }else if (responseCode == HttpsURLConnection.HTTP_BAD_REQUEST){
                     //400
-                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    Session.getInstance().setResponseCode(responseCode);
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
                     response.append(br.readLine());
                     response.append("..phone_number_missed");
+                    myLogs.logMyLog("postResponse","responseCode: "+responseCode+"**"+response);
                 }else if (responseCode == HttpsURLConnection.HTTP_FORBIDDEN){
                     //403
+                    Session.getInstance().setResponseCode(responseCode);
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+                    response.append(br.readLine());
                     response.append("no_available_bikes, error_while_send_sms");
+                    myLogs.logMyLog("postResponse","responseCode: "+responseCode+"**"+response);
                 }else if (responseCode == HttpsURLConnection.HTTP_NOT_FOUND){
                     //404
+                    Session.getInstance().setResponseCode(responseCode);
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+                    response.append(br.readLine());
                     response.append("Trip Not Found");
+                    myLogs.logMyLog("postResponse","responseCode: "+responseCode+"**"+response);
                 } else {
+                    Session.getInstance().setResponseCode(responseCode);
                     response.append("Error Registering");
+                    myLogs.logMyLog("postResponse","responseCode: "+responseCode+"**"+response);
                 }
 
             }else{
@@ -116,12 +136,54 @@ public class postClass {
                 if (responseCode == HttpsURLConnection.HTTP_OK) {
                     BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     response.append(br.readLine());
-                }else if (responseCode == HttpsURLConnection.HTTP_MOVED_TEMP || responseCode == 400) {
-
+                    myLogs.logMyLog("postResponse","responseCode: "+responseCode+"**"+response);
+                }else if (responseCode == HttpsURLConnection.HTTP_MOVED_TEMP || responseCode == HttpsURLConnection.HTTP_BAD_REQUEST) {
                     response.append(conn.getHeaderField("location"));
-
-                } else {
-                    response.append("Error Registering");
+                    myLogs.logMyLog("postResponse","responseCode: "+responseCode+"**"+response);
+                }else if (responseCode == HttpsURLConnection.HTTP_FORBIDDEN){
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    response.append(br.readLine());
+                    myLogs.logMyLog("postResponse","responseCode: "+responseCode+"**"+response);
+                }else if (responseCode == HttpsURLConnection.HTTP_NOT_FOUND){
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    response.append(br.readLine());
+                    myLogs.logMyLog("postResponse","responseCode: "+responseCode+"**"+response);
+                }else if (responseCode == HttpsURLConnection.HTTP_CLIENT_TIMEOUT){
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    response.append(br.readLine());
+                    myLogs.logMyLog("postResponse","responseCode: "+responseCode+"**"+response);
+                }else if (responseCode == HttpsURLConnection.HTTP_ACCEPTED){
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    response.append(br.readLine());
+                    myLogs.logMyLog("postResponse","responseCode: "+responseCode+"**"+response);
+                }else if (responseCode == HttpsURLConnection.HTTP_GONE){
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    response.append(br.readLine());
+                    myLogs.logMyLog("postResponse","responseCode: "+responseCode+"**"+response);
+                } else if (responseCode == HttpsURLConnection.HTTP_CONFLICT){
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    response.append(br.readLine());
+                    myLogs.logMyLog("postResponse","responseCode: "+responseCode+"**"+response);
+                }else if (responseCode == HttpsURLConnection.HTTP_CREATED){
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    response.append(br.readLine());
+                    myLogs.logMyLog("postResponse","responseCode: "+responseCode+"**"+response);
+                }else if (responseCode == HttpsURLConnection.HTTP_REQ_TOO_LONG){
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    response.append(br.readLine());
+                    myLogs.logMyLog("postResponse","responseCode: "+responseCode+"**"+response);
+                }else if (responseCode == HttpsURLConnection.HTTP_INTERNAL_ERROR){
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    response.append(br.readLine());
+                    myLogs.logMyLog("postResponse","responseCode: "+responseCode+"**"+response);
+                }else if (responseCode == HttpsURLConnection.HTTP_MULT_CHOICE){
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    response.append(br.readLine());
+                    myLogs.logMyLog("postResponse","responseCode: "+responseCode+"**"+response);
+                }else{
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    response.append(br.readLine());
+                    myLogs.logMyLog("postResponse","responseCode: "+responseCode+"**"+response);
                 }
 
                 myLogs.logMyLog("postResponse",url.toString());

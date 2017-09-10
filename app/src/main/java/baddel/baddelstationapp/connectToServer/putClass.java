@@ -5,6 +5,7 @@ import android.util.Log;
 
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -98,36 +99,103 @@ public class putClass {
             urlConnection.connect();
             int responseCode = urlConnection.getResponseCode();
 
-            myLogs.logMyLog("putResponseCodeTag", String.valueOf(responseCode));
+            //myLogs.logMyLog("putResponseCodeTag", String.valueOf(responseCode));
             //Log.d("putResponseCodeTag", String.valueOf(responseCode));
 
             if (responseCode == HttpsURLConnection.HTTP_OK) {
+                Session.getInstance().setResponseCode(responseCode);
                 BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
                 response.append(br.readLine());
-            }else if (responseCode == HttpsURLConnection.HTTP_MOVED_TEMP) {
+                myLogs.logMyLog("putResponse","responseCode: "+responseCode+"**"+response);
+            }else if (responseCode == HttpsURLConnection.HTTP_FORBIDDEN){
+                Session.getInstance().setResponseCode(responseCode);
                 BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
                 response.append(br.readLine());
-            }else if (responseCode == 400) {
+                myLogs.logMyLog("putResponse","responseCode: "+responseCode+"**"+response);
+            }else if (responseCode == HttpsURLConnection.HTTP_NOT_FOUND){
+                Session.getInstance().setResponseCode(responseCode);
+//                BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+//                response.append(br.readLine());
+                BufferedInputStream is = new BufferedInputStream(urlConnection.getErrorStream());
+                BufferedReader br = new BufferedReader(new InputStreamReader(is));
+                String inputLine = "";
+                while ((inputLine = br.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                myLogs.logMyLog("putResponse","responseCode: "+responseCode+"**"+response);
+            }else if (responseCode == HttpsURLConnection.HTTP_CLIENT_TIMEOUT){
+                Session.getInstance().setResponseCode(responseCode);
+                BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getErrorStream()));
+                response.append(br.readLine());
+                myLogs.logMyLog("putResponse","responseCode: "+responseCode+"**"+response);
+            }else if (responseCode == HttpsURLConnection.HTTP_MOVED_TEMP){
+                Session.getInstance().setResponseCode(responseCode);
                 BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
                 response.append(br.readLine());
-            }else if (responseCode == 500){
+                myLogs.logMyLog("putResponse","responseCode: "+responseCode+"**"+response);
+            }else if (responseCode == HttpsURLConnection.HTTP_BAD_REQUEST){
+                Session.getInstance().setResponseCode(responseCode);
+//                BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+//                response.append(br.readLine());
+                BufferedInputStream is = new BufferedInputStream(urlConnection.getErrorStream());
+                BufferedReader br = new BufferedReader(new InputStreamReader(is));
+                String inputLine = "";
+                while ((inputLine = br.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                myLogs.logMyLog("putResponse","responseCode: "+responseCode+"**"+response.toString());
+            }else if (responseCode == HttpsURLConnection.HTTP_ACCEPTED){
+                Session.getInstance().setResponseCode(responseCode);
                 BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
                 response.append(br.readLine());
-            } else if (responseCode == 404) {
-                response.append("404");
-            }else if (responseCode == 403) {
-                response.append("403");
+                myLogs.logMyLog("putResponse","responseCode: "+responseCode+"**"+response);
+            }else if (responseCode == HttpsURLConnection.HTTP_GONE){
+                Session.getInstance().setResponseCode(responseCode);
+                BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                response.append(br.readLine());
+                myLogs.logMyLog("putResponse","responseCode: "+responseCode+"**"+response);
+            } else if (responseCode == HttpsURLConnection.HTTP_CONFLICT){
+                Session.getInstance().setResponseCode(responseCode);
+                BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                response.append(br.readLine());
+                myLogs.logMyLog("putResponse","responseCode: "+responseCode+"**"+response);
+            }else if (responseCode == HttpsURLConnection.HTTP_CREATED){
+                Session.getInstance().setResponseCode(responseCode);
+                BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                response.append(br.readLine());
+                myLogs.logMyLog("putResponse","responseCode: "+responseCode+"**"+response);
+            }else if (responseCode == HttpsURLConnection.HTTP_REQ_TOO_LONG){
+                Session.getInstance().setResponseCode(responseCode);
+                BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                response.append(br.readLine());
+                myLogs.logMyLog("putResponse","responseCode: "+responseCode+"**"+response);
+            }else if (responseCode == HttpsURLConnection.HTTP_INTERNAL_ERROR){
+                Session.getInstance().setResponseCode(responseCode);
+                BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                response.append(br.readLine());
+                myLogs.logMyLog("putResponse","responseCode: "+responseCode+"**"+response);
+            }else if (responseCode == HttpsURLConnection.HTTP_MULT_CHOICE){
+                Session.getInstance().setResponseCode(responseCode);
+                BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                response.append(br.readLine());
+                myLogs.logMyLog("putResponse","responseCode: "+responseCode+"**"+response);
+            }else{
+                Session.getInstance().setResponseCode(responseCode);
+                BufferedReader br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                response.append(br.readLine());
+                myLogs.logMyLog("putResponse","responseCode: "+responseCode+"**"+response);
             }
+
 
 
             return response.toString();
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
-            return "Error" + e.toString();
+            return "putResponse Error " + e.toString();
         } catch (Exception e) {
             e.printStackTrace();
-            return "Error" + e.toString();
+            return "putResponse Error " + e.toString();
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();

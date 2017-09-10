@@ -1,6 +1,8 @@
 package baddel.baddelstationapp.internalStorage;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import baddel.baddelstationapp.Models.Advert_DS;
 import baddel.baddelstationapp.Models.trip_DS;
@@ -10,7 +12,6 @@ import baddel.baddelstationapp.Models.trip_DS;
  */
 
 public class Session {
-
     //random constant values
     private int waitingTime = 60000;
     private int chosenPeriodTime = 0;
@@ -27,6 +28,9 @@ public class Session {
     private Boolean finished = false;
     private String KioskPassword = "300594";
     private String androidId;
+    private int responseCode;
+
+    private Boolean internetAvailability;
 
     public String getKioskPassword() {
         return KioskPassword;
@@ -42,21 +46,23 @@ public class Session {
 
     //webSocket constant Values
     //private String webSocketBaseUrl = "http://104.197.104.190:8081/realtime";
-    //private String webSocketBaseUrl = "http://dev.api.baddelonline.com/realtime";
+    private String webSocketBaseUrl = "http://dev.api.baddelonline.com/realtime";
     //private String webSocketBaseUrl = "http://192.168.1.12:8888/realtime";
-    private String webSocketBaseUrl = "http://api.baddelonline.com/realtime";
+    //private String webSocketBaseUrl = "http://api.baddelonline.com/realtime";
     private String webSocketStartTripOnMethod = "startTrip";
     private String webSocketUpdateAppMethod = "updateApp";
     private String webSocketHub = "stationsHub";
 
     //HTTP API constant Values
-    //private String webServicesBaseUrl = "http://104.197.104.190:8081/api/";
-    //private String webServicesBaseUrl = "http://dev.api.baddelonline.com/api/";
+//    private String webServicesBaseUrl = "http://104.197.104.190:8081/api/";
+    private String webServicesBaseUrl = "http://dev.api.baddelonline.com/api/";
     //private String webServicesBaseUrl = "http://192.168.1.6:28824";
-    private String webServicesBaseUrl = "http://api.baddelonline.com/api/";
+    //private String webServicesBaseUrl = "http://api.baddelonline.com/api/";
     //private String webServicesBaseUrl = "http://staging.api.baddelonline.com/api/";
     private String tokenUserName = "station";
     private String tokenPassword = "Baddel@123";
+
+    private String APIMETHODGetStationSystemSettings = "system-settings";
     private String APIMETHODGetStationIDByIMEI = "stations/by-imei/";
     private String APIMETHODPostAppVersion = "stations/set-app-version";
     private String APIMETHODPostRequestTrip = "trips/request";
@@ -68,12 +74,14 @@ public class Session {
     private String APIMETHODPutSetOrder = "trips/set-order";
     private String APIMETHODPostCancelTrip = "trips/cancel-trip";
 
+    private Queue<String> startTripsOfflineObjects = new LinkedList<>();
+    private Queue<String> finishTripsOfflineObjects = new LinkedList<>();
 
     //TCPSocket constant Values
-//    private String tcpSocketIP = "192.168.1.3";
-//    private int tcpSocketPORT = 5002;
-    private String tcpSocketIP = "192.168.1.100";
+    private String tcpSocketIP = "192.168.1.2";
     private int tcpSocketPORT = 5001;
+//    private String tcpSocketIP = "192.168.1.100";
+//    private int tcpSocketPORT = 5001;
     private String messageResponse;
 
     //payment values
@@ -82,6 +90,7 @@ public class Session {
 
     private String OrderId;
 
+    private String savingLogs = "";
 
     private static Session instance;
 
@@ -178,7 +187,6 @@ public class Session {
     public String getOrderId() {
         return OrderId;
     }
-
 
     public String getPayFortUrl() {
         return payFortUrl;
@@ -296,5 +304,52 @@ public class Session {
         this.finished = finished;
     }
 
+    public String getSavingLogs() {
+        return savingLogs;
+    }
+
+    public void setSavingLogs(String savingLogs) {
+        this.savingLogs = savingLogs;
+    }
+
+    public Boolean getInternetAvailability() {
+        return internetAvailability;
+    }
+
+    public void setInternetAvailability(Boolean internetAvailability) {
+        this.internetAvailability = internetAvailability;
+    }
+
+    public Queue<String> getStartTripsOfflineObject() {
+        return startTripsOfflineObjects;
+    }
+
+    public void setStartTripsOfflineObject(String startTripsOfflineObject) {
+        this.startTripsOfflineObjects.add(startTripsOfflineObject);
+    }
+
+    public Queue<String> getFinishTripsOfflineObject() {
+        return finishTripsOfflineObjects;
+    }
+
+    public void setFinishTripsOfflineObject(String finishTripsOfflineObject) {
+        this.finishTripsOfflineObjects.add(finishTripsOfflineObject);
+    }
+
+    public int getResponseCode() {
+        return responseCode;
+    }
+
+    public void setResponseCode(int responseCode) {
+        this.responseCode = responseCode;
+    }
+
+    public String getAPIMETHODGetStationSystemSettings() {
+        return APIMETHODGetStationSystemSettings;
+    }
+
+    public void setAPIMETHODGetStationSystemSettings(String APIMETHODGetStationSystemSettings) {
+        this.APIMETHODGetStationSystemSettings = APIMETHODGetStationSystemSettings;
+    }
 }
 

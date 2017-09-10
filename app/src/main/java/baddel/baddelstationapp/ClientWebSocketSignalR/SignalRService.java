@@ -2,6 +2,7 @@ package baddel.baddelstationapp.ClientWebSocketSignalR;
 
 import android.app.Service;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Handler;
@@ -70,6 +71,7 @@ public class SignalRService extends Service {
         super.onCreate();
 
         initSignalr();
+        //testConnection();
 
         mHandler = new Handler();
     }
@@ -115,9 +117,9 @@ public class SignalRService extends Service {
 //
 //                    Log.d("TCPreconnect", "tcp connected");
 //                }
-                testConnection();
+                initSignalr();
+                //testConnection();
                 myLogs.logMyLog(LOGTAG, "test connection");
-
             } catch (Exception e) {
                 initSignalr();
             } finally {
@@ -160,41 +162,45 @@ public class SignalRService extends Service {
     private void testConnection() {
         Log.d(LOGTAG, "signalR test Connection");
 
-        initSignalr();
+        if (isNetworkConnected() ){
+            Log.d(LOGTAG, "signalR test connection");
+            initSignalr();
 
-        mHubConnection.reconnecting(new Runnable() {
-            @Override
-            public void run() {
-                //mHubConnection.disconnect();
-                mHubConnection.stop();
+            mHubConnection.reconnecting(new Runnable() {
+                @Override
+                public void run() {
+                    //mHubConnection.disconnect();
+                    mHubConnection.stop();
+                    myLogs.logMyLog(LOGTAG, "Reconnecting");
+                }
+            });
 
-                myLogs.logMyLog(LOGTAG, "Reconnecting");
-            }
-        });
+            mHubConnection.reconnected(new Runnable() {
+                @Override
+                public void run() {
+                    myLogs.logMyLog(LOGTAG, "Reconnected");
+                }
+            });
+//            mHubConnection.connectionSlow(new Runnable() {
+//                @Override
+//                public void run() {
+//                    //mHubConnection.disconnect();
+//                    mHubConnection.stop();
+//                    myLogs.logMyLog(LOGTAG, "Connection Slow");
+//                }
+//            });
+            mHubConnection.closed(new Runnable() {
+                @Override
+                public void run() {
+                    myLogs.logMyLog(LOGTAG, "Connection CLosed");
+                    initSignalr();
+                }
+            });
+        }else{
+            Log.d(LOGTAG, "signalR test noInternet connection");
+        }
 
-        mHubConnection.reconnected(new Runnable() {
-            @Override
-            public void run() {
-                myLogs.logMyLog(LOGTAG, "Reconnected");
-            }
-        });
-        mHubConnection.connectionSlow(new Runnable() {
-            @Override
-            public void run() {
-                //mHubConnection.disconnect();
-                mHubConnection.stop();
-                myLogs.logMyLog(LOGTAG, "Connection Slow");
-            }
-        });
-        mHubConnection.closed(new Runnable() {
-            @Override
-            public void run() {
-                myLogs.logMyLog(LOGTAG, "Connection CLosed");
 
-                initSignalr();
-
-            }
-        });
     }
 
 
@@ -207,9 +213,7 @@ public class SignalRService extends Service {
         if (stationID != null) {
             Logger mLogger = new Logger() {
                 @Override
-                public void log(String s, LogLevel logLevel) {
-
-                }
+                public void log(String s, LogLevel logLevel) {}
             };
             Platform.loadPlatformComponent(new AndroidPlatformComponent());
 
@@ -218,7 +222,12 @@ public class SignalRService extends Service {
             mClientTransport = new ServerSentEventsTransport(mHubConnection.getLogger());
             myLogs.logMyLog(LOGTAG, "initiated signalR" + stationID);
 
-            signalRFuture = mHubConnection.start(mClientTransport);
+            signalRFuture = mHubConnection.start().done(new Action<Void>() {
+                @Override
+                public void run(Void obj) throws Exception {
+                    myLogs.logMyLog(LOGTAG, "Socket connection started");
+                }
+            });
 
             try {
                 //signalRFuture.get(3000, TimeUnit.MILLISECONDS);
@@ -260,6 +269,12 @@ public class SignalRService extends Service {
 //                startSignal();
 //            }
         }
+    }
+
+    //check the connection
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(this.CONNECTIVITY_SERVICE);
+        return cm.getActiveNetworkInfo() != null;
     }
 
 
